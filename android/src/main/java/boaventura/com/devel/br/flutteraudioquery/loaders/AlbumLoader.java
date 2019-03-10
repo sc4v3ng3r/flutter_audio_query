@@ -13,9 +13,9 @@ import java.util.Map;
 import boaventura.com.devel.br.flutteraudioquery.loaders.tasks.AbstractLoadTask;
 import io.flutter.plugin.common.MethodChannel;
 
-public class AlbumLoader {
+public class AlbumLoader extends AbstractLoader {
 
-    private final ContentResolver m_resolver;
+    //private final ContentResolver m_resolver;
 
     private static final String[] ALBUM_PROJECTION = {
             MediaStore.Audio.AudioColumns._ID,
@@ -35,7 +35,7 @@ public class AlbumLoader {
     };
 
     public AlbumLoader(final Context context){
-        m_resolver = context.getContentResolver();
+        super(context);
     }
 
     /**
@@ -69,11 +69,13 @@ public class AlbumLoader {
                 new String[] { artistName }, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER ).execute();
     }
 
-    private AlbumLoadTask createLoadTask(final MethodChannel.Result result,  final String selection,
+
+    @Override
+    protected AlbumLoadTask createLoadTask(final MethodChannel.Result result,  final String selection,
                                          final String[] selectionArgs, String sortOrder){
 
+        return new AlbumLoadTask(result, getContentResolver() , selection, selectionArgs, sortOrder);
 
-        return new AlbumLoadTask(result,m_resolver, selection, selectionArgs, sortOrder);
     }
 
 

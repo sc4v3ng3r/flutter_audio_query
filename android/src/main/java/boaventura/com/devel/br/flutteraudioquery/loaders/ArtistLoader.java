@@ -14,9 +14,8 @@ import boaventura.com.devel.br.flutteraudioquery.loaders.tasks.AbstractLoadTask;
 import io.flutter.plugin.common.MethodChannel;
 
 
-public class ArtistLoader {
+public class ArtistLoader extends AbstractLoader {
 
-    private final ContentResolver m_resolver;
     private static final String TAG = "MDBG";
 
     private static final String[] PROJECTION = new String [] {
@@ -26,10 +25,7 @@ public class ArtistLoader {
             MediaStore.Audio.ArtistColumns.NUMBER_OF_ALBUMS,
     };
 
-    public ArtistLoader(final Context context){
-        m_resolver = context.getContentResolver();
-    }
-
+    public ArtistLoader(final Context context) { super(context);  }
 
     /**
      * This method queries in background all artists available in device storage.
@@ -40,19 +36,12 @@ public class ArtistLoader {
                 MediaStore.Audio.Artists.DEFAULT_SORT_ORDER).execute();
     }
 
-    /**
-     * This method creates a new background task to run SQLite queries and return
-     * the results.
-     * @param result
-     * @param selection
-     * @param selectionArgs
-     * @param sortOrder
-     * @return
-     */
-    private ArtistLoadTask createLoadTask(final MethodChannel.Result result, final String selection,
+
+    @Override
+    protected ArtistLoadTask createLoadTask(final MethodChannel.Result result, final String selection,
                                           final String[] selectionArgs, final String sortOrder){
 
-        return new ArtistLoadTask(result, m_resolver, selection,selectionArgs, sortOrder);
+        return new ArtistLoadTask(result, getContentResolver(), selection,selectionArgs, sortOrder);
     }
 
     static class ArtistLoadTask extends AbstractLoadTask<List <Map<String,Object>> > {

@@ -16,7 +16,12 @@ public abstract class AbstractLoadTask<T> extends AsyncTask<Void, Void, T>
     private String m_selection, m_sortOrder;
     private String[] m_selectionArgs;
 
-
+    /**
+     * Constructor for AbstractLoadTask.
+     * @param selection SQL selection param. WHERE clauses.
+     * @param selectionArgs SQL Where clauses query values.
+     * @param sortOrder Ordering.
+     */
     public AbstractLoadTask(final String selection, final String[] selectionArgs,
                             final String sortOrder){
         this.m_selection =selection;

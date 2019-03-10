@@ -22,7 +22,9 @@ class SongInfo extends DataModel {
   /// Returns the song title.
   String get title => _data['title'];
 
-  /// Returns the song display name.It's different from song title.
+  /// Returns the song display name. Display name string
+  /// is a combination of [Track number] + [Song title] [File extension]
+  /// Something like 1 My pretty song.mp3
   String get displayName => _data['_display_name'];
 
   /// Returns the composer name of this song.

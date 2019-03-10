@@ -38,15 +38,23 @@ class SongsListViewWidget extends StatelessWidget {
                 itemBuilder: (context, index){
                   SongInfo song = snapshot.data[index];
 
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: ( currentAlbum?.albumArt == null)
-                          ? AssetImage("assets/no_cover.png")
-                          : FileImage( File( currentAlbum?.albumArt )),
-                    ),
-                    title: Text("${song.track} - ${ song.title }"),
-                    subtitle: Text("${song.album}"),
-                    onTap: _onTapCallback,
+                  return Column(
+                    children: <Widget>[
+                      ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: ( currentAlbum?.albumArt == null)
+                              ? AssetImage("assets/no_cover.png")
+                              : FileImage( File( currentAlbum?.albumArt )),
+                        ),
+                        title: Text("${ song.displayName }"),
+                        subtitle: Text("${song.artist}"),
+                        onTap: () => print("Song Selected: $song"),
+                      ),
+                      Container(
+                        height: 1.0,
+                        color: Colors.grey[300],
+                      ),
+                    ],
                   );
                 }
             );

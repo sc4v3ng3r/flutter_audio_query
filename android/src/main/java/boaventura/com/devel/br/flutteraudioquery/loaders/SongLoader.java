@@ -13,9 +13,9 @@ import java.util.Map;
 import boaventura.com.devel.br.flutteraudioquery.loaders.tasks.AbstractLoadTask;
 import io.flutter.plugin.common.MethodChannel;
 
-public class SongLoader {
+public class SongLoader extends AbstractLoader {
 
-    final private ContentResolver m_resolver;
+    //final private ContentResolver m_resolver;
     private static final String TAG = "MDBG";
     private static final String GENRE_NAME = "genre_name";
 
@@ -47,33 +47,34 @@ public class SongLoader {
     };
 
     public SongLoader(final Context context){
-        m_resolver = context.getContentResolver();
+        super(context);
     }
 
 
     public void getSongs( final MethodChannel.Result result ){
         createLoadTask( result,null,null,
-                MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
+                MediaStore.Audio.Media.DEFAULT_SORT_ORDER).execute();
     }
 
 
     public void getSongsFromAlbum(final MethodChannel.Result result, final String albumId){
        createLoadTask( result, MediaStore.Audio.Media.ALBUM_ID + " =? ",
                 new String[] {albumId},
-               MediaStore.Audio.Media.DEFAULT_SORT_ORDER );
+               MediaStore.Audio.Media.DEFAULT_SORT_ORDER ).execute();
     }
 
 
     public void getSongsFromArtist(final MethodChannel.Result result, final String artistName){
-
         createLoadTask(result, MediaStore.Audio.Media.ARTIST + " =? ",
-                new String[] { artistName }, MediaStore.Audio.Media.DEFAULT_SORT_ORDER );
+                new String[] { artistName }, MediaStore.Audio.Media.DEFAULT_SORT_ORDER )
+                .execute();
     }
 
-    private void createLoadTask(MethodChannel.Result result, final String selection, final String [] selectionArgs,
+    @Override
+    protected SongTaskLoad createLoadTask(MethodChannel.Result result, final String selection, final String [] selectionArgs,
                                 final String sortOrder){
 
-        new SongTaskLoad(result, m_resolver, selection, selectionArgs,sortOrder).execute();
+        return new SongTaskLoad(result, getContentResolver(), selection, selectionArgs,sortOrder);
 
     }
 
