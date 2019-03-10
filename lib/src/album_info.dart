@@ -19,9 +19,9 @@ class AlbumInfo extends DataModel {
   ///Returns the artist name that songs appears in this album.
   String get artist => _data['artist'];
 
-  int get firstYear => _data['minyear'];
+  String get firstYear => _data['minyear'];
 
-  int get lastYear => _data['maxyear'];
+  String get lastYear => _data['maxyear'];
 
   /// Returns the number of songs that this album contains.
   String get numberOfSongs => _data['numsongs'];
