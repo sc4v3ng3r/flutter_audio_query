@@ -49,6 +49,9 @@ class SongInfo extends DataModel {
   /// Returns a String with the size, in bytes, of this audio file.
   String get fileSize => _data['_size'];
 
+  ///Returns album artwork path if this song has an album and if
+  ///his album has artwork.
+  String get albumArtwork => _data['album_artwork'];
 
   bool get isMusic => _data['is_music'];
 

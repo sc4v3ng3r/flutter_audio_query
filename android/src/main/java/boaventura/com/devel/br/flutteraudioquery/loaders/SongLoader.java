@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +22,11 @@ public class SongLoader extends AbstractLoader {
 
     //private static final String MOST_PLAYED = "most_played"; //undocumented column
     //private static final String RECENTLY_PLAYED = "recently_played"; // undocumented column
+
+    private static final String[] SONG_ALBUM_PROJECTION = {
+            MediaStore.Audio.AlbumColumns.ALBUM,
+            MediaStore.Audio.AlbumColumns.ALBUM_ART
+    };
 
     private static final String[] SONG_PROJECTION = {
             MediaStore.Audio.Media._ID,// row id
@@ -114,24 +120,60 @@ public class SongLoader extends AbstractLoader {
 
             List< Map<String, Object> > dataList = new ArrayList<>();
 
-            Cursor cursor = resolver.query(
+            Cursor songsCursor = resolver.query(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     SongLoader.SONG_PROJECTION, selection, selectionArgs, sortOrder );
 
-            if (cursor != null){
+            if (songsCursor != null){
+                Map<String,String> albumArtMap = new HashMap<>();
 
-                while( cursor.moveToNext() ){
+                while( songsCursor.moveToNext() ){
+
                     Map<String, Object> songData = new HashMap<>();
-                    for (String column: cursor.getColumnNames())
-                        songData.put(column, cursor.getString( cursor.getColumnIndex( column )) );
+                    for (String column: songsCursor.getColumnNames())
+                        songData.put(column, songsCursor.getString( songsCursor.getColumnIndex( column )) );
+
+                    String albumKey = songsCursor.getString(
+                            songsCursor.getColumnIndex( SONG_PROJECTION[4] ));
+
+                    String artPath = null;
+                    if (!albumArtMap.containsKey(albumKey) ){
+
+                        artPath = getAlbumArtPathForSong(albumKey);
+                        albumArtMap.put(albumKey,artPath );
+
+                        Log.i("MDBG", "song for album  " + albumKey + "adding path: " + artPath);
+                    }
+
+                    artPath = albumArtMap.get(albumKey);
+                    songData.put("album_artwork", artPath);
 
                     dataList.add( songData );
                 }
 
-                cursor.close();
+                songsCursor.close();
             }
 
             return dataList;
+        }
+
+        private String getAlbumArtPathForSong(String album){
+            Cursor artCursor = resolver.query(
+                    MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                    SONG_ALBUM_PROJECTION,
+                    SONG_ALBUM_PROJECTION[0] +  " =?",
+                    new String[] {album},
+                    null);
+
+            String artPath = null;
+
+            if (artCursor !=null){
+                while (artCursor.moveToNext())
+                    artPath = artCursor.getString( artCursor.getColumnIndex( SONG_ALBUM_PROJECTION[1]));
+                artCursor.close();
+            }
+
+            return artPath;
         }
     }
 }

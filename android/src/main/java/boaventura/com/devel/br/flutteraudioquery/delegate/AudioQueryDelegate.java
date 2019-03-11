@@ -2,8 +2,6 @@ package boaventura.com.devel.br.flutteraudioquery.delegate;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.util.Log;
-
 import androidx.core.app.ActivityCompat;
 import boaventura.com.devel.br.flutteraudioquery.loaders.AlbumLoader;
 import boaventura.com.devel.br.flutteraudioquery.loaders.ArtistLoader;
@@ -12,8 +10,26 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.PluginRegistry;
 
+/**
+ * AudioQueryDelegate makes a validation if a method call can be executed, permission validation and
+ * requests and delegates the desired method call to a required loader class where the real call
+ * happens in background
+ *
+ * <p>The work flow in this class is: </p>
+ * <p>1) Verify if  already exists a call method to be executed. If there's we finish with a error if not
+ *  we go to setp 2.</p>
+ *
+ *  <p>2) Verify if we have system permissions to run a specific method. If permission is granted we go
+ *  to step 3, if not, we make a system permission request and if permission is denied we finish with a
+ *  permission_denial error other way we go to step 3.</p>
+ *
+ *  <p>3) After all validation process we delegate the current method call to a required Loader class
+ *  to do a hard work in background. </p>
+ *
+ */
+public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResultListener,
+    AudioQueryDelegateInterface {
 
-public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResultListener {
     private static final String ERROR_KEY_PENDING_RESULT = "pending_result";
     private static final String ERROR_KEY_PERMISSION_DENIAL = "permission_denial";
 
@@ -52,6 +68,13 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
         registrar.addRequestPermissionsResultListener(this);
     }
 
+
+    /**
+     * Method used to handle all method calls that is about artist.
+     * @param call Method call
+     * @param result results input
+     */
+    @Override
     public void artistSourceHandler(MethodCall call, MethodChannel.Result result){
         if ( canIbeDepedency(call, result)){
 
@@ -68,6 +91,13 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
 
     }
 
+
+    /**
+     * Method used to handle all method calls that is about album data queries.
+     * @param call Method call
+     * @param result results input
+     */
+    @Override
     public void albumSourceHandler(MethodCall call, MethodChannel.Result result) {
         if ( canIbeDepedency(call, result)){
 
@@ -81,6 +111,12 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
         } else finishWithAlreadyActiveError(result);
     }
 
+    /**
+     * Method used to handle all method calls that is about song data queries.
+     * @param call Method call
+     * @param result results input
+     */
+    @Override
     public void songSourceHandler(MethodCall call, MethodChannel.Result result){
         if ( canIbeDepedency(call, result)){
 
@@ -94,7 +130,13 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
         } else finishWithAlreadyActiveError(result);
     }
 
-    public void GenreSourceHandler(MethodCall call, MethodChannel.Result result){
+    /**
+     * Method used to handle all method calls that is about genre data queries.
+     * @param call Method call
+     * @param result results input
+     */
+    @Override
+    public void genreSourceHandler(MethodCall call, MethodChannel.Result result){
         if ( canIbeDepedency(call, result)){
 
             if (m_permissionManager.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE) ){
@@ -107,18 +149,26 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
                         REQUEST_CODE_PERMISSION_READ_EXTERNAL);
         } else finishWithAlreadyActiveError(result);
     }
+
+    /**
+     * Method used to handle all method calls that is about playlist.
+     * @param call Method call
+     * @param result results input
+     */
+    @Override
     public void playlistSourceHandler(MethodCall call, MethodChannel.Result result){
         // TODO here we'll got two type of methods, read only and write only method
-        //
+        result.notImplemented();
 
-        /* were we'll needd write permissionto create save playlist in future
-        if ( canIbeDepedency(call, result, Manifest.permission.READ_EXTERNAL_STORAGE)){
-            switch (call.method){
-
-            }
-        }*/
     }
 
+
+    /**
+     * This method do the real delegate work. After all validation process this method
+     * delegates the calls that are read only to a required loader class where all call happen in background.
+     * @param call method to be called.
+     * @param result results input object.
+     */
     private void handleReadOnlyMethods(MethodCall call, MethodChannel.Result result){
         switch (call.method){
             case "getArtists":
@@ -228,4 +278,13 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
         boolean isPermissionGranted(String permissionName);
         void askForPermission(String permissionName, int requestCode);
     }
+}
+
+interface AudioQueryDelegateInterface{
+
+    void artistSourceHandler(MethodCall call, MethodChannel.Result result);
+    void albumSourceHandler(MethodCall call, MethodChannel.Result result);
+    void songSourceHandler(MethodCall call, MethodChannel.Result result);
+    void genreSourceHandler(MethodCall call, MethodChannel.Result result);
+    void playlistSourceHandler(MethodCall call, MethodChannel.Result result);
 }
