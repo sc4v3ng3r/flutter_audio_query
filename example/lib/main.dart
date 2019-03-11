@@ -9,7 +9,7 @@ void main() => runApp( MyApp() );
 
 class MyApp extends StatelessWidget {
   final FlutterAudioQuery audioQuery = FlutterAudioQuery();
-
+  
   @override
   Widget build(BuildContext context) {
 

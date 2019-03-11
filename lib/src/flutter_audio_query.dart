@@ -3,14 +3,12 @@ part of flutter_audio_query;
 
 class FlutterAudioQuery {
   static const String CHANNEL_NAME = "boaventura.com.devel.br.flutteraudioquery";
+  static const MethodChannel _channel = const MethodChannel(CHANNEL_NAME);
 
-  /*static final List<String> DELEGATE_MAP = ['artist_delegate',
-    'album_delegate', 'song_delegate'];*/
-
-  //static const String DELEGATE = "delegate";
-
-  static const MethodChannel _channel =
-      const MethodChannel(CHANNEL_NAME);
+  static const String _DELEGATE_KEY = "delegate";
+  static const String _ARTIST_DELEGATE = 'artist_delegate';
+  static const String _ALBUM_DELEGATE = 'album_delegate';
+  static const String _SONG_DELEGATE = 'song_delegate';
 
   // TODO this will burn!
   static Future<String> get platformVersion async {
@@ -20,26 +18,28 @@ class FlutterAudioQuery {
 
   /// This method returns all artists info available on device storage
   Future< List< ArtistInfo> > getArtists() async {
-    List<dynamic> dataList = await _channel.invokeMethod('getArtists');
+    List<dynamic> dataList = await _channel.invokeMethod('getArtists', {_DELEGATE_KEY : _ARTIST_DELEGATE});
     return _parseArtistDataList(dataList);
   }
 
   /// This method returns all albums info available on device storage
   Future < List<AlbumInfo> > getAlbums() async {
-    List<dynamic> dataList = await _channel.invokeMethod('getAlbums');
+    List<dynamic> dataList = await _channel.invokeMethod('getAlbums', {_DELEGATE_KEY : _ALBUM_DELEGATE});
     return _parseAlbumDataList(dataList);
   }
 
   /// This method returns all albums info from a specifc artist
   /// [artist] must be non null.
   Future< List<AlbumInfo> > getAlbumsFromArtist( {@required final ArtistInfo artist} ) async {
-    List<dynamic> dataList = await _channel.invokeMethod('getAlbumsFromArtist', {'artist': artist.name} );
+    List<dynamic> dataList = await _channel.invokeMethod('getAlbumsFromArtist', {
+      'artist': artist.name, _DELEGATE_KEY : _ALBUM_DELEGATE} );
+
     return _parseAlbumDataList(dataList);
   }
 
   /// This method return all songs info available on device storage.
   Future< List<SongInfo> > getSongs() async {
-    List<dynamic> dataList = await _channel.invokeMethod( "getSongs");
+    List<dynamic> dataList = await _channel.invokeMethod( "getSongs", {_DELEGATE_KEY : _SONG_DELEGATE});
 
     return _parseSongDataList(dataList);
   }
@@ -47,7 +47,7 @@ class FlutterAudioQuery {
   /// This method return all songs info from a specific artist.
   Future< List<SongInfo> > getSongsFromArtist( {@required final ArtistInfo artist} ) async {
     List<dynamic> dataList = await _channel.invokeMethod(
-        "getSongsFromArtist", {'artist': artist.name});
+        "getSongsFromArtist", {'artist': artist.name, _DELEGATE_KEY : _SONG_DELEGATE });
 
     return _parseSongDataList(dataList);
   }
@@ -55,7 +55,7 @@ class FlutterAudioQuery {
   /// This method return all songs info from a specific album
   Future< List<SongInfo> > getSongsFromAlbum( {@required final AlbumInfo album} ) async {
     List<dynamic> dataList = await _channel.invokeMethod(
-        "getSongsFromAlbum", {'album_id': album.id});
+        "getSongsFromAlbum", {'album_id': album.id, _DELEGATE_KEY : _SONG_DELEGATE });
 
     return _parseSongDataList(dataList);
   }
