@@ -1,20 +1,12 @@
 package boaventura.com.devel.br.flutteraudioquery;
 
-import android.Manifest;
-import android.app.Activity;
-import android.content.pm.PackageManager;
+import android.util.Log;
 
-import java.lang.reflect.Method;
-
-import androidx.core.app.ActivityCompat;
-import boaventura.com.devel.br.flutteraudioquery.loaders.AlbumLoader;
-import boaventura.com.devel.br.flutteraudioquery.loaders.ArtistLoader;
-import boaventura.com.devel.br.flutteraudioquery.loaders.SongLoader;
+import boaventura.com.devel.br.flutteraudioquery.delegate.AudioQueryDelegate;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 /** FlutterAudioQueryPlugin */
@@ -22,20 +14,14 @@ public class FlutterAudioQueryPlugin implements MethodCallHandler/*,
         PluginRegistry.RequestPermissionsResultListener*/  {
   /** Plugin registration. */
 
-  private final Activity m_activity;
-  private final ArtistLoader m_artistLoader;
-  private final AlbumLoader m_albumLoader;
-  private final SongLoader m_songLoader;
-
-  private static final String CHANNEL_NAME = "boaventura.com.devel.br.flutteraudioquery";
-
   static final int REQUEST_READ_PERMISSION = 0x1;
+  private static final String CHANNEL_NAME = "boaventura.com.devel.br.flutteraudioquery";
+  private final AudioQueryDelegate m_delegate;
 
-  private FlutterAudioQueryPlugin(Registrar registrar){
-    m_activity = registrar.activity();
-    m_artistLoader = new ArtistLoader(registrar.context());
-    m_albumLoader = new AlbumLoader(registrar.context());
-    m_songLoader = new SongLoader( registrar.context() );
+
+
+  private FlutterAudioQueryPlugin(AudioQueryDelegate delegate){
+      m_delegate = delegate;
   }
 
   public static void registerWith(Registrar registrar) {
@@ -43,12 +29,55 @@ public class FlutterAudioQueryPlugin implements MethodCallHandler/*,
       return;
 
     final MethodChannel channel = new MethodChannel(registrar.messenger(), CHANNEL_NAME);
-    channel.setMethodCallHandler(new FlutterAudioQueryPlugin(registrar));
+    final AudioQueryDelegate delegate = new AudioQueryDelegate( registrar );
+
+    channel.setMethodCallHandler(new FlutterAudioQueryPlugin(delegate));
 
   }
 
   @Override
   public void onMethodCall(MethodCall call, Result result) {
+
+      String source = call.argument("source");
+      if (source != null ){
+
+          switch (source){
+              case "artist":
+                  Log.i("MDBG", "onMethodCall:: calling artistSourceHandler");
+                  m_delegate.artistSourceHandler(call, result);
+                  break;
+
+              case "album":
+                  Log.i("MDBG", "onMethodCall:: calling albumSourceHandler");
+                  m_delegate.albumSourceHandler(call, result);
+                  break;
+
+              case "song":
+                  Log.i("MDBG", "onMethodCall:: calling songSourceHandler");
+                  m_delegate.songSourceHandler(call, result);
+                  break;
+
+              case "genre":
+                  result.notImplemented();
+                  break;
+
+              case "playlist":
+                  result.notImplemented();
+                  break;
+
+                  default:
+                      result.error("unknown_source",
+                              "method call was made by an unknown source", null);
+                      break;
+
+          }
+      }
+
+      else {
+          result.error("no_source", "There is no source in your method call", null);
+      }
+
+      /*
       switch (call.method){
           case "getArtists":
               m_artistLoader.getArtists(result);
@@ -78,9 +107,10 @@ public class FlutterAudioQueryPlugin implements MethodCallHandler/*,
           default:
               result.notImplemented();
               break;
-      }
+      }*/
 
   }
+
   /*
   private boolean isReadPermissionGranted(){
     /// if we already have permission

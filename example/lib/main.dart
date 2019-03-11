@@ -23,6 +23,20 @@ class MyApp extends StatelessWidget {
           future: audioQuery.getArtists(), /// getting all artists available
           builder: (context, snapshot){
 
+            if (snapshot.hasError){
+              print(snapshot.error);
+              return Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Center(
+                    child:Text("${snapshot.error}"),
+                  ),
+                ],
+              );
+            }
+
             if (!snapshot.hasData){
               return Column(
                 mainAxisSize: MainAxisSize.max,
@@ -67,6 +81,7 @@ class MyApp extends StatelessWidget {
   }
 
   void _onArtistTap(final ArtistInfo artistSelected, final BuildContext context){
+
     Navigator.push(context,
         MaterialPageRoute(
           builder: (context) => ContentScreen(
