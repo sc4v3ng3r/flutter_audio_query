@@ -19,7 +19,7 @@ class MyApp extends StatefulWidget{
 
 class _MyAppState extends State<MyApp>{
   final FlutterAudioQuery audioQuery = FlutterAudioQuery();
-  final options = ["Artists", "Albums", "Songs"];
+  final options = ["Artists", "Albums", "Songs", "Genres"];
 
   String currentOption;
 
@@ -36,7 +36,7 @@ class _MyAppState extends State<MyApp>{
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Flutter Audio Pulgin'),
+          title: const Text('Flutter Audio Plugin'),
           actions: <Widget>[
             Theme(
                 data: ThemeData.dark(),
@@ -48,7 +48,8 @@ class _MyAppState extends State<MyApp>{
                         currentOption = item;
                       });
                     },
-                    items: List.generate(options.length,(index) =>
+
+                    items: List.generate(options.length, (index) =>
                         DropdownMenuItem<String>(
                           child: Text(options[index]),
                           value: options[index],
@@ -61,6 +62,12 @@ class _MyAppState extends State<MyApp>{
         ),
 
         body: _createBody(),
+
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.expand_more),
+            onPressed: (){
+            },
+        ),
       ),
     );
   }
@@ -264,6 +271,68 @@ class _MyAppState extends State<MyApp>{
         /// getting all songs available on device
         //return _getAndBuildSongsWidget( audioQuery.getSongs());
         break;
+
+
+      case "Genres":
+        bodyWidget = FutureBuilder< List<GenreInfo> >(
+            /// getting ll genres available
+            future: audioQuery.getGenres(),
+            builder: (context, snapshot){
+
+              if (snapshot.hasError){
+                return Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Center(
+                      child: Text(snapshot.error),
+                    ),
+                  ],
+                );
+              }
+
+              if(!snapshot.hasData){
+                return Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  ],
+                );
+              }
+
+              else {
+
+                return ListView.builder(
+                    itemCount: snapshot.data.length,
+                    itemBuilder: (context, index){
+                      GenreInfo genre = snapshot.data[index];
+                      return Column(
+                        children: <Widget>[
+                          ListTile(
+                            leading: CircleAvatar(
+                              backgroundImage: AssetImage("assets/no_cover.png"),
+                            ),
+                            title: Text("${ genre.name }"),
+                            //onTap: () => print("Song Selected: $genre"),
+                          ),
+                          Container(
+                            height: 1.0,
+                            color: Colors.grey[300],
+                          ),
+                        ],
+                      );
+                    }
+                );
+              }
+            }
+        );
+        break;
+
     }
 
     return bodyWidget;

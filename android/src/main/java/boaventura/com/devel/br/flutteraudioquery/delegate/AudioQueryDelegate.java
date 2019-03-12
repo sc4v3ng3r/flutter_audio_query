@@ -2,9 +2,12 @@ package boaventura.com.devel.br.flutteraudioquery.delegate;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.util.Log;
+
 import androidx.core.app.ActivityCompat;
 import boaventura.com.devel.br.flutteraudioquery.loaders.AlbumLoader;
 import boaventura.com.devel.br.flutteraudioquery.loaders.ArtistLoader;
+import boaventura.com.devel.br.flutteraudioquery.loaders.GenreLoader;
 import boaventura.com.devel.br.flutteraudioquery.loaders.SongLoader;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -44,12 +47,14 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
     private final ArtistLoader m_artistLoader;
     private final AlbumLoader m_albumLoader;
     private final SongLoader m_songLoader;
+    private final GenreLoader m_genreLoader;
 
     public AudioQueryDelegate(final PluginRegistry.Registrar registrar){
 
         m_artistLoader = new ArtistLoader(registrar.context());
         m_albumLoader = new AlbumLoader(registrar.context());
         m_songLoader = new SongLoader( registrar.context() );
+        m_genreLoader = new GenreLoader( registrar.context() );
 
         m_permissionManager = new PermissionManager() {
             @Override
@@ -137,6 +142,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
      */
     @Override
     public void genreSourceHandler(MethodCall call, MethodChannel.Result result){
+        //Log.i("MDBG", "genreSourceHandler");
         if ( canIbeDepedency(call, result)){
 
             if (m_permissionManager.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE) ){
@@ -193,6 +199,10 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
 
             case "getSongsFromAlbum":
                 m_songLoader.getSongsFromAlbum( result, (String) call.argument("album_id" ) );
+                break;
+
+            case "getGenres":
+                m_genreLoader.getGenres(result);
                 break;
         }
 

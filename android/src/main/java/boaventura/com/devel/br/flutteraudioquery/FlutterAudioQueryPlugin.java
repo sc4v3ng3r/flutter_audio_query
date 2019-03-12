@@ -1,6 +1,8 @@
 package boaventura.com.devel.br.flutteraudioquery;
 
 
+import android.util.Log;
+
 import boaventura.com.devel.br.flutteraudioquery.delegate.AudioQueryDelegate;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -50,7 +52,7 @@ public class FlutterAudioQueryPlugin implements MethodCallHandler {
                   break;
 
               case "genre":
-                  result.notImplemented();
+                  m_delegate.genreSourceHandler(call, result);
                   break;
 
               case "playlist":

@@ -45,7 +45,7 @@ public class AlbumLoader extends AbstractLoader {
      */
     public void getAlbums(MethodChannel.Result result){
         createLoadTask(result,null, null,
-                MediaStore.Audio.Artists.DEFAULT_SORT_ORDER).execute();
+                MediaStore.Audio.Artists.DEFAULT_SORT_ORDER,0).execute();
     }
 
     /**
@@ -56,7 +56,7 @@ public class AlbumLoader extends AbstractLoader {
     public void getAlbumById(MethodChannel.Result result, long albumId){
         createLoadTask(result, ALBUM_PROJECTION[0] + " = ? ",
                 new String[] { String.valueOf(albumId) },
-                MediaStore.Audio.Albums.DEFAULT_SORT_ORDER ).execute();
+                MediaStore.Audio.Albums.DEFAULT_SORT_ORDER,0 ).execute();
     }
 
     /**
@@ -66,13 +66,14 @@ public class AlbumLoader extends AbstractLoader {
      */
     public void getAlbumsFromArtist(MethodChannel.Result result, String artistName){
         createLoadTask(result,ALBUM_PROJECTION[3] + " = ? ",
-                new String[] { artistName }, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER ).execute();
+                new String[] { artistName }, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER,0 ).execute();
     }
 
 
     @Override
-    protected AlbumLoadTask createLoadTask(final MethodChannel.Result result,  final String selection,
-                                         final String[] selectionArgs, String sortOrder){
+    protected AlbumLoadTask createLoadTask(
+            final MethodChannel.Result result, final String selection,
+            final String[] selectionArgs, final String sortOrder, final int type){
 
         return new AlbumLoadTask(result, getContentResolver() , selection, selectionArgs, sortOrder);
 

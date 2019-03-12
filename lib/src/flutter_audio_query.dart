@@ -12,12 +12,6 @@ class FlutterAudioQuery {
   static const String _SOURCE_GENRE = 'genre';
   static const String _SOURCE_PLAYLIST = 'playlist';
 
-  // TODO this will burn!
-  static Future<String> get platformVersion async {
-    final String version = await _channel.invokeMethod('getPlatformVersion');
-    return version;
-  }
-
   /// This method returns all artists info available on device storage
   Future< List< ArtistInfo> > getArtists() async {
     List<dynamic> dataList = await _channel.invokeMethod('getArtists', {_SOURCE_KEY : _SOURCE_ARTIST});
@@ -43,7 +37,7 @@ class FlutterAudioQuery {
   Future< List<SongInfo> > getSongs() async {
     List<dynamic> dataList = await _channel.invokeMethod( "getSongs",
         { _SOURCE_KEY : _SOURCE_SONGS,
-          
+
         });
 
     return _parseSongDataList(dataList);
@@ -65,6 +59,12 @@ class FlutterAudioQuery {
     return _parseSongDataList(dataList);
   }
 
+
+  Future< List<GenreInfo> > getGenres() async {
+    List<dynamic> dataList = await _channel.invokeMethod('getGenres', {_SOURCE_KEY : _SOURCE_GENRE});
+    return _parseGenreDataList(dataList);
+  }
+
   List< ArtistInfo > _parseArtistDataList( List<dynamic> dataList ){
     return dataList.map<ArtistInfo>( (dynamic item)
     => ArtistInfo._(item)).toList();
@@ -80,4 +80,8 @@ class FlutterAudioQuery {
     => SongInfo._(item) ).toList();
   }
 
+  List < GenreInfo > _parseGenreDataList(List<dynamic> dataList){
+    return dataList.map<GenreInfo>(  (dynamic item)
+      => GenreInfo._(item)).toList();
+  }
 }

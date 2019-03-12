@@ -11,4 +11,5 @@ part 'src/data_model.dart';
 part 'src/artist_info.dart';
 part 'src/album_info.dart';
 part 'src/song_info.dart';
+part 'src/genre_info.dart';
 

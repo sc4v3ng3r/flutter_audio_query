@@ -59,26 +59,26 @@ public class SongLoader extends AbstractLoader {
 
     public void getSongs( final MethodChannel.Result result ){
         createLoadTask( result,null,null,
-                MediaStore.Audio.Media.DEFAULT_SORT_ORDER).execute();
+                MediaStore.Audio.Media.DEFAULT_SORT_ORDER,0).execute();
     }
 
 
     public void getSongsFromAlbum(final MethodChannel.Result result, final String albumId){
        createLoadTask( result, MediaStore.Audio.Media.ALBUM_ID + " =? ",
                 new String[] {albumId},
-               MediaStore.Audio.Media.DEFAULT_SORT_ORDER ).execute();
+               MediaStore.Audio.Media.DEFAULT_SORT_ORDER,0 ).execute();
     }
 
 
     public void getSongsFromArtist(final MethodChannel.Result result, final String artistName){
         createLoadTask(result, MediaStore.Audio.Media.ARTIST + " =? ",
-                new String[] { artistName }, MediaStore.Audio.Media.DEFAULT_SORT_ORDER )
+                new String[] { artistName }, MediaStore.Audio.Media.DEFAULT_SORT_ORDER,0 )
                 .execute();
     }
 
     @Override
     protected SongTaskLoad createLoadTask(MethodChannel.Result result, final String selection, final String [] selectionArgs,
-                                final String sortOrder){
+                                final String sortOrder, final int type){
 
         return new SongTaskLoad(result, getContentResolver(), selection, selectionArgs,sortOrder);
 

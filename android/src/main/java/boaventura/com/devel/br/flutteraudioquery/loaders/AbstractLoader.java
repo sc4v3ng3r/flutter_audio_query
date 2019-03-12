@@ -25,6 +25,6 @@ public abstract class AbstractLoader {
      * @return
      */
     protected abstract AbstractLoadTask createLoadTask(final MethodChannel.Result result, final String selection,
-                                         final String[] selectionArgs, String sortOrder);
+                                         final String[] selectionArgs, String sortOrder, final int type );
 
 }

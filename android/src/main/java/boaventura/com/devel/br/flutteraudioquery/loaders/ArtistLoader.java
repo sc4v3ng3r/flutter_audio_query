@@ -33,13 +33,17 @@ public class ArtistLoader extends AbstractLoader {
      */
     public void getArtists(final MethodChannel.Result result){
         createLoadTask(result,null,null,
-                MediaStore.Audio.Artists.DEFAULT_SORT_ORDER).execute();
+                MediaStore.Audio.Artists.DEFAULT_SORT_ORDER,0).execute();
     }
 
+    public void getArtistsByGenre(final MethodChannel.Result result, final String genreName){
+
+    }
 
     @Override
-    protected ArtistLoadTask createLoadTask(final MethodChannel.Result result, final String selection,
-                                          final String[] selectionArgs, final String sortOrder){
+    protected ArtistLoadTask createLoadTask(
+            final MethodChannel.Result result, final String selection,
+            final String[] selectionArgs, final String sortOrder, final int type){
 
         return new ArtistLoadTask(result, getContentResolver(), selection,selectionArgs, sortOrder);
     }
@@ -94,6 +98,32 @@ public class ArtistLoader extends AbstractLoader {
             return list;
         }
 
+        private List< Map<String,Object> > basicDataLoad(
+                final String selection, final String [] selectionArgs, final String sortOrder){
+            Cursor artistCursor = m_resolver.query(
+                    MediaStore.Audio.Artists.EXTERNAL_CONTENT_URI,
+                    ArtistLoader.PROJECTION,
+                    selection, selectionArgs, sortOrder );
+
+            List< Map<String,Object> > list = new ArrayList<>();
+            if (artistCursor != null){
+
+                while ( artistCursor.moveToNext() ){
+                    Map<String, Object> map = new HashMap<>();
+                    for (String artistColumn : PROJECTION) {
+                        String data = artistCursor.getString(artistCursor.getColumnIndex(artistColumn));
+                        map.put(artistColumn, data);
+                    }
+                    // some album artwork of this artist that can be used
+                    // as artist cover picture if there is one.
+                    map.put("artist_cover", getArtistArtPath( (String) map.get(PROJECTION[1]) ) );
+                    list.add( map );
+                }
+                artistCursor.close();
+            }
+
+            return list;
+        }
 
         /**
          * Method used to get some album artwork image path from an especifc artist
@@ -133,6 +163,23 @@ public class ArtistLoader extends AbstractLoader {
             }
 
             return artworkPath;
+        }
+
+        private List<Map<String,Object>> loadArtistsByGenre(final String genreName){
+
+            Cursor artistNamesCursor = m_resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    new String[]{MediaStore.Audio.Media.ARTIST, "genre_name" },
+                    "genre_name" + " =?",new String[] {genreName},null);
+
+            if (artistNamesCursor != null){
+
+                while (artistNamesCursor.moveToNext()){
+
+                }
+                artistNamesCursor.close();
+            }
+
+            return null;
         }
     }
 }
