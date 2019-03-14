@@ -18,7 +18,6 @@ public class ArtistLoader extends AbstractLoader {
 
     private static final String TAG = "MDBG";
 
-    private static final int QUERY_TYPE_DEFAULT = 0x00;
     private static final int QUERY_TYPE_GENRE_ARTISTS = 0x01;
     private static final int QUERY_TYPE_SEARCH_BY_NAME = 0x02;
 
@@ -37,7 +36,7 @@ public class ArtistLoader extends AbstractLoader {
      */
     public void getArtists(final MethodChannel.Result result){
         createLoadTask(result,null,null,
-                MediaStore.Audio.Artists.DEFAULT_SORT_ORDER,QUERY_TYPE_DEFAULT).execute();
+                MediaStore.Audio.Artists.DEFAULT_SORT_ORDER, QUERY_TYPE_DEFAULT).execute();
     }
 
     public void getArtistsByGenre(final MethodChannel.Result result, final String genreName){
@@ -91,11 +90,12 @@ public class ArtistLoader extends AbstractLoader {
 
                 case ArtistLoader.QUERY_TYPE_GENRE_ARTISTS:
                     /// in this case the genre name comes from selection param
-                    List<String> artistsName = loadArtistNamesByGenre(selection);
-                    int totalArtists = artistsName.size();
+                    List<String> artistIds = loadArtistIdsGenre(selection);
+                    int totalArtists = artistIds.size();
+
                     if (totalArtists > 0){
                         if (totalArtists > 1){
-                            String[] params = artistsName.toArray(new String[artistsName.size()]);
+                            String[] params = artistIds.toArray(new String[artistIds.size()]);
 
                             String createdSelection = createMultipleValueSelectionArgs(params );
 
@@ -105,8 +105,8 @@ public class ArtistLoader extends AbstractLoader {
 
                         else {
                             return basicDataLoad(
-                                    MediaStore.Audio.Artists.ARTIST + " =?",
-                                    new String[] { artistsName.get(0)},
+                                    MediaStore.Audio.Artists._ID + " =?",
+                                    new String[] { artistIds.get(0)},
                                     MediaStore.Audio.Artists.DEFAULT_SORT_ORDER);
                         }
                     }
@@ -169,7 +169,7 @@ public class ArtistLoader extends AbstractLoader {
         }
 
         /**
-         * Method used to get some album artwork image path from an especifc artist
+         * Method used to get some album artwork image path from an specific artist
          * and this image can be used as artist cover.
          * @param artistName name of artist
          * @return Path String from some album from artist or null if there is no one.
@@ -208,25 +208,29 @@ public class ArtistLoader extends AbstractLoader {
             return artworkPath;
         }
 
-        private List<String> loadArtistNamesByGenre(final String genreName){
+        /**
+         * This methods query artist Id's filtered by a specific genre
+         * in Media "TABLE".
+         * @param genreName genre name to filter artists.
+         * @return List of strings with artist Id's
+         */
+        private List<String> loadArtistIdsGenre(final String genreName){
             //Log.i("MDBG",  "Genero: " + genreName +" Artistas: ");
             List<String> artistsIds = new ArrayList<>();
 
             Cursor artistNamesCursor = m_resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    new String[]{"Distinct " + MediaStore.Audio.Media.ARTIST, "genre_name" },
+                    new String[]{"Distinct " + MediaStore.Audio.Media.ARTIST_ID, "genre_name" },
                     "genre_name" + " =?",new String[] {genreName},null);
 
             if (artistNamesCursor != null){
-                //Log.i("MDBG", "TOTAL DE RESLTADOS ARTIST-> GENERO: " + artistNamesCursor.getCount());
 
                 while (artistNamesCursor.moveToNext()){
                     String artistName = artistNamesCursor.getString( artistNamesCursor.getColumnIndex(
-                            MediaStore.Audio.Media.ARTIST ));
+                            MediaStore.Audio.Media.ARTIST_ID ));
 
-                    //Log.i("MDBG",  artistName);
                     artistsIds.add(artistName);
                 }
-                //Log.i("MDBG",  "-----------");
+                
                 artistNamesCursor.close();
             }
 
@@ -245,7 +249,7 @@ public class ArtistLoader extends AbstractLoader {
         private String createMultipleValueSelectionArgs( /*String column */String[] params){
 
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(MediaStore.Audio.Artists.ARTIST + " IN(?" );
+            stringBuilder.append(MediaStore.Audio.Artists._ID + " IN(?" );
 
             for(int i=0; i < (params.length-1); i++)
                 stringBuilder.append(",?");

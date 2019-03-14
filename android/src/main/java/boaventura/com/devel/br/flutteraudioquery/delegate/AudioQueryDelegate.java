@@ -195,6 +195,9 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
                 m_albumLoader.getAlbumsFromArtist(result, artist);
                 break;
 
+            case "getAlbumsFromGenre":
+                m_albumLoader.getAlbumFromGenre(result, (String)call.argument("genre_name"));
+                break;
 
             // song calls section
             case "getSongs":
@@ -301,9 +304,38 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
 
 interface AudioQueryDelegateInterface{
 
+    /**
+     * Interface method to handle artist queries related calls
+     * @param call
+     * @param result
+     */
     void artistSourceHandler(MethodCall call, MethodChannel.Result result);
+
+    /**
+     * Interface method to handle album queries related calls
+     * @param call
+     * @param result
+     */
     void albumSourceHandler(MethodCall call, MethodChannel.Result result);
+
+    /**
+     * Interface method to handle song queries related calls
+     * @param call
+     * @param result
+     */
     void songSourceHandler(MethodCall call, MethodChannel.Result result);
+
+    /**
+     * Interface method to handle genre queries related calls
+     * @param call
+     * @param result
+     */
     void genreSourceHandler(MethodCall call, MethodChannel.Result result);
+
+    /**
+     * Interface method to handle playlist related calls
+     * @param call
+     * @param result
+     */
     void playlistSourceHandler(MethodCall call, MethodChannel.Result result);
 }

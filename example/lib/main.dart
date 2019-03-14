@@ -72,13 +72,13 @@ class _MyAppState extends State<MyApp>{
 
                  audioQuery.getArtistsByGenre(genre: genre)
                      .then( (artistList){
-                       print("Artists from genre ${genre.name}: ");
-                       artistList.forEach(  (artist) => print("${artist}") );
+                       print("Artist from genre ${genre.name}: ");
+                       artistList.forEach(  (artist) => print("$artist") );
                        print("-------------------------\n");
                  } );
                });
 
-              } ).catchError( (error ) { print("Erro ao pegar artista por genero. $error");});
+              } ).catchError( (error ) { print("Erro ao pegar artista por genero. $error"); });
             },
         ),
       ),
@@ -117,7 +117,7 @@ class _MyAppState extends State<MyApp>{
                   children: <Widget>[
                     Center(
                       child: CircularProgressIndicator(),
-                    )
+                    ),
                   ],
                 );
               }

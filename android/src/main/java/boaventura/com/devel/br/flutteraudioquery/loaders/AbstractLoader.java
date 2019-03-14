@@ -8,7 +8,7 @@ import io.flutter.plugin.common.MethodChannel;
 
 public abstract class AbstractLoader {
     private final ContentResolver m_resolver;
-
+    static final int QUERY_TYPE_DEFAULT = 0x00;
     AbstractLoader(final Context context){
         m_resolver = context.getContentResolver();
     }
