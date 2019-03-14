@@ -142,7 +142,6 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
      */
     @Override
     public void genreSourceHandler(MethodCall call, MethodChannel.Result result){
-        //Log.i("MDBG", "genreSourceHandler");
         if ( canIbeDepedency(call, result)){
 
             if (m_permissionManager.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE) ){
@@ -177,9 +176,16 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
      */
     private void handleReadOnlyMethods(MethodCall call, MethodChannel.Result result){
         switch (call.method){
+
+            // artists calls section
             case "getArtists":
                 m_artistLoader.getArtists(result);
                 break;
+
+            case "getArtistsByGenre":
+                m_artistLoader.getArtistsByGenre(result, (String)call.argument("genre_name"));
+                break;
+            //album calls section
             case "getAlbums":
                 m_albumLoader.getAlbums(result);
                 break;
@@ -189,6 +195,8 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
                 m_albumLoader.getAlbumsFromArtist(result, artist);
                 break;
 
+
+            // song calls section
             case "getSongs":
                 m_songLoader.getSongs(result);
                 break;
@@ -201,6 +209,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
                 m_songLoader.getSongsFromAlbum( result, (String) call.argument("album_id" ) );
                 break;
 
+            // genre calls section
             case "getGenres":
                 m_genreLoader.getGenres(result);
                 break;

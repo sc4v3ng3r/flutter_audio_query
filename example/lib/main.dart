@@ -65,7 +65,20 @@ class _MyAppState extends State<MyApp>{
 
         floatingActionButton: FloatingActionButton(
           child: Icon(Icons.expand_more),
-            onPressed: (){
+            onPressed: () async {
+              audioQuery.getGenres().then( (genreList) {
+
+               genreList.forEach(  (genre){
+
+                 audioQuery.getArtistsByGenre(genre: genre)
+                     .then( (artistList){
+                       print("Artists from genre ${genre.name}: ");
+                       artistList.forEach(  (artist) => print("${artist}") );
+                       print("-------------------------\n");
+                 } );
+               });
+
+              } ).catchError( (error ) { print("Erro ao pegar artista por genero. $error");});
             },
         ),
       ),

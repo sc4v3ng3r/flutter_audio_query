@@ -22,6 +22,8 @@ public abstract class AbstractLoader {
      * @param selection
      * @param selectionArgs
      * @param sortOrder
+     * @param type An integer number that can be used to identify what kind of task do you want
+     *             to create.
      * @return
      */
     protected abstract AbstractLoadTask createLoadTask(final MethodChannel.Result result, final String selection,

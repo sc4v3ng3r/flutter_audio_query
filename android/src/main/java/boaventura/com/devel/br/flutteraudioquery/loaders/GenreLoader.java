@@ -71,9 +71,11 @@ public class GenreLoader extends AbstractLoader {
                 while ( genreCursor.moveToNext() ){
                     Map<String, Object> data = new HashMap<>();
 
-                    for(String column : genreCursor.getColumnNames())
+                    for(String column : genreCursor.getColumnNames()){
                         data.put(column, genreCursor.getString(
                                 genreCursor.getColumnIndex( column )));
+                    }
+
 
                     dataList.add(data);
                 }

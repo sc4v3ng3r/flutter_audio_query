@@ -11,7 +11,7 @@ class DataModel {
   DataModel._(this._data);
 
   /// The data model id
-  String get id => _data[ID];
+  String get id => _data[ID] ?? "";
 
   @override
   String toString() {
