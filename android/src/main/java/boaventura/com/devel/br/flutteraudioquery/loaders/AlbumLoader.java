@@ -87,7 +87,7 @@ public class AlbumLoader extends AbstractLoader {
     }
 
 
-    static class AlbumLoadTask extends AbstractLoadTask< List<Map<String,Object>> >{
+    static class AlbumLoadTask extends AbstractLoadTask< List<Map<String,Object>> > {
 
         private ContentResolver m_resolver;
         private MethodChannel.Result m_result;
@@ -95,7 +95,7 @@ public class AlbumLoader extends AbstractLoader {
 
         private AlbumLoadTask(final MethodChannel.Result result, ContentResolver resolver,
                              final String selection, final String[] selectionArgs,
-                              String sortOrder, final int type){
+                              final String sortOrder, final int type){
             super(selection, selectionArgs,sortOrder);
 
             m_result = result;
@@ -103,7 +103,7 @@ public class AlbumLoader extends AbstractLoader {
             m_queryType = type;
         }
 
-        private String createMultipleValueSelectionArgs( /*String column */String[] params){
+        private String createMultipleValueSelectionArgs( /*String column */String[] params) {
 
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(MediaStore.Audio.Albums._ID + " IN(?" );
@@ -126,11 +126,11 @@ public class AlbumLoader extends AbstractLoader {
 
                 case QUERY_TYPE_GENRE_ALBUM:
                     List<String> albumsFromGenre =  getAlbumNamesFromGenre(selection);
-                    int albumsSize = albumsFromGenre.size();
+                    int idCount = albumsFromGenre.size();
 
-                    if (albumsSize > 0){
-                        if (albumsSize > 1) {
-                            String[] params = albumsFromGenre.toArray(new String[albumsFromGenre.size()]);
+                    if (idCount > 0){
+                        if (idCount > 1) {
+                            String[] params = albumsFromGenre.toArray(new String[idCount]);
                             String createdSelection = createMultipleValueSelectionArgs(params);
 
                             return basicDataLoad(createdSelection, params,

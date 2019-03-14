@@ -2,7 +2,6 @@ package boaventura.com.devel.br.flutteraudioquery.delegate;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 import boaventura.com.devel.br.flutteraudioquery.loaders.AlbumLoader;
@@ -81,7 +80,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
      */
     @Override
     public void artistSourceHandler(MethodCall call, MethodChannel.Result result){
-        if ( canIbeDepedency(call, result)){
+        if ( canIbeDependency(call, result)){
 
             if (m_permissionManager.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE) ){
                 clearPendencies();
@@ -104,7 +103,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
      */
     @Override
     public void albumSourceHandler(MethodCall call, MethodChannel.Result result) {
-        if ( canIbeDepedency(call, result)){
+        if ( canIbeDependency(call, result)){
 
             if (m_permissionManager.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE) ){
                 clearPendencies();
@@ -123,7 +122,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
      */
     @Override
     public void songSourceHandler(MethodCall call, MethodChannel.Result result){
-        if ( canIbeDepedency(call, result)){
+        if ( canIbeDependency(call, result)){
 
             if (m_permissionManager.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE) ){
                 clearPendencies();
@@ -142,7 +141,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
      */
     @Override
     public void genreSourceHandler(MethodCall call, MethodChannel.Result result){
-        if ( canIbeDepedency(call, result)){
+        if ( canIbeDependency(call, result)){
 
             if (m_permissionManager.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE) ){
                 clearPendencies();
@@ -212,6 +211,10 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
                 m_songLoader.getSongsFromAlbum( result, (String) call.argument("album_id" ) );
                 break;
 
+            case "getSongsFromGenre":
+                m_songLoader.getSongsFromGenre(result, (String) call.argument("genre_name"));
+                break;
+
             // genre calls section
             case "getGenres":
                 m_genreLoader.getGenres(result);
@@ -225,7 +228,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
     }
 
 
-    private boolean canIbeDepedency(MethodCall call, MethodChannel.Result result){
+    private boolean canIbeDependency(MethodCall call, MethodChannel.Result result){
 
         if ( !setPendingMethodAndCall(call, result) ){
             return false;

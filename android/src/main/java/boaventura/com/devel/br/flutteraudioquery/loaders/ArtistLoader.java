@@ -19,7 +19,7 @@ public class ArtistLoader extends AbstractLoader {
     private static final String TAG = "MDBG";
 
     private static final int QUERY_TYPE_GENRE_ARTISTS = 0x01;
-    private static final int QUERY_TYPE_SEARCH_BY_NAME = 0x02;
+    //private static final int QUERY_TYPE_SEARCH_BY_NAME = 0x02;
 
     private static final String[] PROJECTION = new String [] {
             MediaStore.Audio.AudioColumns._ID, // row id
@@ -91,15 +91,15 @@ public class ArtistLoader extends AbstractLoader {
                 case ArtistLoader.QUERY_TYPE_GENRE_ARTISTS:
                     /// in this case the genre name comes from selection param
                     List<String> artistIds = loadArtistIdsGenre(selection);
-                    int totalArtists = artistIds.size();
+                    int idCount = artistIds.size();
 
-                    if (totalArtists > 0){
-                        if (totalArtists > 1){
-                            String[] params = artistIds.toArray(new String[artistIds.size()]);
+                    if (idCount > 0){
+                        if (idCount > 1){
+                            String[] args = artistIds.toArray(new String[idCount]);
 
-                            String createdSelection = createMultipleValueSelectionArgs(params );
+                            String createdSelection = createMultipleValueSelectionArgs( args );
 
-                            return basicDataLoad( createdSelection, params,
+                            return basicDataLoad( createdSelection, args,
                                     MediaStore.Audio.Artists.DEFAULT_SORT_ORDER);
                         }
 
@@ -230,7 +230,7 @@ public class ArtistLoader extends AbstractLoader {
 
                     artistsIds.add(artistName);
                 }
-                
+
                 artistNamesCursor.close();
             }
 

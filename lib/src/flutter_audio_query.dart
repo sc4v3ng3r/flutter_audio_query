@@ -71,6 +71,12 @@ class FlutterAudioQuery {
     return _parseSongDataList(dataList);
   }
 
+  Future< List<SongInfo> > getSongsFromGenre({@required final GenreInfo genre}) async{
+    List<dynamic> dataList = await _channel.invokeMethod("getSongsFromGenre",
+      {_SOURCE_KEY : _SOURCE_SONGS, 'genre_name' : genre.name });
+
+    return _parseSongDataList(dataList);
+  }
 
   Future< List<GenreInfo> > getGenres() async {
     List<dynamic> dataList = await _channel.invokeMethod('getGenres', {_SOURCE_KEY : _SOURCE_GENRE });

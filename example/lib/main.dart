@@ -70,10 +70,10 @@ class _MyAppState extends State<MyApp>{
 
                genreList.forEach(  (genre){
 
-                 audioQuery.getArtistsByGenre(genre: genre)
-                     .then( (artistList){
-                       print("Artist from genre ${genre.name}: ");
-                       artistList.forEach(  (artist) => print("$artist") );
+                 audioQuery.getSongsFromGenre(genre: genre)
+                     .then( (songList){
+                       print("Songfrom genre ${genre.name}: ");
+                       songList.forEach(  (song) => print("${song.displayName}") );
                        print("-------------------------\n");
                  } );
                });
