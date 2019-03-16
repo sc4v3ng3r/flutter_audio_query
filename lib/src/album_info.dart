@@ -1,6 +1,9 @@
 
 part of flutter_audio_query;
 
+
+/// AlbumInfo class holds all information about a specific artist album.
+///
 class AlbumInfo extends DataModel {
   AlbumInfo._(Map<dynamic, dynamic> map) : super._(map);
 

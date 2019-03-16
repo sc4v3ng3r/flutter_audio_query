@@ -1,6 +1,8 @@
 
 part of flutter_audio_query;
 
+
+/// SongInfo class holds all information about a specific song audio file.
 class SongInfo extends DataModel {
   SongInfo._(Map<dynamic, dynamic> map) : super._(map);
 
@@ -30,7 +32,7 @@ class SongInfo extends DataModel {
   /// Returns the composer name of this song.
   String get composer => _data['composer'];
 
-  /// Returns the year of this song was created
+  /// Returns the year of this song was created.
   String get year => _data['year'];
 
   /// Returns the album track number if this song has one.
@@ -43,14 +45,13 @@ class SongInfo extends DataModel {
   /// from the last time.
   String get bookmark => _data['bookmark'];
 
-  /// Returns a String with a file path to this audio file
+  /// Returns a String with a file path to audio data file
   String get filePath => _data['_data'];
 
   /// Returns a String with the size, in bytes, of this audio file.
   String get fileSize => _data['_size'];
 
-  ///Returns album artwork path if this song has an album and if
-  ///his album has artwork.
+  ///Returns album artwork path which current song appears.
   String get albumArtwork => _data['album_artwork'];
 
   bool get isMusic => _data['is_music'];
