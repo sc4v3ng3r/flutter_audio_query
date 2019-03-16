@@ -11,13 +11,17 @@ albums, songs and genres available on device storage.
 * Get albums from a specific artist
 * Get songs all songs available on device storage
 * Get songs from a specific album
-
-## TO DO
 * Permission Handling built in
 * Get available genre
 * Get artists by genre
 * Get album by genre
+
+## TO DO
+
+* iOS implementation
 * CRUD on user playlists
+* Streams support
+
 
 
 ## Installation
@@ -59,8 +63,7 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 Please make sure to update tests as appropriate.
 
 ## License
-[MIT](https://choosealicense.com/licenses/mit/)
-
+[GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)
 
 
 # flutter_audio_query

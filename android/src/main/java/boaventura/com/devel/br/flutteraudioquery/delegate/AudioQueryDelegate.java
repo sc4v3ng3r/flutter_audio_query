@@ -1,3 +1,19 @@
+//Copyright (C) <2019>  <Marcos Antonio Boaventura Feitoza> <scavenger.gnu@gmail.com>
+//
+//        This program is free software: you can redistribute it and/or modify
+//        it under the terms of the GNU General Public License as published by
+//        the Free Software Foundation, either version 3 of the License, or
+//        (at your option) any later version.
+//
+//        This program is distributed in the hope that it will be useful,
+//        but WITHOUT ANY WARRANTY; without even the implied warranty of
+//        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//        GNU General Public License for more details.
+//
+//        You should have received a copy of the GNU General Public License
+//        along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
 package boaventura.com.devel.br.flutteraudioquery.delegate;
 
 import android.Manifest;
@@ -12,23 +28,23 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.PluginRegistry;
 
-/**
- * AudioQueryDelegate makes a validation if a method call can be executed, permission validation and
- * requests and delegates the desired method call to a required loader class where the real call
- * happens in background
- *
- * <p>The work flow in this class is: </p>
- * <p>1) Verify if  already exists a call method to be executed. If there's we finish with a error if not
- *  we go to setp 2.</p>
- *
- *  <p>2) Verify if we have system permissions to run a specific method. If permission is granted we go
- *  to step 3, if not, we make a system permission request and if permission is denied we finish with a
- *  permission_denial error other way we go to step 3.</p>
- *
- *  <p>3) After all validation process we delegate the current method call to a required Loader class
- *  to do a hard work in background. </p>
- *
- */
+///
+// * AudioQueryDelegate makes a validation if a method call can be executed, permission validation and
+// * requests and delegates the desired method call to a required loader class where the real call
+// * happens in background
+// *
+// * <p>The work flow in this class is: </p>
+// * <p>1) Verify if  already exists a call method to be executed. If there's we finish with a error if not
+// *  we go to setp 2.</p>
+// *
+// *  <p>2) Verify if we have system permissions to run a specific method. If permission is granted we go
+// *  to step 3, if not, we make a system permission request and if permission is denied we finish with a
+// *  permission_denial error other way we go to step 3.</p>
+// *
+// *  <p>3) After all validation process we delegate the current method call to a required Loader class
+// *  to do a hard work in background. </p>
+// *
+// */
 public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResultListener,
     AudioQueryDelegateInterface {
 
