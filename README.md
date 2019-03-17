@@ -4,7 +4,7 @@ A Flutter plugin, Android only at this moment, that allows you query for audio m
 albums, songs audio files and genres available on device storage. All work is made using Android native
 [MediaStore API](https://developer.android.com/reference/android/provider/MediaStore) with 
 [ContentResolver API](https://developer.android.com/reference/android/content/ContentResolver) and query methods
-are't running in main thread. AndroidX support it's OK!
+run in background thread. AndroidX support it's OK!
 
 Note*: This plugin is under development, Works in Android devices only and some APIs are not available yet.
 Feedback, pull request, bug reports and suggestions are all welcome!
@@ -49,16 +49,16 @@ To use this plugin, add `flutter_audio_query` as a [dependency in your pubspec.y
 To get get audio files metadata info you just need `FlutterAudioQuery` object instance.
 
 ```dart
-//you need include this file only.
+///you need include this file only.
 import 'package:flutter_audio_query/flutter_audio_query.dart';
 
-// create a FlutterAudioQuery instance.
+/// create a FlutterAudioQuery instance.
 final FlutterAudioQuery audioQuery = FlutterAudioQuery();
 
 List<ArtistInfo> artists = await audioQuery.getArtists(); // returns all artists available
  
 artists.forEach( (artist){
-      print(artist); // prints all artist property values
+      print(artist); /// prints all artist property values
     } );
 
 /// getting all albums available from a specific artist
@@ -68,21 +68,33 @@ List<AlbumInfo> albums = await audioQuery.getAlbumsFromArtist(artist: artist);
     });
 
  /// getting all albums available on device storage
- List<AlbumInfo> albums = await audioQuery.getAlbums(); 
-
+ List<AlbumInfo> albumList = await audioQuery.getAlbums(); 
+ 
 /// getting all genres available
  List<GenreInfo> genreList = audioQuery.getGenres();
 
 
- genreList.foreach((genre){
+ genreList.foreach( (genre){
    /// getting all artists available from specific genre.
-   audioQuery.getArtistsByGenre(genre: genre)
+   await audioQuery.getArtistsFromGenre(genre: genre);
+ 
+   /// getting all albums which appears on genre [genre].
+   await audioQuery.getAlbumsFromGenre(genre: genre);
+   
+   // getting all songs which appears on genre [genre]
+   await audioQuery.getSongsFromGenre(genre: genre);
+    
  } );
  
  
  /// getting all songs available on device storage
-List<SongInfo> songs = await audioQuery.getSongs(); // gets all songs available on device storage
+List<SongInfo> songs = await audioQuery.getSongs();
 
+
+albumList.foreach( (album){  
+  /// getting songs from specific album
+  audioQuery.getSongsFromAlbum(album: album);
+ } );
 
 ```
 

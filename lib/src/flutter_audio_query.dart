@@ -73,9 +73,7 @@ class FlutterAudioQuery {
   /// This method returns a list with all songs available on device storage.
   Future< List<SongInfo> > getSongs() async {
     List<dynamic> dataList = await _channel.invokeMethod( "getSongs",
-        { _SOURCE_KEY : _SOURCE_SONGS,
-
-        });
+        { _SOURCE_KEY : _SOURCE_SONGS,});
 
     return _parseSongDataList(dataList);
   }
