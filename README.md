@@ -11,6 +11,14 @@ Feedback, pull request, bug reports and suggestions are all welcome!
 
 Feel free to help!  
 
+# Example app included
+ 
+![](https://i.ibb.co/pX7jV3N/artists.gif) | 
+![](https://i.ibb.co/RBf12n6/albums.gif) | 
+![](https://i.ibb.co/ncZvtrS/songs.gif) | 
+![](https://i.ibb.co/c2XNMhp/genres.gif) | 
+
+
 ## Features
 * Android permission READ_EXTERNAL_STORAGE built-in
 * Get all artists audio info available on device storage.
