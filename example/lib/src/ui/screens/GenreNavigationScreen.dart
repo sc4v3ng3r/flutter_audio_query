@@ -27,8 +27,10 @@ class _GenreNavigationScreenState extends State<GenreNavigationScreen> {
         child: Column(
           children: <Widget>[
             _createGenreArtistsWidget(
-                audioQuery.getArtistsByGenre(genre: widget.currentGenre)),
-            ///gets all albums from current genre and show them
+                 /// getting all artists from genre
+                audioQuery.getArtistsFromGenre( genre: widget.currentGenre) ),
+
+            ///getting all albums from current genre and show them
             _createGenreAlbumsWidget( audioQuery.getAlbumsFromGenre(
                 genre: widget.currentGenre)),
           ],

@@ -38,8 +38,8 @@ class FlutterAudioQuery {
   ///This method returns a list with all artists that belongs to [genre]
   ///
   /// [genre] must be non null
-  Future< List<ArtistInfo>> getArtistsByGenre({@required final GenreInfo genre}) async {
-    List<dynamic> dataList = await _channel.invokeMethod('getArtistsByGenre',
+  Future< List<ArtistInfo>> getArtistsFromGenre({@required final GenreInfo genre}) async {
+    List<dynamic> dataList = await _channel.invokeMethod('getArtistsFromGenre',
       {_SOURCE_KEY : _SOURCE_ARTIST, 'genre_name' : genre.name});
     return _parseArtistDataList(dataList);
   }

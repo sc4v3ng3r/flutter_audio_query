@@ -306,6 +306,8 @@ class _MyAppState extends State<MyApp>{
 
   // Method to build Songs widget layout
   Widget _buildSongsWidgetLayout(Future<List<SongInfo>> future){
+
+
     return FutureBuilder< List<SongInfo> >(
 
         future: future,

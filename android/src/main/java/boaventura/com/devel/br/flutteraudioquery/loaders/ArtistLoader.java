@@ -54,7 +54,7 @@ public class ArtistLoader extends AbstractLoader {
                 MediaStore.Audio.Artists.DEFAULT_SORT_ORDER, QUERY_TYPE_DEFAULT).execute();
     }
 
-    public void getArtistsByGenre(final MethodChannel.Result result, final String genreName){
+    public void getArtistsFromGenre(final MethodChannel.Result result, final String genreName){
 
         createLoadTask(result, genreName, null,
                 null, QUERY_TYPE_GENRE_ARTISTS ).execute();

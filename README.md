@@ -1,38 +1,52 @@
 # Flutter Audio Query
 
-FlutterAudioQuery plugin allows you to query ANDROID ONLY YET MediaStore Audio data info like artists, 
-albums, songs and genres available on device storage. 
+A Flutter plugin, Android only at this moment, that allows you query for audio metadata info about artists, 
+albums, songs audio files and genres available on device storage. All work is made using Android native
+[MediaStore API](https://developer.android.com/reference/android/provider/MediaStore) with 
+[ContentResolver API](https://developer.android.com/reference/android/content/ContentResolver) and query methods
+are't running in main thread. AndroidX support it's OK!
+
+Note*: This plugin is under development, Works in Android devices only and some APIs are not available yet.
+Feedback, pull request, bug reports and suggestions are all welcome!
+
+Feel free to help!  
 
 ## Features
-
-* Get all Artists audio info available on device storage.
-* Artist Artwork cover
-* Get all albums info available on device storage;
-* Get albums from a specific artist
-* Get songs all songs available on device storage
-* Get songs from a specific album
-* Permission Handling built in
-* Get available genre
-* Get artists by genre
-* Get album by genre
+* Android permission READ_EXTERNAL_STORAGE built-in
+* Get all artists audio info available on device storage.
+* Get all artists available from a specific genre.
+* Artist comes with some album Artwork cover if available.
+* Get all albums info available on device storage.
+* Get all albums available from a specific artist.
+* Get all albums available from a specific genre.
+* Album artwork included if available.
+* Get songs all songs available on device storage.
+* Get songs from a specific album.
+* Get available genre.
+* Get artists by genre.
+* Get album by genre.
+* Song comes with album artwork which the specific song appears.
 
 ## TO DO
 
-* iOS implementation
-* CRUD on user playlists
-* Streams support
-
-
-
-## Installation
-
-
-
-```bash
-You need include in your pubspec.yaml flutter_audio_query
-```
+* Make this basic implementation for iOS.
+* CRUD operations against playlist provider.
+* Streams support.
+* Improvements in background tasks.
+* More tests and probably bug fixes.
 
 ## Usage
+To use this plugin, add `flutter_audio_query` as a [dependency in your pubspec.yaml file](https://flutter.io/platform-plugins/). For example:
+
+```yaml
+  dependencies:
+    flutter_audio_query
+```
+
+## API
+
+### FlutterAudioQuery
+To get get audio files metadata info you just need `FlutterAudioQuery` object instance.
 
 ```dart
 //you need include this file only.
@@ -47,13 +61,28 @@ artists.forEach( (artist){
       print(artist); // prints all artist property values
     } );
 
-// gets all albums available from a specific artist
+/// getting all albums available from a specific artist
 List<AlbumInfo> albums = await audioQuery.getAlbumsFromArtist(artist: artist);
     albums.forEach( (artistAlbum) {
       print(artistAlbum); //print all album property values
     });
 
-List<SongInfo> songs = await  audioQuery.getSongs(); // gets all songs available on device storage
+ /// getting all albums available on device storage
+ List<AlbumInfo> albums = await audioQuery.getAlbums(); 
+
+/// getting all genres available
+ List<GenreInfo> genreList = audioQuery.getGenres();
+
+
+ genreList.foreach((genre){
+   /// getting all artists available from specific genre.
+   audioQuery.getArtistsByGenre(genre: genre)
+ } );
+ 
+ 
+ /// getting all songs available on device storage
+List<SongInfo> songs = await audioQuery.getSongs(); // gets all songs available on device storage
+
 
 ```
 
@@ -64,19 +93,3 @@ Please make sure to update tests as appropriate.
 
 ## License
 [GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)
-
-
-# flutter_audio_query
-
-A new Flutter plugin to query android MediaStore Audio data.
-
-## Getting Started
-
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.io/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
-
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.io/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
