@@ -17,22 +17,23 @@ class ItemHolderWidget<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-
     final mainContainer = Container(
       width: width,
       height: height,
       decoration: BoxDecoration(
-            image: DecorationImage(
-              image: (imagePath == null) ? AssetImage("assets/no_cover.png")
-                  : FileImage( File( imagePath )),
-              fit: BoxFit.cover,
-              alignment: AlignmentDirectional.center,
-          ),
-      ),
+        image: DecorationImage(
+          image: (imagePath == null) ? AssetImage("assets/no_cover.png")
+              : FileImage( File( imagePath )),
+          fit: BoxFit.cover,
+          alignment: AlignmentDirectional.center,
+        ),
+    ),
 
       child: Stack(
+
         alignment: AlignmentDirectional.bottomCenter,
         children: <Widget>[
+
 
           Container(
             color: Color.fromRGBO(0xff, 0xff, 0xff, 0.5),

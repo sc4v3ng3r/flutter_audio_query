@@ -11,6 +11,7 @@ class ContentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
 
       body: NestedScrollView(
@@ -30,10 +31,10 @@ class ContentScreen extends StatelessWidget {
                       overflow: TextOverflow.fade,
                       style: TextStyle( color: Colors.white,),
                     ),
+
                   background: (appBarBackgroundImage == null)
                       ? Image.asset("assets/no_cover.png", fit: BoxFit.cover,)
-                      : Image.file( File(appBarBackgroundImage), fit: BoxFit.cover,
-                  ),
+                      : Image.file( File(appBarBackgroundImage), fit: BoxFit.cover,),
                 ),
               ),
             ];

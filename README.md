@@ -6,7 +6,7 @@ albums, songs audio files and genres available on device storage. All work is ma
 [ContentResolver API](https://developer.android.com/reference/android/content/ContentResolver) and query methods
 run in background thread. AndroidX support it's OK!
 
-Note*: This plugin is under development, Works in Android devices only and some APIs are not available yet.
+Note: This plugin is under development, Works in Android devices only and some APIs are not available yet.
 Feedback, pull request, bug reports and suggestions are all welcome!
 
 Feel free to help!  
@@ -89,7 +89,7 @@ List<AlbumInfo> albums = await audioQuery.getAlbumsFromArtist(artist: artist);
    /// getting all albums which appears on genre [genre].
    await audioQuery.getAlbumsFromGenre(genre: genre);
    
-   // getting all songs which appears on genre [genre]
+   /// getting all songs which appears on genre [genre]
    await audioQuery.getSongsFromGenre(genre: genre);
     
  } );

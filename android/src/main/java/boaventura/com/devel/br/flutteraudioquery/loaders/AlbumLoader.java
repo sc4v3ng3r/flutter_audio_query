@@ -195,13 +195,21 @@ public class AlbumLoader extends AbstractLoader {
 
                 else {
                     while ( cursor.moveToNext() ){
-                        Map<String, Object> dataMap = new HashMap<>();
-                        for (String albumColumn : ALBUM_PROJECTION) {
-                            String value = cursor.getString(cursor.getColumnIndex(albumColumn));
-                            dataMap.put(albumColumn, value);
-                            //Log.i(TAG, albumColumn + ": " + value);
+
+                        try {
+                            Map<String, Object> dataMap = new HashMap<>();
+                            for (String albumColumn : ALBUM_PROJECTION) {
+                                String value = cursor.getString(cursor.getColumnIndex(albumColumn));
+                                dataMap.put(albumColumn, value);
+                                //Log.i(TAG, albumColumn + ": " + value);
+                            }
+                            dataList.add( dataMap );
                         }
-                        dataList.add( dataMap );
+                        catch (Exception ex){
+                            Log.e("ERROR", "AlbumLoader::basicLoad", ex);
+                            Log.e("ERROR", "while reading basic load cursor");
+                        }
+
                     }
                 }
                 cursor.close();
@@ -218,16 +226,23 @@ public class AlbumLoader extends AbstractLoader {
 
             if (albumNamesCursor != null){
 
-                while (albumNamesCursor.moveToNext()){
-                    String albumName = albumNamesCursor.getString( albumNamesCursor.getColumnIndex(
-                            MediaStore.Audio.Media.ALBUM_ID ));
-                    albumNames.add(albumName);
+                try {
+                    while (albumNamesCursor.moveToNext()){
+                        String albumName = albumNamesCursor.getString( albumNamesCursor.getColumnIndex(
+                                MediaStore.Audio.Media.ALBUM_ID ));
+                        albumNames.add(albumName);
+                    }
+                    albumNamesCursor.close();
                 }
-                albumNamesCursor.close();
+                catch (Exception ex){
+                    Log.e("ERROR", "AlbumLoader::getAlbumNamesFromGenre", ex);
+                }
+
             }
 
             return albumNames;
         }
+
 
         private List<Map<String, Object>> loadAlbumsInfoWithMediaSupport(final String artistName){
 
@@ -240,10 +255,11 @@ public class AlbumLoader extends AbstractLoader {
                     MediaStore.Audio.Albums.ARTIST +"=?" + " and "
                             + MediaStore.Audio.Media.IS_MUSIC + "!=?"
                             + ") GROUP BY (" + MediaStore.Audio.Albums.ALBUM,
-                    new String[] { artistName, "0" },
+                    new String[] { artistName, "1" },
                     MediaStore.Audio.Media.DEFAULT_SORT_ORDER );
 
             if ( artistAlbumsCursor != null ){
+                ///TODO tem que ter try catch
                 String albumId = artistAlbumsCursor.getString(
                         artistAlbumsCursor.getColumnIndex( ALBUM_MEDIA_PROJECTION [0]) );
 
@@ -260,17 +276,25 @@ public class AlbumLoader extends AbstractLoader {
 
                     if ( albumDataCursor != null ){
 
-                        while( albumDataCursor.moveToNext() ){
-                            Map<String, Object> albumData = new HashMap<>();
+                        try {
+                            while( albumDataCursor.moveToNext() ){
+                                Map<String, Object> albumData = new HashMap<>();
 
-                            for (String albumColumn : ALBUM_PROJECTION)
-                                albumData.put(albumColumn, albumDataCursor.
-                                        getString( albumDataCursor.getColumnIndex( albumColumn) ) );
+                                for (String albumColumn : ALBUM_PROJECTION)
+                                    albumData.put(albumColumn, albumDataCursor.
+                                            getString( albumDataCursor.getColumnIndex( albumColumn) ) );
 
-                            dataList.add( albumData );
+                                dataList.add( albumData );
+                            }
+                            albumDataCursor.close();
+
+                        } catch (Exception ex){
+                            Log.e("ERROR", "AlbumLoader::loadAlbumsInfoWithMediaSupport", ex);
+
                         }
-                        albumDataCursor.close();
+
                     }
+
                 }
 
                 artistAlbumsCursor.close();
