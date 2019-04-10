@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 
 import boaventura.com.devel.br.flutteraudioquery.loaders.tasks.AbstractLoadTask;
+import boaventura.com.devel.br.flutteraudioquery.sortingtypes.GenreSortType;
+import boaventura.com.devel.br.flutteraudioquery.sortingtypes.SongSortType;
 import io.flutter.plugin.common.MethodChannel;
 
 public class GenreLoader extends AbstractLoader {
@@ -49,8 +51,22 @@ public class GenreLoader extends AbstractLoader {
     }
 
 
-    public void getGenres(final MethodChannel.Result result){
-        createLoadTask(result, null, null, null,0).execute();
+    private String parseSortOrder(GenreSortType sortType){
+        String sortOrder;
+
+        switch (sortType){
+
+            default:
+            case DEFAULT:
+                sortOrder = MediaStore.Audio.Genres.DEFAULT_SORT_ORDER;
+                break;
+        }
+
+        return sortOrder;
+    }
+
+    public void getGenres(final MethodChannel.Result result, final GenreSortType sortType){
+        createLoadTask(result, null, null, parseSortOrder(sortType),0).execute();
     }
 
     static class GenreLoadTask extends AbstractLoadTask<List<Map<String,Object>>>{
@@ -84,15 +100,19 @@ public class GenreLoader extends AbstractLoader {
 
             if (genreCursor != null){
                 while ( genreCursor.moveToNext() ){
-                    Map<String, Object> data = new HashMap<>();
-
-                    for(String column : genreCursor.getColumnNames()){
-                        data.put(column, genreCursor.getString(
-                                genreCursor.getColumnIndex( column )));
+                    try {
+                        Map<String, Object> data = new HashMap<>();
+                        for (String column : genreCursor.getColumnNames()) {
+                            data.put(column, genreCursor.getString(
+                                    genreCursor.getColumnIndex(column)));
+                        }
+                        dataList.add(data);
                     }
 
-
-                    dataList.add(data);
+                    catch(Exception ex){
+                        Log.e(TAG_ERROR, "GenreLoader::loadData method exception");
+                        Log.e(TAG_ERROR, ex.getMessage() );
+                    }
                 }
                 genreCursor.close();
             }

@@ -16,8 +16,6 @@
 package boaventura.com.devel.br.flutteraudioquery;
 
 
-import android.util.Log;
-
 import boaventura.com.devel.br.flutteraudioquery.delegate.AudioQueryDelegate;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -42,7 +40,6 @@ public class FlutterAudioQueryPlugin implements MethodCallHandler {
 
     final MethodChannel channel = new MethodChannel(registrar.messenger(), CHANNEL_NAME);
     final AudioQueryDelegate delegate = new AudioQueryDelegate( registrar );
-
     channel.setMethodCallHandler(new FlutterAudioQueryPlugin(delegate));
 
   }

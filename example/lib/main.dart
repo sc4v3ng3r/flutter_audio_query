@@ -2,26 +2,56 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
+import 'package:flutter_audio_query_example/src/Utility.dart';
 import 'package:flutter_audio_query_example/src/ui/screens/ContentScreen.dart';
 import 'package:flutter_audio_query_example/src/ui/screens/GenreNavigationScreen.dart';
 import 'package:flutter_audio_query_example/src/ui/widgets/AlbumGridViewWidget.dart';
 import 'package:flutter_audio_query_example/src/ui/widgets/ItemHolderWidget.dart';
 import 'package:flutter_audio_query_example/src/ui/widgets/SongListViewWidget.dart';
+import 'package:flutter_audio_query_example/src/ui/widgets/SortOptionsDialog.dart';
 
 void main() => runApp( MyApp() );
 
-class MyApp extends StatefulWidget{
+class MyApp extends StatelessWidget {
 
   @override
-  State createState() => _MyAppState();
-
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: MyAppWidget(),
+    );
+  }
 }
 
 
-class _MyAppState extends State<MyApp>{
+enum NavigationOptions { ARTISTS, ALBUMS, SONGS, GENRES }
+
+class MyAppWidget extends StatefulWidget {
+  @override
+  _MyAppWidgetState createState() => _MyAppWidgetState();
+}
+
+
+class _MyAppWidgetState extends State<MyAppWidget> {
   /// audio query object
   final FlutterAudioQuery audioQuery = FlutterAudioQuery();
-  int _selectedIndex = 0;
+  NavigationOptions _currentOption = NavigationOptions.ARTISTS;
+
+  final _artistSortNames = ["DEFAULT", "MORE ALBUMS NUMBER FIRST",
+  "LESS ALBUMS NUMBER FIRST", "MORE TRACKS NUMBER FIRST", "LESS TRACKS NUMBER FIRST"];
+
+  final _albumsSortNames = ["DEFAULT", "ALPHABETIC ARTIST NAME", "MORE SONGS NUMBER FIRST",
+  "LESS SONGS NUMBER FIRST", "MOST RECENT YEAR", "OLDEST YEAR"];
+
+  final _songsSortNames = ["DEFAULT", "ALPHABETIC COMPOSER", "GREATER DURATION",
+  "SMALLER DURATION", "RECENT YEAR", "OLDEST YEAR", "ALPHABETIC ARTIST",
+  "ALPHABETIC ALBUM", "GREATER TRACK NUMBER", "SMALLER TRACK NUMBER", "DISPLAY NAME"];
+
+  final _genreSortNames = ["DEFAULT"];
+
+  ArtistSortType _artistSortTypeSelected = ArtistSortType.DEFAULT;
+  AlbumSortType _albumsSortTypeSelected = AlbumSortType.DEFAULT;
+  SongSortType _songsSortTypeSelected = SongSortType.DEFAULT;
+  GenreSortType _genreSortTypeSelected = GenreSortType.DEFAULT;
 
   @override
   void initState() {
@@ -35,10 +65,16 @@ class _MyAppState extends State<MyApp>{
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Flutter Audio Plugin Example'),
+          actions: <Widget>[
+            IconButton(icon: Icon(Icons.sort,),
+                tooltip: "Sorting types",
+                onPressed: (){
+                  showSortTypeChooseDialog();
+                }),
+          ],
         ),
 
         body: _createBody(),
-
         bottomNavigationBar: _createBottomBarNavigator()
       ),
     );
@@ -52,10 +88,10 @@ class _MyAppState extends State<MyApp>{
       ),
 
       child: BottomNavigationBar(
-        currentIndex: _selectedIndex,
+        currentIndex: _currentOption.index,
         onTap: (indexSelected){
           setState(() {
-            _selectedIndex = indexSelected;
+            _currentOption = NavigationOptions.values[indexSelected];
           });
         },
         type: BottomNavigationBarType.fixed,
@@ -93,26 +129,27 @@ class _MyAppState extends State<MyApp>{
   }
 
   Widget _createBody(){
-    switch( _selectedIndex){
-      case 0:
+    switch( _currentOption){
+      case NavigationOptions.ARTISTS:
         /// query for all artists available and build layout
         /// inside this call you can se some ArtistInfo properties
-        return _buildArtistsWidgetLayout( audioQuery.getArtists() );
+        return _buildArtistsWidgetLayout( audioQuery.getArtists(
+            sortType: _artistSortTypeSelected) );
 
-      case 1:
+      case NavigationOptions.ALBUMS:
         /// getting all albums available on device
       /// inside this call you can se some AlbumInfo properties
-        return _buildAlbumsWidgetLayout( audioQuery.getAlbums() );
+        return _buildAlbumsWidgetLayout( audioQuery.getAlbums(sortType: _albumsSortTypeSelected) );
 
-      case 2:
+      case NavigationOptions.SONGS:
         /// getting all songs available on device storage
         ///inside this call you can see the usage of some SongInfo properties
-        return _buildSongsWidgetLayout( audioQuery.getSongs());
+        return _buildSongsWidgetLayout( audioQuery.getSongs( sortType: _songsSortTypeSelected ) );
 
-      case 3:
+      case NavigationOptions.GENRES:
         /// getting all genres available on your device
         /// The only property available at this moment in GenreInfo class is 'name'.
-        return _buildGenresWidgetLayout( audioQuery.getGenres() );
+        return _buildGenresWidgetLayout( audioQuery.getGenres(sortType: _genreSortTypeSelected) );
 
       default:
         break;
@@ -125,6 +162,75 @@ class _MyAppState extends State<MyApp>{
     );
   }
 
+  void showSortTypeChooseDialog(){
+
+    switch(_currentOption){
+      case NavigationOptions.ARTISTS:
+        showDialog<void>(context: context,
+            builder: (BuildContext context){
+              return SortOptionsDialog(
+                title: "Artist Sort Options",
+                initialSelectedIndex: _artistSortTypeSelected.index,
+                options: _artistSortNames,
+                onChange: (index){
+                  setState(() => _artistSortTypeSelected = ArtistSortType.values[index] );
+                  Navigator.pop(context);
+                },
+              );
+            }
+        );
+        break;
+
+      case NavigationOptions.ALBUMS:
+        showDialog<void>(context: context,
+            builder: (BuildContext context){
+              return SortOptionsDialog(
+                title: "Albums Sort Options",
+                initialSelectedIndex: _albumsSortTypeSelected.index,
+                options: _albumsSortNames,
+                onChange: (index){
+                  setState(() => _albumsSortTypeSelected = AlbumSortType.values[index] );
+                  Navigator.pop(context);
+                },
+              );
+            }
+        );
+        break;
+
+      case NavigationOptions.GENRES:
+        showDialog<void>(context: context,
+            builder: (BuildContext context){
+              return SortOptionsDialog(
+                title: "Genre Sort Options",
+                initialSelectedIndex: _genreSortTypeSelected.index,
+                options: _genreSortNames,
+                onChange: (index){
+                  setState(() => _genreSortTypeSelected = GenreSortType.values[index] );
+                  Navigator.pop(context);
+                },
+              );
+            }
+        );
+        break;
+
+      case NavigationOptions.SONGS:
+        showDialog<void>(context: context,
+            builder: (BuildContext context){
+              return SortOptionsDialog(
+                title: "Songs Sort Options",
+                initialSelectedIndex: _songsSortTypeSelected.index,
+                options: _songsSortNames,
+                onChange: (index){
+                  setState(() => _songsSortTypeSelected = SongSortType.values[index] );
+                  Navigator.pop(context);
+                },
+              );
+            }
+        );
+        break;
+    }
+  }
+
   void _onArtistTap(final ArtistInfo artistSelected, final BuildContext context){
 
     Navigator.push(context,
@@ -134,9 +240,8 @@ class _MyAppState extends State<MyApp>{
           appBarTitle: artistSelected.name,
 
           bodyContent: AlbumGridViewWidget(
-
             ///getting all albums from specific artist
-            future: audioQuery.getAlbumsFromArtist(artist: artistSelected),
+            future: audioQuery.getAlbumsFromArtist(artist: artistSelected, ),
 
             onItemTapCallback: (albumSelected){
               Navigator.push(context,
@@ -146,7 +251,10 @@ class _MyAppState extends State<MyApp>{
                     appBarTitle: albumSelected.title,
                     bodyContent: SongsListViewWidget(
                       ///getting all songs from a specific album
-                      future: audioQuery.getSongsFromAlbum( album: albumSelected),
+                      future: audioQuery.getSongsFromAlbum(
+                        album: albumSelected,
+                        sortType: SongSortType.DISPLAY_NAME
+                      ),
                       currentAlbum: albumSelected,
                     ),
                   ),
@@ -167,7 +275,8 @@ class _MyAppState extends State<MyApp>{
           appBarTitle: albumSelected.title,
           bodyContent: SongsListViewWidget(
             ///getting all songs from a specific album
-            future: audioQuery.getSongsFromAlbum( album: albumSelected),
+            future: audioQuery.getSongsFromAlbum( album: albumSelected,
+                sortType: SongSortType.DISPLAY_NAME),
             currentAlbum: albumSelected,
           ),
         ),
@@ -175,10 +284,8 @@ class _MyAppState extends State<MyApp>{
     );
   }
 
-
   // Method to build artist widget layout
   Widget _buildArtistsWidgetLayout(Future<List<ArtistInfo>> future){
-
     return FutureBuilder(
         future: future,
         builder: (context, snapshot){
@@ -306,7 +413,6 @@ class _MyAppState extends State<MyApp>{
   // Method to build Songs widget layout
   Widget _buildSongsWidgetLayout(Future<List<SongInfo>> future){
 
-
     return FutureBuilder< List<SongInfo> >(
 
         future: future,
@@ -339,12 +445,10 @@ class _MyAppState extends State<MyApp>{
           }
 
           else {
-
             return ListView.builder(
                 itemCount: snapshot.data.length,
                 itemBuilder: (context, index){
                   SongInfo song = snapshot.data[index];
-
                   return Column(
                     children: <Widget>[
                       ListTile(
@@ -356,6 +460,9 @@ class _MyAppState extends State<MyApp>{
                         title: Text("${ song.displayName }"),
                         subtitle: Text("${song.artist}"),
                         onTap: () => print("Song Selected: $song"),
+                        trailing: Text("${Utility.parseToMinutesSeconds(int.parse(song.duration))}",
+                          style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500),
+                        ),
                       ),
                       Container(
                         height: 1.0,

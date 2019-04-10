@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import boaventura.com.devel.br.flutteraudioquery.loaders.tasks.AbstractLoadTask;
+import boaventura.com.devel.br.flutteraudioquery.sortingtypes.AlbumSortType;
 import io.flutter.plugin.common.MethodChannel;
 
 public class AlbumLoader extends AbstractLoader {
@@ -52,67 +53,102 @@ public class AlbumLoader extends AbstractLoader {
             MediaStore.Audio.Media.IS_MUSIC
     };
 
-    public AlbumLoader(final Context context){
+    public AlbumLoader(final Context context) {
         super(context);
+    }
+
+
+    private String parseSortOrder(AlbumSortType sortType){
+        String sortOrder;
+
+        switch (sortType){
+
+            case LESS_SONGS_NUMBER_FIRST:
+                sortOrder = MediaStore.Audio.Albums.NUMBER_OF_SONGS + " ASC";
+                break;
+
+            case MORE_SONGS_NUMBER_FIRST:
+                sortOrder = MediaStore.Audio.Albums.NUMBER_OF_SONGS + " DESC";
+                break;
+
+            case ALPHABETIC_ARTIST_NAME:
+                sortOrder = MediaStore.Audio.Albums.ARTIST;
+                break;
+
+            case MOST_RECENT_YEAR:
+                sortOrder = MediaStore.Audio.Albums.LAST_YEAR + " DESC";
+                break;
+
+            case OLDEST_YEAR:
+                sortOrder = MediaStore.Audio.Albums.LAST_YEAR + " ASC";
+                break;
+
+            case DEFAULT:
+            default:
+                sortOrder = MediaStore.Audio.Albums.DEFAULT_SORT_ORDER;
+                break;
+        }
+        return sortOrder;
     }
 
     /**
      * This method queries in background all albums available in device storage
+     *
      * @param result MethodChannel results object to send to Dart side
      *               the query results.
      */
-    public void getAlbums(MethodChannel.Result result){
-        createLoadTask(result,null, null,
-                MediaStore.Audio.Artists.DEFAULT_SORT_ORDER,0).execute();
+    public void getAlbums(MethodChannel.Result result, AlbumSortType sortType) {
+        createLoadTask(result, null, null,
+                parseSortOrder(sortType), 0).execute();
     }
 
     /**
-     *
      * @param result
      * @param albumId
      */
-    public void getAlbumById(MethodChannel.Result result, long albumId){
+    public void getAlbumById(MethodChannel.Result result, long albumId) {
         createLoadTask(result, ALBUM_PROJECTION[0] + " = ? ",
-                new String[] { String.valueOf(albumId) },
-                MediaStore.Audio.Albums.DEFAULT_SORT_ORDER,0 ).execute();
+                new String[]{String.valueOf(albumId)},
+                MediaStore.Audio.Albums.DEFAULT_SORT_ORDER, 0).execute();
     }
 
-    public void getAlbumFromGenre(final MethodChannel.Result result, final String genre){
+    public void getAlbumFromGenre(final MethodChannel.Result result, final String genre,
+                                  AlbumSortType sortType) {
         createLoadTask(result, genre, null,
-                MediaStore.Audio.Albums.DEFAULT_SORT_ORDER, QUERY_TYPE_GENRE_ALBUM).execute();
+                parseSortOrder(sortType), QUERY_TYPE_GENRE_ALBUM).execute();
     }
+
     /**
-     *
      * @param result
      * @param artistName
      */
-    public void getAlbumsFromArtist(MethodChannel.Result result, String artistName){
-        createLoadTask(result,ALBUM_PROJECTION[3] + " = ? ",
-                new String[] { artistName }, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER,0 ).execute();
+    public void getAlbumsFromArtist(MethodChannel.Result result, String artistName, AlbumSortType sortType) {
+        createLoadTask(result, ALBUM_PROJECTION[3] + " = ? ",
+                new String[]{artistName}, parseSortOrder(sortType), 0).execute();
     }
 
 
     @Override
     protected AlbumLoadTask createLoadTask(
             final MethodChannel.Result result, final String selection,
-            final String[] selectionArgs, final String sortOrder, final int type){
+            final String[] selectionArgs, final String sortOrder, final int type) {
 
-        return new AlbumLoadTask(result, getContentResolver() , selection, selectionArgs,
+        return new AlbumLoadTask(result, getContentResolver(), selection, selectionArgs,
                 sortOrder, type);
 
     }
 
 
-    static class AlbumLoadTask extends AbstractLoadTask< List<Map<String,Object>> > {
+    static class AlbumLoadTask extends AbstractLoadTask<List<Map<String, Object>>> {
 
         private ContentResolver m_resolver;
         private MethodChannel.Result m_result;
         private int m_queryType;
 
         private AlbumLoadTask(final MethodChannel.Result result, ContentResolver resolver,
-                             final String selection, final String[] selectionArgs,
-                              final String sortOrder, final int type){
-            super(selection, selectionArgs,sortOrder);
+                              final String selection, final String[] selectionArgs,
+                              final String sortOrder, final int type) {
+            super(selection, selectionArgs, sortOrder);
 
             m_result = result;
             m_resolver = resolver;
@@ -122,9 +158,9 @@ public class AlbumLoader extends AbstractLoader {
         private String createMultipleValueSelectionArgs( /*String column */String[] params) {
 
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(MediaStore.Audio.Albums._ID + " IN(?" );
+            stringBuilder.append(MediaStore.Audio.Albums._ID + " IN(?");
 
-            for(int i=0; i < (params.length-1); i++)
+            for (int i = 0; i < (params.length - 1); i++)
                 stringBuilder.append(",?");
 
             stringBuilder.append(')');
@@ -132,31 +168,29 @@ public class AlbumLoader extends AbstractLoader {
         }
 
         @Override
-        protected List< Map<String,Object> > loadData(
-                final String selection, final String [] selectionArgs,
-                final String sortOrder ){
+        protected List<Map<String, Object>> loadData(
+                final String selection, final String[] selectionArgs,
+                final String sortOrder) {
 
-            switch (m_queryType){
+            switch (m_queryType) {
                 case QUERY_TYPE_DEFAULT:
                     return this.basicDataLoad(selection, selectionArgs, sortOrder);
 
                 case QUERY_TYPE_GENRE_ALBUM:
-                    List<String> albumsFromGenre =  getAlbumNamesFromGenre(selection);
+                    List<String> albumsFromGenre = getAlbumNamesFromGenre(selection);
                     int idCount = albumsFromGenre.size();
 
-                    if (idCount > 0){
+                    if (idCount > 0) {
                         if (idCount > 1) {
                             String[] params = albumsFromGenre.toArray(new String[idCount]);
                             String createdSelection = createMultipleValueSelectionArgs(params);
 
                             return basicDataLoad(createdSelection, params,
                                     MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
-                        }
-
-                        else {
+                        } else {
                             return basicDataLoad(
                                     MediaStore.Audio.Albums._ID + " =?",
-                                    new String[] { albumsFromGenre.get(0)},
+                                    new String[]{albumsFromGenre.get(0)},
                                     MediaStore.Audio.Artists.DEFAULT_SORT_ORDER);
                         }
                     }
@@ -169,15 +203,15 @@ public class AlbumLoader extends AbstractLoader {
         }
 
 
-        private List<Map<String,Object>> basicDataLoad( final String selection, final String [] selectionArgs,
-                                                        final String sortOrder){
+        private List<Map<String, Object>> basicDataLoad(final String selection, final String[] selectionArgs,
+                                                        final String sortOrder) {
 
-            List< Map<String,Object> > dataList = new ArrayList<>();
+            List<Map<String, Object>> dataList = new ArrayList<>();
 
-            Cursor cursor = m_resolver.query( MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
-                    ALBUM_PROJECTION, selection, selectionArgs, sortOrder );
+            Cursor cursor = m_resolver.query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                    ALBUM_PROJECTION, selection, selectionArgs, sortOrder);
 
-            if  ( cursor != null ){
+            if (cursor != null) {
 
                 //Sometimes the relationship album -> artist in Album "TABLE" are missing and I really
                 //don't know why but I saw this happen in API level 19.So as work around, when we can't get
@@ -188,14 +222,11 @@ public class AlbumLoader extends AbstractLoader {
 
                 //It's not the best way to do this, but we get the results.
 
-                if (cursor.getCount() == 0){
+                if (cursor.getCount() == 0) {
                     cursor.close();
-                    dataList = loadAlbumsInfoWithMediaSupport( selectionArgs[0] );
-                }
-
-                else {
-                    while ( cursor.moveToNext() ){
-
+                    dataList = loadAlbumsInfoWithMediaSupport(selectionArgs[0]);
+                } else {
+                    while (cursor.moveToNext()) {
                         try {
                             Map<String, Object> dataMap = new HashMap<>();
                             for (String albumColumn : ALBUM_PROJECTION) {
@@ -203,9 +234,8 @@ public class AlbumLoader extends AbstractLoader {
                                 dataMap.put(albumColumn, value);
                                 //Log.i(TAG, albumColumn + ": " + value);
                             }
-                            dataList.add( dataMap );
-                        }
-                        catch (Exception ex){
+                            dataList.add(dataMap);
+                        } catch (Exception ex) {
                             Log.e("ERROR", "AlbumLoader::basicLoad", ex);
                             Log.e("ERROR", "while reading basic load cursor");
                         }
@@ -217,82 +247,78 @@ public class AlbumLoader extends AbstractLoader {
             return dataList;
         }
 
-        private List<String> getAlbumNamesFromGenre(final String genre){
+        private List<String> getAlbumNamesFromGenre(final String genre) {
             List<String> albumNames = new ArrayList<>();
 
             Cursor albumNamesCursor = m_resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    new String[] {"Distinct " + MediaStore.Audio.Media.ALBUM_ID, "genre_name" },
-                    "genre_name" + " =?",new String[] {genre},null);
+                    new String[]{"Distinct " + MediaStore.Audio.Media.ALBUM_ID, "genre_name"},
+                    "genre_name" + " =?", new String[]{genre}, null);
 
-            if (albumNamesCursor != null){
+            if (albumNamesCursor != null) {
 
-                try {
-                    while (albumNamesCursor.moveToNext()){
-                        String albumName = albumNamesCursor.getString( albumNamesCursor.getColumnIndex(
-                                MediaStore.Audio.Media.ALBUM_ID ));
+                while (albumNamesCursor.moveToNext()) {
+                    try {
+                        String albumName = albumNamesCursor.getString(albumNamesCursor.getColumnIndex(
+                                MediaStore.Audio.Media.ALBUM_ID));
                         albumNames.add(albumName);
+                    } catch (Exception ex) {
+                        Log.e("ERROR", "AlbumLoader::getAlbumNamesFromGenre", ex);
                     }
-                    albumNamesCursor.close();
+
                 }
-                catch (Exception ex){
-                    Log.e("ERROR", "AlbumLoader::getAlbumNamesFromGenre", ex);
-                }
+                albumNamesCursor.close();
 
             }
 
             return albumNames;
         }
 
+        private List<Map<String, Object>> loadAlbumsInfoWithMediaSupport(final String artistName) {
 
-        private List<Map<String, Object>> loadAlbumsInfoWithMediaSupport(final String artistName){
-
-            List<Map<String,Object>> dataList = new ArrayList<>();
+            List<Map<String, Object>> dataList = new ArrayList<>();
 
             // we get albums from an specific artist
             Cursor artistAlbumsCursor = m_resolver.query(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     ALBUM_MEDIA_PROJECTION,
-                    MediaStore.Audio.Albums.ARTIST +"=?" + " and "
+                    MediaStore.Audio.Albums.ARTIST + "=?" + " and "
                             + MediaStore.Audio.Media.IS_MUSIC + "!=?"
                             + ") GROUP BY (" + MediaStore.Audio.Albums.ALBUM,
-                    new String[] { artistName, "1" },
-                    MediaStore.Audio.Media.DEFAULT_SORT_ORDER );
+                    new String[]{artistName, "1"},
+                    MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
 
-            if ( artistAlbumsCursor != null ){
+            if (artistAlbumsCursor != null) {
                 ///TODO tem que ter try catch
                 String albumId = artistAlbumsCursor.getString(
-                        artistAlbumsCursor.getColumnIndex( ALBUM_MEDIA_PROJECTION [0]) );
+                        artistAlbumsCursor.getColumnIndex(ALBUM_MEDIA_PROJECTION[0]));
 
                 // for earch album from desired artist we get all album info needed
                 // from Album "TABLE"
-                while( artistAlbumsCursor.moveToNext() ){
+                while (artistAlbumsCursor.moveToNext()) {
 
                     Cursor albumDataCursor = m_resolver.query(
                             MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
                             ALBUM_PROJECTION,
                             MediaStore.Audio.Albums._ID + "=?",
-                            new String[] { albumId },
-                            MediaStore.Audio.Albums.DEFAULT_SORT_ORDER );
+                            new String[]{albumId},
+                            MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
 
-                    if ( albumDataCursor != null ){
+                    if (albumDataCursor != null) {
 
-                        try {
-                            while( albumDataCursor.moveToNext() ){
+                        while (albumDataCursor.moveToNext()) {
+                            try {
                                 Map<String, Object> albumData = new HashMap<>();
-
                                 for (String albumColumn : ALBUM_PROJECTION)
                                     albumData.put(albumColumn, albumDataCursor.
-                                            getString( albumDataCursor.getColumnIndex( albumColumn) ) );
+                                            getString(albumDataCursor.getColumnIndex(albumColumn)));
 
-                                dataList.add( albumData );
+                                dataList.add(albumData);
                             }
-                            albumDataCursor.close();
-
-                        } catch (Exception ex){
-                            Log.e("ERROR", "AlbumLoader::loadAlbumsInfoWithMediaSupport", ex);
-
+                            catch (Exception ex) {
+                                Log.e("ERROR", "AlbumLoader::loadAlbumsInfoWithMediaSupport", ex);
+                            }
                         }
-
+                        albumDataCursor.close();
                     }
 
                 }

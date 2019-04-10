@@ -18,15 +18,21 @@ package boaventura.com.devel.br.flutteraudioquery.delegate;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 import boaventura.com.devel.br.flutteraudioquery.loaders.AlbumLoader;
 import boaventura.com.devel.br.flutteraudioquery.loaders.ArtistLoader;
 import boaventura.com.devel.br.flutteraudioquery.loaders.GenreLoader;
 import boaventura.com.devel.br.flutteraudioquery.loaders.SongLoader;
+import boaventura.com.devel.br.flutteraudioquery.sortingtypes.AlbumSortType;
+import boaventura.com.devel.br.flutteraudioquery.sortingtypes.ArtistSortType;
+import boaventura.com.devel.br.flutteraudioquery.sortingtypes.GenreSortType;
+import boaventura.com.devel.br.flutteraudioquery.sortingtypes.SongSortType;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.PluginRegistry;
+import io.flutter.view.FlutterNativeView;
 
 ///
 // * AudioQueryDelegate makes a validation if a method call can be executed, permission validation and
@@ -35,7 +41,7 @@ import io.flutter.plugin.common.PluginRegistry;
 // *
 // * <p>The work flow in this class is: </p>
 // * <p>1) Verify if  already exists a call method to be executed. If there's we finish with a error if not
-// *  we go to setp 2.</p>
+// *  we go to step 2.</p>
 // *
 // *  <p>2) Verify if we have system permissions to run a specific method. If permission is granted we go
 // *  to step 3, if not, we make a system permission request and if permission is denied we finish with a
@@ -50,7 +56,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
 
     private static final String ERROR_KEY_PENDING_RESULT = "pending_result";
     private static final String ERROR_KEY_PERMISSION_DENIAL = "permission_denial";
-
+    private static final String SORT_TYPE = "sort_type";
     private static final int REQUEST_CODE_PERMISSION_READ_EXTERNAL = 0x01;
     private static final int REQUEST_CODE_PERMISSION_WRITE_EXTERNAL = 0x02;
 
@@ -63,6 +69,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
     private final AlbumLoader m_albumLoader;
     private final SongLoader m_songLoader;
     private final GenreLoader m_genreLoader;
+
 
     public AudioQueryDelegate(final PluginRegistry.Registrar registrar){
 
@@ -86,6 +93,15 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
         };
 
         registrar.addRequestPermissionsResultListener(this);
+
+        registrar.addViewDestroyListener(new PluginRegistry.ViewDestroyListener() {
+            @Override
+            public boolean onViewDestroy(FlutterNativeView flutterNativeView) {
+                // ideal
+                Log.i("MDBG", "onViewDestroy");
+                return true;
+            }
+        });
     }
 
 
@@ -190,50 +206,57 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
      * @param result results input object.
      */
     private void handleReadOnlyMethods(MethodCall call, MethodChannel.Result result){
+
         switch (call.method){
 
             // artists calls section
             case "getArtists":
-                m_artistLoader.getArtists(result);
+                m_artistLoader.getArtists(result, ArtistSortType.values()[(int)call.argument(SORT_TYPE)] );
                 break;
 
             case "getArtistsFromGenre":
-                m_artistLoader.getArtistsFromGenre(result, (String)call.argument("genre_name"));
+                m_artistLoader.getArtistsFromGenre(result, (String)call.argument("genre_name"),
+                        ArtistSortType.values()[(int)call.argument(SORT_TYPE)] );
                 break;
             //album calls section
             case "getAlbums":
-                m_albumLoader.getAlbums(result);
+                m_albumLoader.getAlbums(result, AlbumSortType.values()[(int)call.argument(SORT_TYPE)] );
                 break;
 
             case "getAlbumsFromArtist":
                 String artist = call.argument("artist" );
-                m_albumLoader.getAlbumsFromArtist(result, artist);
+                m_albumLoader.getAlbumsFromArtist(result, artist,
+                        AlbumSortType.values()[(int)call.argument(SORT_TYPE)]);
                 break;
 
             case "getAlbumsFromGenre":
-                m_albumLoader.getAlbumFromGenre(result, (String)call.argument("genre_name"));
+                m_albumLoader.getAlbumFromGenre(result, (String)call.argument("genre_name"),
+                        AlbumSortType.values()[(int)call.argument(SORT_TYPE)] );
                 break;
 
             // song calls section
             case "getSongs":
-                m_songLoader.getSongs(result);
+                m_songLoader.getSongs(result, SongSortType.values()[(int)call.argument(SORT_TYPE)] );
                 break;
 
             case "getSongsFromArtist":
-                m_songLoader.getSongsFromArtist( result, (String) call.argument("artist" ) );
+                m_songLoader.getSongsFromArtist( result, (String) call.argument("artist" ),
+                        SongSortType.values()[ (int)call.argument(SORT_TYPE) ]);
                 break;
 
             case "getSongsFromAlbum":
-                m_songLoader.getSongsFromAlbum( result, (String) call.argument("album_id" ) );
+                m_songLoader.getSongsFromAlbum( result, (String) call.argument("album_id" ),
+                        SongSortType.values()[ (int)call.argument(SORT_TYPE)] );
                 break;
 
             case "getSongsFromGenre":
-                m_songLoader.getSongsFromGenre(result, (String) call.argument("genre_name"));
+                m_songLoader.getSongsFromGenre(result, (String) call.argument("genre_name"),
+                        SongSortType.values()[ (int)call.argument(SORT_TYPE)] );
                 break;
 
             // genre calls section
             case "getGenres":
-                m_genreLoader.getGenres(result);
+                m_genreLoader.getGenres(result, GenreSortType.values()[ (int)call.argument(SORT_TYPE) ]);
                 break;
         }
 

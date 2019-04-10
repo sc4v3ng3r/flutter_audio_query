@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
+import 'package:flutter_audio_query_example/src/Utility.dart';
 
 /// Widget that shows all songs of a specific album
 class SongsListViewWidget extends StatelessWidget {
@@ -48,6 +49,9 @@ class SongsListViewWidget extends StatelessWidget {
                         ),
                         title: Text("${ song.displayName }"),
                         subtitle: Text("${song.artist}"),
+                        trailing: Text("${Utility.parseToMinutesSeconds(int.parse(song.duration))}",
+                          style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500),
+                        ),
                         onTap: () => print("Song Selected: $song"),
                       ),
                       Container(

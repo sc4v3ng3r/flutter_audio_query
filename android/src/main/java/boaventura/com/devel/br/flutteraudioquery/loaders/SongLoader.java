@@ -19,6 +19,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,11 +27,11 @@ import java.util.List;
 import java.util.Map;
 
 import boaventura.com.devel.br.flutteraudioquery.loaders.tasks.AbstractLoadTask;
+import boaventura.com.devel.br.flutteraudioquery.sortingtypes.SongSortType;
 import io.flutter.plugin.common.MethodChannel;
 
 public class SongLoader extends AbstractLoader {
 
-    //final private ContentResolver m_resolver;
     private static final String TAG = "MDBG";
     private static final String GENRE_NAME = "genre_name";
 
@@ -69,32 +70,116 @@ public class SongLoader extends AbstractLoader {
     };
 
     public SongLoader(final Context context){
+
         super(context);
+
+        /*getContentResolver().registerContentObserver(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                true,
+                new ContentObserver(null){
+                    @Override
+                    public boolean deliverSelfNotifications() {
+                        return super.deliverSelfNotifications();
+                    }
+
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        super.onChange(selfChange);
+                        Log.i("MDBG", "onChange(self) in SongLoaderObserver");
+                    }
+
+                    @Override
+                    public void onChange(boolean selfChange, Uri uri) {
+                        super.onChange(selfChange, uri);
+                        Log.i("MDBG", "onChange(self,uri) in SongLoaderObserver Uri: " + uri);
+                    }
+                }
+
+                );*/
     }
 
 
-    public void getSongs( final MethodChannel.Result result ){
+    private String parseSortOrder(SongSortType sortType){
+        String sortOrder;
+
+        switch (sortType){
+
+            case ALPHABETIC_COMPOSER:
+                sortOrder = MediaStore.Audio.Media.COMPOSER+ " ASC";
+                break;
+
+            case GREATER_DURATION:
+                sortOrder = MediaStore.Audio.Media.DURATION + " DESC";
+                break;
+
+            case SMALLER_DURATION:
+                sortOrder = MediaStore.Audio.Media.DURATION + " ASC";
+                break;
+
+            case RECENT_YEAR:
+                sortOrder = MediaStore.Audio.Media.YEAR + " DESC";
+                break;
+
+            case OLDEST_YEAR:
+                sortOrder = MediaStore.Audio.Media.YEAR + " ASC";
+                break;
+
+            case ALPHABETIC_ARTIST:
+                sortOrder = MediaStore.Audio.Media.ARTIST_KEY;
+                break;
+
+            case ALPHABETIC_ALBUM:
+                sortOrder = MediaStore.Audio.Media.ALBUM_KEY;
+                break;
+
+            case SMALLER_TRACK_NUMBER:
+                sortOrder = MediaStore.Audio.Media.TRACK + " ASC";
+                break;
+
+            case GREATER_TRACK_NUMBER:
+                sortOrder = MediaStore.Audio.Media.TRACK + " DESC";
+                break;
+
+            case DISPLAY_NAME:
+                sortOrder = MediaStore.Audio.Media.DISPLAY_NAME;
+                break;
+            case DEFAULT:
+            default:
+                sortOrder = MediaStore.Audio.Media.DEFAULT_SORT_ORDER;
+                break;
+        }
+        return sortOrder;
+    }
+
+    public void getSongs(final MethodChannel.Result result, final SongSortType sortType){
+
         createLoadTask( result,null,null,
-                MediaStore.Audio.Media.DEFAULT_SORT_ORDER,QUERY_TYPE_DEFAULT).execute();
+                parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
     }
 
 
-    public void getSongsFromAlbum(final MethodChannel.Result result, final String albumId){
+    public void getSongsFromAlbum(final MethodChannel.Result result, final String albumId,
+                                  final SongSortType sortType){
+
        createLoadTask( result, MediaStore.Audio.Media.ALBUM_ID + " =? ",
                 new String[] {albumId},
-               MediaStore.Audio.Media.DEFAULT_SORT_ORDER,QUERY_TYPE_DEFAULT ).execute();
+               parseSortOrder(sortType), QUERY_TYPE_DEFAULT ).execute();
     }
 
 
-    public void getSongsFromArtist(final MethodChannel.Result result, final String artistName){
+    public void getSongsFromArtist(final MethodChannel.Result result, final String artistName,
+                                   final SongSortType sortType ){
+
         createLoadTask(result, MediaStore.Audio.Media.ARTIST + " =? ",
-                new String[] { artistName }, MediaStore.Audio.Media.DEFAULT_SORT_ORDER,QUERY_TYPE_DEFAULT )
+                new String[] { artistName }, parseSortOrder(sortType),QUERY_TYPE_DEFAULT )
                 .execute();
     }
 
-    public void getSongsFromGenre(final MethodChannel.Result result, final String genre){
+    public void getSongsFromGenre(final MethodChannel.Result result, final String genre,
+                                  final SongSortType sortType){
+
         createLoadTask(result, genre, null,
-                MediaStore.Audio.Media.DEFAULT_SORT_ORDER, QUERY_TYPE_GENRE_SONGS )
+                parseSortOrder( sortType), QUERY_TYPE_GENRE_SONGS )
                 .execute();
     }
 
@@ -172,44 +257,6 @@ public class SongLoader extends AbstractLoader {
             }
 
             return new ArrayList<>();
-            /*
-            List< Map<String, Object> > dataList = new ArrayList<>();
-
-            Cursor songsCursor = m_resolver.query(
-                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    SongLoader.SONG_PROJECTION, selection, selectionArgs, sortOrder );
-
-            if (songsCursor != null){
-                Map<String,String> albumArtMap = new HashMap<>();
-
-                while( songsCursor.moveToNext() ){
-
-                    Map<String, Object> songData = new HashMap<>();
-                    for (String column: songsCursor.getColumnNames())
-                        songData.put(column, songsCursor.getString( songsCursor.getColumnIndex( column )) );
-
-                    String albumKey = songsCursor.getString(
-                            songsCursor.getColumnIndex( SONG_PROJECTION[4] ));
-
-                    String artPath = null;
-                    if (!albumArtMap.containsKey(albumKey) ){
-
-                        artPath = getAlbumArtPathForSong(albumKey);
-                        albumArtMap.put(albumKey,artPath );
-
-                        Log.i("MDBG", "song for album  " + albumKey + "adding path: " + artPath);
-                    }
-
-                    artPath = albumArtMap.get(albumKey);
-                    songData.put("album_artwork", artPath);
-
-                    dataList.add( songData );
-                }
-
-                songsCursor.close();
-            }
-
-            return dataList;*/
         }
 
         private String createMultipleValueSelectionArgs( /*String column */String[] params){
@@ -234,8 +281,14 @@ public class SongLoader extends AbstractLoader {
            if (songIdsCursor != null){
 
                while ( songIdsCursor.moveToNext() ){
-                   String id = songIdsCursor.getString( songIdsCursor.getColumnIndex( MediaStore.Audio.Media._ID));
-                   songIds.add(id);
+                   try {
+                       String id = songIdsCursor.getString(songIdsCursor.getColumnIndex(MediaStore.Audio.Media._ID));
+                       songIds.add(id);
+                   }
+                   catch (Exception ex){
+                       Log.e(TAG_ERROR, "SongLoader::getSonIdsFromGenre method exception");
+                       Log.e(TAG_ERROR, ex.getMessage() );
+                   }
                }
                songIdsCursor.close();
            }
@@ -256,27 +309,33 @@ public class SongLoader extends AbstractLoader {
                 Map<String,String> albumArtMap = new HashMap<>();
 
                 while( songsCursor.moveToNext() ){
+                    try {
 
-                    Map<String, Object> songData = new HashMap<>();
-                    for (String column: songsCursor.getColumnNames())
-                        songData.put(column, songsCursor.getString( songsCursor.getColumnIndex( column )) );
+                        Map<String, Object> songData = new HashMap<>();
+                        for (String column : songsCursor.getColumnNames())
+                            songData.put(column, songsCursor.getString( songsCursor.getColumnIndex(column)) );
 
-                    String albumKey = songsCursor.getString(
-                            songsCursor.getColumnIndex( SONG_PROJECTION[4] ));
+                        String albumKey = songsCursor.getString(
+                                songsCursor.getColumnIndex(SONG_PROJECTION[4]));
 
-                    String artPath;
-                    if (!albumArtMap.containsKey(albumKey) ){
+                        String artPath;
+                        if (!albumArtMap.containsKey(albumKey)) {
 
-                        artPath = getAlbumArtPathForSong(albumKey);
-                        albumArtMap.put(albumKey,artPath );
+                            artPath = getAlbumArtPathForSong(albumKey);
+                            albumArtMap.put(albumKey, artPath);
 
-                        //Log.i("MDBG", "song for album  " + albumKey + "adding path: " + artPath);
+                            //Log.i("MDBG", "song for album  " + albumKey + "adding path: " + artPath);
+                        }
+
+                        artPath = albumArtMap.get(albumKey);
+                        songData.put("album_artwork", artPath);
+                        dataList.add(songData);
                     }
 
-                    artPath = albumArtMap.get(albumKey);
-                    songData.put("album_artwork", artPath);
-
-                    dataList.add( songData );
+                    catch(Exception ex){
+                        Log.e(TAG_ERROR, "SongLoader::basicLoad method exception");
+                        Log.e(TAG_ERROR, ex.getMessage() );
+                    }
                 }
 
                 songsCursor.close();
@@ -296,8 +355,15 @@ public class SongLoader extends AbstractLoader {
             String artPath = null;
 
             if (artCursor !=null){
-                while (artCursor.moveToNext())
-                    artPath = artCursor.getString( artCursor.getColumnIndex( SONG_ALBUM_PROJECTION[1]));
+                while (artCursor.moveToNext()) {
+                    try {
+                        artPath = artCursor.getString(artCursor.getColumnIndex(SONG_ALBUM_PROJECTION[1]));
+                    } catch (Exception ex) {
+                        Log.e(TAG_ERROR, "SongLoader::getAlbumArtPathForSong method exception");
+                        Log.e(TAG_ERROR, ex.getMessage());
+                    }
+                }
+
                 artCursor.close();
             }
 

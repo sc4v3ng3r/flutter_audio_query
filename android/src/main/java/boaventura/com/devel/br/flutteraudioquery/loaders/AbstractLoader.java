@@ -22,8 +22,11 @@ import boaventura.com.devel.br.flutteraudioquery.loaders.tasks.AbstractLoadTask;
 import io.flutter.plugin.common.MethodChannel;
 
 public abstract class AbstractLoader {
+    static final String TAG_ERROR = "ERROR";
+
     private final ContentResolver m_resolver;
     static final int QUERY_TYPE_DEFAULT = 0x00;
+
     AbstractLoader(final Context context){
         m_resolver = context.getContentResolver();
     }
@@ -43,5 +46,7 @@ public abstract class AbstractLoader {
      */
     protected abstract AbstractLoadTask createLoadTask(final MethodChannel.Result result, final String selection,
                                          final String[] selectionArgs, String sortOrder, final int type );
+
+
 
 }
