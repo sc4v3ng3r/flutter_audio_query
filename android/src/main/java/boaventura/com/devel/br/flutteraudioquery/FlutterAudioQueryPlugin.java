@@ -68,7 +68,8 @@ public class FlutterAudioQueryPlugin implements MethodCallHandler {
                   break;
 
               case "playlist":
-                  result.notImplemented();
+                  m_delegate.playlistSourceHandler(call, result);
+                  //result.notImplemented();
                   break;
 
                   default:

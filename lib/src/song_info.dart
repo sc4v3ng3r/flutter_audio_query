@@ -53,7 +53,7 @@ class SongInfo extends DataModel {
   /// Returns the album track number if this song has one.
   String get track => _data['track'];
 
-  /// Returns the duration, in ms, of this audio file.
+  /// Returns a String with a number in milliseconds (ms) that is the duration of this audio file.
   String get duration => _data['duration'];
 
   /// Returns in ms, playback position when this song was stopped.

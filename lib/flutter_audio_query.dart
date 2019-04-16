@@ -26,6 +26,7 @@ part 'src/artist_info.dart';
 part 'src/album_info.dart';
 part 'src/song_info.dart';
 part 'src/genre_info.dart';
+part 'src/playlist_info.dart';
 part 'src/artist_sort_type.dart';
 part 'src/album_sort_type.dart';
 part 'src/song_sort_type.dart';

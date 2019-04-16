@@ -66,4 +66,27 @@ public abstract class AbstractLoadTask<T> extends AsyncTask<Void, Void, T>
         m_selection = null;
         m_sortOrder = null;
     }
+
+    /**
+     * This method should implements if useful a creation of
+     * a string that can be used as selection query argument
+     * for multiple values for a specific table column.
+     * <p>
+     * something like:
+     * SELECT column1, column2, columnN FROM myTable Where id in (1,2,3,4,5,6);
+     *
+     * @param column A specific table column
+     * @param params Array with query param values.
+     * @return
+     */
+    protected String createMultipleValueSelectionArgs( final String column, final String[] params){
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(column + " IN(?");
+
+        for (int i = 0; i < (params.length - 1); i++)
+            stringBuilder.append(",?");
+
+        stringBuilder.append(')');
+        return stringBuilder.toString();
+    }
 }

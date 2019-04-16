@@ -20,10 +20,13 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
+import java.util.List;
+
 import androidx.core.app.ActivityCompat;
 import boaventura.com.devel.br.flutteraudioquery.loaders.AlbumLoader;
 import boaventura.com.devel.br.flutteraudioquery.loaders.ArtistLoader;
 import boaventura.com.devel.br.flutteraudioquery.loaders.GenreLoader;
+import boaventura.com.devel.br.flutteraudioquery.loaders.PlaylistLoader;
 import boaventura.com.devel.br.flutteraudioquery.loaders.SongLoader;
 import boaventura.com.devel.br.flutteraudioquery.sortingtypes.AlbumSortType;
 import boaventura.com.devel.br.flutteraudioquery.sortingtypes.ArtistSortType;
@@ -57,6 +60,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
     private static final String ERROR_KEY_PENDING_RESULT = "pending_result";
     private static final String ERROR_KEY_PERMISSION_DENIAL = "permission_denial";
     private static final String SORT_TYPE = "sort_type";
+    private static final String PLAYLIST_METHOD_TYPE = "method_type";
     private static final int REQUEST_CODE_PERMISSION_READ_EXTERNAL = 0x01;
     private static final int REQUEST_CODE_PERMISSION_WRITE_EXTERNAL = 0x02;
 
@@ -69,7 +73,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
     private final AlbumLoader m_albumLoader;
     private final SongLoader m_songLoader;
     private final GenreLoader m_genreLoader;
-
+    private final PlaylistLoader m_playlistLoader;
 
     public AudioQueryDelegate(final PluginRegistry.Registrar registrar){
 
@@ -77,11 +81,11 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
         m_albumLoader = new AlbumLoader(registrar.context());
         m_songLoader = new SongLoader( registrar.context() );
         m_genreLoader = new GenreLoader( registrar.context() );
+        m_playlistLoader = new PlaylistLoader( registrar.context() );
 
         m_permissionManager = new PermissionManager() {
             @Override
             public boolean isPermissionGranted(String permissionName) {
-
                 return (ActivityCompat.checkSelfPermission( registrar.activity(), permissionName)
                     == PackageManager.PERMISSION_GRANTED);
             }
@@ -193,11 +197,41 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
      */
     @Override
     public void playlistSourceHandler(MethodCall call, MethodChannel.Result result){
-        // TODO here we'll got two type of methods, read only and write only method
-        result.notImplemented();
+        PlaylistLoader.PlayListMethodType type =
+                PlaylistLoader.PlayListMethodType.values()[ (int) call.argument(PLAYLIST_METHOD_TYPE)];
 
+        switch (type){
+            case READ:
+                if ( canIbeDependency(call, result)){
+
+                    if (m_permissionManager.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE) ){
+                        clearPendencies();
+                        handleReadOnlyMethods(call, result);
+                    }
+                    else
+                        m_permissionManager.askForPermission(Manifest.permission.READ_EXTERNAL_STORAGE,
+                                REQUEST_CODE_PERMISSION_READ_EXTERNAL);
+                } else finishWithAlreadyActiveError(result);
+                break;
+
+            case WRITE:
+                if ( canIbeDependency(call, result)){
+
+                    if (m_permissionManager.isPermissionGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE) ){
+                        clearPendencies();
+                        handleWriteOnlyMethods(call, result);
+                    }
+                    else
+                        m_permissionManager.askForPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                REQUEST_CODE_PERMISSION_WRITE_EXTERNAL);
+                } else finishWithAlreadyActiveError(result);
+                break;
+
+            default:
+                result.notImplemented();
+                break;
+        }
     }
-
 
     /**
      * This method do the real delegate work. After all validation process this method
@@ -254,16 +288,53 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
                         SongSortType.values()[ (int)call.argument(SORT_TYPE)] );
                 break;
 
+            case "getSongsFromPlaylist":
+                final List<String> ids = call.argument("memberIds");
+                m_songLoader.getSongsFromPlaylist(result, ids);
+                break;
+
             // genre calls section
             case "getGenres":
                 m_genreLoader.getGenres(result, GenreSortType.values()[ (int)call.argument(SORT_TYPE) ]);
+                break;
+
+                // playlist read calls section
+            case "getPlaylists":
+                m_playlistLoader.getPlaylists(result);
                 break;
         }
 
     }
 
     private void handleWriteOnlyMethods(MethodCall call, MethodChannel.Result result){
-        result.notImplemented();
+        String playlistId;
+        String songId;
+        final String keyPlaylistName = "playlist_name";
+        final String keyPlaylistId = "playlist_id";
+        final String keySongId = "song_id";
+        switch (call.method){
+
+            case "createPlaylist":
+                String name = call.argument(keyPlaylistName);
+                m_playlistLoader.createPlaylist(result, name);
+                break;
+
+            case "addSongToPlaylist":
+                playlistId = call.argument( keyPlaylistId );
+                songId = call.argument( keySongId );
+                m_playlistLoader.addSongToPlaylist(result, playlistId, songId);
+                break;
+
+            case "removeSongFromPlaylist":
+                playlistId = call.argument(keyPlaylistId);
+                songId = call.argument(keySongId);
+                m_playlistLoader.removeSongFromPlaylist(result, playlistId, songId);
+                break;
+
+            default:
+                result.notImplemented();
+        }
+
     }
 
 

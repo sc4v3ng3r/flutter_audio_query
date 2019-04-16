@@ -128,6 +128,8 @@ public class ArtistLoader extends AbstractLoader {
                 selectionArgs, sortOrder, type);
     }
 
+
+
     static class ArtistLoadTask extends AbstractLoadTask<List<Map<String, Object>>> {
         private ContentResolver m_resolver;
         private MethodChannel.Result m_result;
@@ -170,7 +172,8 @@ public class ArtistLoader extends AbstractLoader {
                         if (idCount > 1) {
                             String[] args = artistIds.toArray(new String[idCount]);
 
-                            String createdSelection = createMultipleValueSelectionArgs(args);
+                            String createdSelection = createMultipleValueSelectionArgs(
+                                    MediaStore.Audio.Artists._ID, args);
 
                             return basicDataLoad(createdSelection, args,
                                     MediaStore.Audio.Artists.DEFAULT_SORT_ORDER);
@@ -334,29 +337,6 @@ public class ArtistLoader extends AbstractLoader {
 
             return artistsIds;
         }
-
-        /**
-         * This method creates a string for sql queries that has
-         * multiple values for column MediaStore.Audio.Artist.artist.
-         * <p>
-         * something like:
-         * SELECT column1, column2, columnN FROM ARTIST Where id in (1,2,3,4,5,6);
-         *
-         * @param params
-         * @return
-         */
-        private String createMultipleValueSelectionArgs( /*String column */String[] params) {
-
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(MediaStore.Audio.Artists._ID + " IN(?");
-
-            for (int i = 0; i < (params.length - 1); i++)
-                stringBuilder.append(",?");
-
-            stringBuilder.append(')');
-            return stringBuilder.toString();
-        }
-
 
     }
 }

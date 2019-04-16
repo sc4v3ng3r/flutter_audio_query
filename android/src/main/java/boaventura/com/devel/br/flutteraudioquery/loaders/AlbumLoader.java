@@ -336,5 +336,6 @@ public class AlbumLoader extends AbstractLoader {
             m_result.success(data);
             m_result = null;
         }
+
     }
 }

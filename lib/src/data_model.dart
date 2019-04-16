@@ -22,7 +22,7 @@ class DataModel {
   static const String ID = "_id";
 
   /// model data
-  final Map<dynamic, dynamic> _data;
+  Map<dynamic, dynamic> _data;
 
   DataModel._(this._data);
 

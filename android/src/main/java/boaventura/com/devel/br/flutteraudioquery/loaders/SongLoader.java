@@ -45,7 +45,7 @@ public class SongLoader extends AbstractLoader {
             MediaStore.Audio.AlbumColumns.ALBUM_ART
     };
 
-    private static final String[] SONG_PROJECTION = {
+    static final String[] SONG_PROJECTION = {
             MediaStore.Audio.Media._ID,// row id
             MediaStore.Audio.Media.ALBUM_ID,
             MediaStore.Audio.Media.ARTIST_ID,
@@ -157,6 +157,15 @@ public class SongLoader extends AbstractLoader {
                 parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
     }
 
+    public void getSongsFromPlaylist(MethodChannel.Result result, final List<String> memberIds){
+        String[] values;
+        if ((memberIds != null) && (memberIds.size() > 0) ){
+             values = memberIds.toArray(new String[memberIds.size()] );
+             createLoadTask(result, SONG_PROJECTION[0], values, null,
+                     QUERY_TYPE_DEFAULT).execute();
+        }
+        else result.success( new ArrayList<Map<String,Object>>() );
+    }
 
     public void getSongsFromAlbum(final MethodChannel.Result result, final String albumId,
                                   final SongSortType sortType){
@@ -190,6 +199,7 @@ public class SongLoader extends AbstractLoader {
         return new SongTaskLoad(result, getContentResolver(), selection, selectionArgs, sortOrder, type);
 
     }
+
 
     private static class SongTaskLoad extends AbstractLoadTask< List< Map<String,Object> > > {
         private MethodChannel.Result m_result;
@@ -228,7 +238,12 @@ public class SongLoader extends AbstractLoader {
 
             switch (m_queryType){
                 case QUERY_TYPE_DEFAULT:
-                    return  basicLoad(selection, selectionArgs, sortOrder);
+                    if ( (selectionArgs!=null) && (selectionArgs.length > 1) ){
+                        return basicLoad( createMultipleValueSelectionArgs(MediaStore.Audio.Media._ID,
+                                selectionArgs), selectionArgs, null);
+
+                    } else
+                        return  basicLoad(selection, selectionArgs, sortOrder);
 
 
                 case QUERY_TYPE_GENRE_SONGS:
@@ -238,7 +253,8 @@ public class SongLoader extends AbstractLoader {
 
                         if (idCount > 1 ){
                             String[] args = songIds.toArray( new String[idCount] );
-                            String createdSelection = createMultipleValueSelectionArgs(args);
+                            String createdSelection = createMultipleValueSelectionArgs(
+                                    MediaStore.Audio.Media._ID, args);
                             return  basicLoad(
                                     createdSelection,
                                     args,MediaStore.Audio.Media.DEFAULT_SORT_ORDER );
@@ -259,7 +275,7 @@ public class SongLoader extends AbstractLoader {
             return new ArrayList<>();
         }
 
-        private String createMultipleValueSelectionArgs( /*String column */String[] params){
+        /*private String createMultipleValueSelectionArgs( String column String[] params){
 
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(MediaStore.Audio.Media._ID + " IN(?" );
@@ -269,7 +285,7 @@ public class SongLoader extends AbstractLoader {
 
             stringBuilder.append(')');
             return stringBuilder.toString();
-        }
+        }*/
 
         private List<String> getSongIdsFromGenre(final String genre){
            Cursor songIdsCursor = m_resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -369,6 +385,7 @@ public class SongLoader extends AbstractLoader {
 
             return artPath;
         }
+
     }
 }
 

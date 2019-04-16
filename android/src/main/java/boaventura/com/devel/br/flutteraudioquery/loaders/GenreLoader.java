@@ -127,5 +127,10 @@ public class GenreLoader extends AbstractLoader {
             m_result = null;
             m_resolver = null;
         }
+
+        @Override
+        protected String createMultipleValueSelectionArgs(String column, String[] params) {
+            return null;
+        }
     }
 }

@@ -22,8 +22,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
-enum NavigationOptions { ARTISTS, ALBUMS, SONGS, GENRES }
+enum NavigationOptions { ARTISTS, ALBUMS, SONGS, GENRES, PLAYLISTS }
 
 class MyAppWidget extends StatefulWidget {
   @override
@@ -122,6 +121,13 @@ class _MyAppWidgetState extends State<MyAppWidget> {
                   color: Colors.white
               ))
           ),
+
+          BottomNavigationBarItem(
+            icon: Icon(Icons.list, color: Colors.white),
+            title: Text("Playlists", style: TextStyle(
+                color: Colors.white
+            ))
+          ),
         ],
       ),
     );
@@ -151,6 +157,8 @@ class _MyAppWidgetState extends State<MyAppWidget> {
         /// The only property available at this moment in GenreInfo class is 'name'.
         return _buildGenresWidgetLayout( audioQuery.getGenres(sortType: _genreSortTypeSelected) );
 
+      case NavigationOptions.PLAYLISTS:
+        return Container();
       default:
         break;
     }
@@ -227,6 +235,9 @@ class _MyAppWidgetState extends State<MyAppWidget> {
               );
             }
         );
+        break;
+
+      case NavigationOptions.PLAYLISTS:
         break;
     }
   }
