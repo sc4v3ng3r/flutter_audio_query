@@ -33,8 +33,8 @@ class SongInfo extends DataModel {
   /// Returns the album title which this song appears.
   String get album => _data['album'];
 
-  /// Returns the genre name which this song belongs.
-  String get genre => _data['genre_name'];
+  // Returns the genre name which this song belongs.
+  //String get genre => _data['genre_name'];
 
   /// Returns the song title.
   String get title => _data['title'];

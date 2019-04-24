@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
-import 'package:flutter_audio_query_example/src/ui/widgets/ItemHolderWidget.dart';
+import 'package:flutter_audio_query_example/src/Utility.dart';
+import 'package:flutter_audio_query_example/src/ui/widgets/CardItemWidget.dart';
 
 class GenreNavigationScreen extends StatefulWidget {
   final GenreInfo currentGenre;
@@ -50,22 +51,13 @@ class _GenreNavigationScreenState extends State<GenreNavigationScreen> {
             );
 
           case ConnectionState.waiting:
-            return Column(
-              children: <Widget>[
-                CircularProgressIndicator(),
-                Text("Loading your artists"),
-              ],
-            );
+            return Utility.createDefaultInfoWidget(CircularProgressIndicator());
 
           case ConnectionState.active:
           case ConnectionState.done:
-            if (!snapshot.hasData || (snapshot.data.isEmpty)) {
-              return Center(child: Text("There is no data to show"));
-            }
+            if (snapshot.data.isEmpty)
+              return Utility.createDefaultInfoWidget(Text("There is no Artists data to show"));
 
-            if (snapshot.data.isEmpty){
-              return Center(child: Text("There is no data to show"));
-            }
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -87,20 +79,16 @@ class _GenreNavigationScreenState extends State<GenreNavigationScreen> {
                       padding: EdgeInsets.symmetric(vertical: 8.0),
                       shrinkWrap: true,
                       itemCount: snapshot.data.length,
-
+                      
                       itemBuilder: (context, index) {
-                        ArtistInfo currentArtist = snapshot.data[index];
-
-                        return ItemHolderWidget<ArtistInfo>(
-                          width: 160,
-                          title: Text("Artist: ${currentArtist.name}", overflow: TextOverflow.ellipsis,),
-                          subtitle: Text(
-                              "Songs: ${currentArtist.numberOfTracks}"),
-                          infoText: Text("Albums: ${currentArtist.numberOfAlbums}"),
-
-                          /// if artist has no artwork (null) this is already handled inside ItemHolderWidget
-                          imagePath: currentArtist.artistArtPath,
-                          onItemTap: (artist) {},
+                        ArtistInfo artist = snapshot.data[index];
+                        return CardItemWidget(
+                          width: 150.0,
+                          height: 250.0,
+                          title: "Artist: ${artist.name}",
+                          subtitle: "Number of Albums: ${artist.numberOfAlbums}",
+                          infoText: "Number of Songs: ${artist.numberOfTracks}",
+                          backgroundImage: artist.artistArtPath,
                         );
                       }),
                 ),
@@ -133,13 +121,9 @@ class _GenreNavigationScreenState extends State<GenreNavigationScreen> {
 
           case ConnectionState.active:
           case ConnectionState.done:
-            if (!snapshot.hasData || (snapshot.data.isEmpty)) {
-              return Center(child: Text("There is no data to show"));
-            }
+            if (snapshot.data.isEmpty)
+              return Utility.createDefaultInfoWidget(Text("There is no Albums data to show"));
 
-            if (snapshot.data.isEmpty){
-              return Center(child: Text("There is no data to show"));
-            }
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -163,18 +147,14 @@ class _GenreNavigationScreenState extends State<GenreNavigationScreen> {
                       itemCount: snapshot.data.length,
 
                       itemBuilder: (context, index) {
-                        AlbumInfo currentAlbum = snapshot.data[index];
-
-                        return ItemHolderWidget<ArtistInfo>(
-                          width: 160,
-                          title: Text("Album: ${currentAlbum.title}", overflow: TextOverflow.ellipsis,),
-                          subtitle: Text(
-                              "Songs: ${currentAlbum.numberOfSongs}"),
-                          infoText: Text(currentAlbum.lastYear ?? currentAlbum.lastYear ?? "" ),
-
-                          /// if artist has no artwork (null) this is already handled inside ItemHolderWidget
-                          imagePath: currentAlbum.albumArt,
-                          onItemTap: (album) {},
+                        AlbumInfo album = snapshot.data[index];
+                        return CardItemWidget(
+                          width: 150.0,
+                          height: 250.0,
+                          title: album.title,
+                          subtitle: "Number of Songs: ${album.numberOfSongs}",
+                          infoText: "Artist: ${album.artist}",
+                          backgroundImage: album.albumArt,
                         );
                       }),
                 ),

@@ -1,23 +1,23 @@
 
 import 'package:flutter/material.dart';
 
-class SortOptionsDialog extends StatefulWidget {
+class ChooseDialog extends StatefulWidget {
   final String title;
   final List<String> options;
   final _callback;
   final int indexSelected;
 
-  SortOptionsDialog({String title, List<String> options, void onChange(int index), int initialSelectedIndex = 0} ) :
+  ChooseDialog({String title, List<String> options, void onChange(int index), int initialSelectedIndex } ) :
       title = title,
       options = options,
       indexSelected = initialSelectedIndex,
       _callback = onChange;
 
   @override
-  _SortOptionsDialogState createState() => _SortOptionsDialogState();
+  _ChooseDialogState createState() => _ChooseDialogState();
 }
 
-class _SortOptionsDialogState extends State<SortOptionsDialog> {
+class _ChooseDialogState extends State<ChooseDialog> {
   int selectedIndex;
 
   @override

@@ -40,8 +40,7 @@ public class FlutterAudioQueryPlugin implements MethodCallHandler {
 
     final MethodChannel channel = new MethodChannel(registrar.messenger(), CHANNEL_NAME);
     final AudioQueryDelegate delegate = new AudioQueryDelegate( registrar );
-    channel.setMethodCallHandler(new FlutterAudioQueryPlugin(delegate));
-
+    channel.setMethodCallHandler( new FlutterAudioQueryPlugin(delegate) );
   }
 
   @Override
@@ -69,13 +68,12 @@ public class FlutterAudioQueryPlugin implements MethodCallHandler {
 
               case "playlist":
                   m_delegate.playlistSourceHandler(call, result);
-                  //result.notImplemented();
                   break;
 
-                  default:
-                      result.error("unknown_source",
+              default:
+                  result.error("unknown_source",
                               "method call was made by an unknown source", null);
-                      break;
+                  break;
 
           }
       }

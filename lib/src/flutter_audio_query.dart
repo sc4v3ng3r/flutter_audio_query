@@ -35,12 +35,19 @@ class FlutterAudioQuery {
 
   /// This method returns all artists info available on device storage
   Future< List< ArtistInfo> > getArtists({ArtistSortType sortType = ArtistSortType.DEFAULT}) async {
+    try {
     List<dynamic> dataList = await channel.invokeMethod('getArtists',
         {
           SOURCE_KEY : SOURCE_ARTIST,
           SORT_TYPE : sortType.index,
         } );
     return _parseArtistDataList(dataList);
+
+    }
+
+    on PlatformException catch (ex){
+      throw ex;
+    }
   }
 
   ///This method returns a list with all artists that belongs to [genre]
@@ -192,6 +199,7 @@ class FlutterAudioQuery {
   /// If already exist a playlist with same name as [playlistName] an
   /// exception is throw.
   static Future <PlaylistInfo> createPlaylist({@required final String playlistName}) async {
+
     dynamic data = await FlutterAudioQuery.channel.invokeMethod("createPlaylist",
         {
           FlutterAudioQuery.SOURCE_KEY : FlutterAudioQuery.SOURCE_PLAYLIST,
@@ -201,6 +209,14 @@ class FlutterAudioQuery {
     return PlaylistInfo._(data);
   }
 
+  static Future<void> removePlaylist({@required PlaylistInfo playlist}) async {
+    await channel.invokeMethod("removePlaylist",
+        {
+          SOURCE_KEY : SOURCE_PLAYLIST,
+          FlutterAudioQuery.PLAYLIST_METHOD_TYPE : PlayListMethodType.WRITE.index,
+          "playlist_id" : playlist?.id
+        });
+  }
 
   List< ArtistInfo > _parseArtistDataList( List<dynamic> dataList ){
     return dataList.map<ArtistInfo>( (dynamic item)

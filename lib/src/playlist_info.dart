@@ -24,7 +24,10 @@ class PlaylistInfo extends DataModel {
   /// This method appends a [song] into [playlist] and returns a PlaylistInfo
   /// updated.
   Future<void> addSong({@required final SongInfo song} ) async {
-    dynamic updatedPlaylist = await FlutterAudioQuery.channel.invokeMethod( "addSongToPlaylist",
+
+    print("adding song ${song.id} to playlist ${this.id}");
+
+    List<dynamic> updatedData = await FlutterAudioQuery.channel.invokeMethod( "addSongToPlaylist",
         {
           FlutterAudioQuery.SOURCE_KEY : FlutterAudioQuery.SOURCE_PLAYLIST,
           FlutterAudioQuery.PLAYLIST_METHOD_TYPE : PlayListMethodType.WRITE.index,
@@ -32,30 +35,53 @@ class PlaylistInfo extends DataModel {
           "song_id" : song.id
         });
 
-    PlaylistInfo data = PlaylistInfo._(updatedPlaylist);
+    PlaylistInfo data = PlaylistInfo._(updatedData[0]);
     this._updatePlaylistData(data);
     //return PlaylistInfo._(updatedPlaylist);
   }
 
   Future<void> removeSong({@required SongInfo song}) async {
-    var updatedPlaylist = await FlutterAudioQuery.channel.invokeMethod("removeSongFromPlaylist",
+    List<dynamic> updatedPlaylist = await FlutterAudioQuery.channel.invokeMethod("removeSongFromPlaylist",
         {
           FlutterAudioQuery.SOURCE_KEY : FlutterAudioQuery.SOURCE_PLAYLIST,
-          FlutterAudioQuery.PLAYLIST_METHOD_TYPE : PlayListMethodType.WRITE,
+          FlutterAudioQuery.PLAYLIST_METHOD_TYPE : PlayListMethodType.WRITE.index,
           "playlist_id" : this.id,
-          "song_id" : song.id
+          "song_id" : song.id,
         });
 
-    PlaylistInfo data = PlaylistInfo._(updatedPlaylist);
+    PlaylistInfo data = PlaylistInfo._(updatedPlaylist[0]);
     this._updatePlaylistData(data);
     //return PlaylistInfo._(updatedPlaylist);
   }
 
+  //This method updates the playlist itself.
+  // when some playlist data changes like songs order, or song members
+  // this method keep this playlist updated parsing updated data that comes
+  // from native side.
   void _updatePlaylistData(PlaylistInfo playlist){
     _memberIds = null;
     this._data = playlist._data;
   }
 
+  ///
+  void swapSongs({@required int from, @required int to}) async {
+    if ((from >= 0 && from < (this._memberIds.length) ) && 
+        (to >= 0 && to < (this._memberIds.length)) ){
+      
+      var updatedPlaylist = await FlutterAudioQuery.channel.invokeMethod("swapSongsPosition", 
+          {
+            FlutterAudioQuery.SORT_TYPE : FlutterAudioQuery.SOURCE_PLAYLIST,
+            FlutterAudioQuery.PLAYLIST_METHOD_TYPE : PlayListMethodType.WRITE.index,
+            "playlist_id" : this.id,
+            "song_from_id" : this._memberIds[from],
+            "song_to_id" : this._memberIds[to],
+          }
+      );
+
+      PlaylistInfo data = PlaylistInfo._(updatedPlaylist);
+      this._updatePlaylistData(data);
+    }
+  }
   @override
   String toString() {
     return "Name: $name\n creationDate: $creationDate members: $memberIds";

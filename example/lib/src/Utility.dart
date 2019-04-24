@@ -1,5 +1,7 @@
 
 
+import 'package:flutter/widgets.dart';
+
 class Utility{
 
   /// Simple method to format milliseconds time in mm:ss  minutes:seconds format.
@@ -18,5 +20,18 @@ class Utility{
     data+= seconds.toString();
     return data;
 
+  }
+
+  static Widget createDefaultInfoWidget(final Widget child){
+    return Column(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Center(
+          child: child,
+        ),
+      ],
+    );
   }
 }

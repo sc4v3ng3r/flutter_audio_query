@@ -224,8 +224,11 @@ public class AlbumLoader extends AbstractLoader {
 
                 if (cursor.getCount() == 0) {
                     cursor.close();
-                    dataList = loadAlbumsInfoWithMediaSupport(selectionArgs[0]);
-                } else {
+
+                    if (selectionArgs != null)
+                        dataList = loadAlbumsInfoWithMediaSupport( selectionArgs[0] );
+                }
+                else {
                     while (cursor.moveToNext()) {
                         try {
                             Map<String, Object> dataMap = new HashMap<>();

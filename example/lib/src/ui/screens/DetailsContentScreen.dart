@@ -1,13 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 
-class ContentScreen extends StatelessWidget {
+class DetailsContentScreen extends StatelessWidget {
 
   final Widget bodyContent;
   final String appBarBackgroundImage;
   final String appBarTitle;
 
-  ContentScreen({@required this.bodyContent, this.appBarBackgroundImage, this.appBarTitle});
+  DetailsContentScreen({@required this.bodyContent, this.appBarBackgroundImage, this.appBarTitle});
 
   @override
   Widget build(BuildContext context) {

@@ -33,7 +33,7 @@ import io.flutter.plugin.common.MethodChannel;
 public class SongLoader extends AbstractLoader {
 
     private static final String TAG = "MDBG";
-    private static final String GENRE_NAME = "genre_name";
+    //private static final String GENRE_NAME = "genre_name";
 
     private static final int QUERY_TYPE_GENRE_SONGS = 0x01;
 
@@ -45,13 +45,12 @@ public class SongLoader extends AbstractLoader {
             MediaStore.Audio.AlbumColumns.ALBUM_ART
     };
 
-    static final String[] SONG_PROJECTION = {
+    static private final String[] SONG_PROJECTION = {
             MediaStore.Audio.Media._ID,// row id
             MediaStore.Audio.Media.ALBUM_ID,
             MediaStore.Audio.Media.ARTIST_ID,
             MediaStore.Audio.Media.ARTIST,
             MediaStore.Audio.Media.ALBUM,
-            GENRE_NAME,
             MediaStore.Audio.Media.IS_MUSIC,
             MediaStore.Audio.Media.IS_PODCAST,
             MediaStore.Audio.Media.IS_RINGTONE,
@@ -66,7 +65,6 @@ public class SongLoader extends AbstractLoader {
             MediaStore.Audio.Media.BOOKMARK, // position, in ms, where playback was at in last stopped
             MediaStore.Audio.Media.DATA, // file data path
             MediaStore.Audio.Media.SIZE, // string with file size in bytes
-
     };
 
     public SongLoader(final Context context){
@@ -97,7 +95,6 @@ public class SongLoader extends AbstractLoader {
 
                 );*/
     }
-
 
     private String parseSortOrder(SongSortType sortType){
         String sortOrder;
@@ -157,30 +154,63 @@ public class SongLoader extends AbstractLoader {
                 parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
     }
 
-    public void getSongsFromPlaylist(MethodChannel.Result result, final List<String> memberIds){
+    public void getSongsFromPlaylist(MethodChannel.Result result, final List<String> songIds){
         String[] values;
-        if ((memberIds != null) && (memberIds.size() > 0) ){
-             values = memberIds.toArray(new String[memberIds.size()] );
-             createLoadTask(result, SONG_PROJECTION[0], values, null,
-                     QUERY_TYPE_DEFAULT).execute();
+
+        if ( (songIds != null) && (songIds.size() > 0) ){
+             values = songIds.toArray(new String[songIds.size()] );
+             this.
+             createLoadTask(result, SONG_PROJECTION[0] + " =?", values, preparePlaylistSongsSortOrder(songIds), QUERY_TYPE_DEFAULT)
+                     .execute();
         }
         else result.success( new ArrayList<Map<String,Object>>() );
+    }
+
+    /**
+     * This method creates a SQL CASE WHEN THEN in order to get specific songs
+     * from Media table where the query results is sorted matching [songIds] list values order.
+     *
+     * @param songIds Song ids list
+     * @return Sql String case when then or null if songIds size is not greater then 1.
+     */
+    private String preparePlaylistSongsSortOrder(final List<String> songIds){
+        if (songIds.size() == 1)
+            return null;
+
+        StringBuilder orderStr = new StringBuilder("CASE ")
+                .append(MediaStore.MediaColumns._ID)
+                .append(" WHEN '")
+                .append(songIds.get(0))
+                .append("'")
+                .append(" THEN 0");
+
+        for(int i = 1; i < songIds.size(); i++){
+            orderStr.append(" WHEN '")
+                    .append( songIds.get(i) )
+                    .append("'")
+                    .append(" THEN ")
+                    .append(i);
+        }
+
+        orderStr.append(" END, ")
+                .append(MediaStore.MediaColumns._ID)
+                .append(" ASC");
+        return orderStr.toString();
     }
 
     public void getSongsFromAlbum(final MethodChannel.Result result, final String albumId,
                                   final SongSortType sortType){
 
-       createLoadTask( result, MediaStore.Audio.Media.ALBUM_ID + " =? ",
+       createLoadTask( result, MediaStore.Audio.Media.ALBUM_ID + " =?",
                 new String[] {albumId},
                parseSortOrder(sortType), QUERY_TYPE_DEFAULT ).execute();
     }
 
-
     public void getSongsFromArtist(final MethodChannel.Result result, final String artistName,
                                    final SongSortType sortType ){
 
-        createLoadTask(result, MediaStore.Audio.Media.ARTIST + " =? ",
-                new String[] { artistName }, parseSortOrder(sortType),QUERY_TYPE_DEFAULT )
+        createLoadTask(result, MediaStore.Audio.Media.ARTIST + " =?",
+                new String[] { artistName }, parseSortOrder(sortType), QUERY_TYPE_DEFAULT )
                 .execute();
     }
 
@@ -240,7 +270,7 @@ public class SongLoader extends AbstractLoader {
                 case QUERY_TYPE_DEFAULT:
                     if ( (selectionArgs!=null) && (selectionArgs.length > 1) ){
                         return basicLoad( createMultipleValueSelectionArgs(MediaStore.Audio.Media._ID,
-                                selectionArgs), selectionArgs, null);
+                                selectionArgs), selectionArgs, sortOrder);
 
                     } else
                         return  basicLoad(selection, selectionArgs, sortOrder);
@@ -257,13 +287,13 @@ public class SongLoader extends AbstractLoader {
                                     MediaStore.Audio.Media._ID, args);
                             return  basicLoad(
                                     createdSelection,
-                                    args,MediaStore.Audio.Media.DEFAULT_SORT_ORDER );
+                                    args,sortOrder );
                         }
 
                         else {
                             return basicLoad(MediaStore.Audio.Media._ID + " =?",
                                     new String[]{ songIds.get(0)},
-                                    MediaStore.Audio.Media.DEFAULT_SORT_ORDER );
+                                    sortOrder );
                         }
                     }
                     break;
@@ -274,18 +304,6 @@ public class SongLoader extends AbstractLoader {
 
             return new ArrayList<>();
         }
-
-        /*private String createMultipleValueSelectionArgs( String column String[] params){
-
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(MediaStore.Audio.Media._ID + " IN(?" );
-
-            for(int i=0; i < (params.length-1); i++)
-                stringBuilder.append(",?");
-
-            stringBuilder.append(')');
-            return stringBuilder.toString();
-        }*/
 
         private List<String> getSongIdsFromGenre(final String genre){
            Cursor songIdsCursor = m_resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
@@ -316,10 +334,20 @@ public class SongLoader extends AbstractLoader {
                                                    final String sortOrder){
 
             List< Map<String, Object> > dataList = new ArrayList<>();
+            Cursor songsCursor = null;
 
-            Cursor songsCursor = m_resolver.query(
-                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    SongLoader.SONG_PROJECTION, selection, selectionArgs, sortOrder );
+            try{
+                songsCursor = m_resolver.query(
+                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                        SongLoader.SONG_PROJECTION, selection, selectionArgs, sortOrder );
+
+            }
+
+            catch (RuntimeException ex){
+
+                System.out.println("SongLoader::basicLoad " + ex);
+                m_result.error("SONG_READ_ERROR", ex.getMessage() , null);
+            }
 
             if (songsCursor != null){
                 Map<String,String> albumArtMap = new HashMap<>();
@@ -372,9 +400,13 @@ public class SongLoader extends AbstractLoader {
 
             if (artCursor !=null){
                 while (artCursor.moveToNext()) {
+
                     try {
                         artPath = artCursor.getString(artCursor.getColumnIndex(SONG_ALBUM_PROJECTION[1]));
-                    } catch (Exception ex) {
+
+                    }
+
+                    catch (Exception ex) {
                         Log.e(TAG_ERROR, "SongLoader::getAlbumArtPathForSong method exception");
                         Log.e(TAG_ERROR, ex.getMessage());
                     }

@@ -55,7 +55,7 @@ enum SongSortType {
   SMALLER_TRACK_NUMBER,
 
   /// Return the songs sorted using [display_name] property as sort param.
-  /// Is a good option to used when desired have the original album songs order.
+  /// Is a good option to be used when desired have the original album songs order.
   DISPLAY_NAME
 
 

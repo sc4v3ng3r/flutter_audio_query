@@ -23,6 +23,7 @@ import android.util.Log;
 import java.util.List;
 
 import androidx.core.app.ActivityCompat;
+
 import boaventura.com.devel.br.flutteraudioquery.loaders.AlbumLoader;
 import boaventura.com.devel.br.flutteraudioquery.loaders.ArtistLoader;
 import boaventura.com.devel.br.flutteraudioquery.loaders.GenreLoader;
@@ -54,11 +55,12 @@ import io.flutter.view.FlutterNativeView;
 // *  to do a hard work in background. </p>
 // *
 // */
+
 public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResultListener,
     AudioQueryDelegateInterface {
 
-    private static final String ERROR_KEY_PENDING_RESULT = "pending_result";
-    private static final String ERROR_KEY_PERMISSION_DENIAL = "permission_denial";
+    private static final String ERROR_CODE_PENDING_RESULT = "pending_result";
+    private static final String ERROR_CODE_PERMISSION_DENIED = "PERMISSION DENIED";
     private static final String SORT_TYPE = "sort_type";
     private static final String PLAYLIST_METHOD_TYPE = "method_type";
     private static final int REQUEST_CODE_PERMISSION_READ_EXTERNAL = 0x01;
@@ -97,7 +99,6 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
         };
 
         registrar.addRequestPermissionsResultListener(this);
-
         registrar.addViewDestroyListener(new PluginRegistry.ViewDestroyListener() {
             @Override
             public boolean onViewDestroy(FlutterNativeView flutterNativeView) {
@@ -187,7 +188,9 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
             else
                 m_permissionManager.askForPermission(Manifest.permission.READ_EXTERNAL_STORAGE,
                         REQUEST_CODE_PERMISSION_READ_EXTERNAL);
-        } else finishWithAlreadyActiveError(result);
+        }
+        else
+            finishWithAlreadyActiveError(result);
     }
 
     /**
@@ -252,6 +255,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
                 m_artistLoader.getArtistsFromGenre(result, (String)call.argument("genre_name"),
                         ArtistSortType.values()[(int)call.argument(SORT_TYPE)] );
                 break;
+
             //album calls section
             case "getAlbums":
                 m_albumLoader.getAlbums(result, AlbumSortType.values()[(int)call.argument(SORT_TYPE)] );
@@ -275,17 +279,17 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
 
             case "getSongsFromArtist":
                 m_songLoader.getSongsFromArtist( result, (String) call.argument("artist" ),
-                        SongSortType.values()[ (int)call.argument(SORT_TYPE) ]);
+                        SongSortType.values()[ (int)call.argument(SORT_TYPE) ] );
                 break;
 
             case "getSongsFromAlbum":
                 m_songLoader.getSongsFromAlbum( result, (String) call.argument("album_id" ),
-                        SongSortType.values()[ (int)call.argument(SORT_TYPE)] );
+                        SongSortType.values()[ (int)call.argument(SORT_TYPE) ] );
                 break;
 
             case "getSongsFromGenre":
                 m_songLoader.getSongsFromGenre(result, (String) call.argument("genre_name"),
-                        SongSortType.values()[ (int)call.argument(SORT_TYPE)] );
+                        SongSortType.values()[ (int)call.argument(SORT_TYPE) ] );
                 break;
 
             case "getSongsFromPlaylist":
@@ -312,6 +316,9 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
         final String keyPlaylistName = "playlist_name";
         final String keyPlaylistId = "playlist_id";
         final String keySongId = "song_id";
+        final String keySongFromId = "song_from_id";
+        final String keySongToId = "song_to_id";
+
         switch (call.method){
 
             case "createPlaylist":
@@ -331,15 +338,25 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
                 m_playlistLoader.removeSongFromPlaylist(result, playlistId, songId);
                 break;
 
+            case "removePlaylist":
+                playlistId = call.argument(keyPlaylistId);
+                m_playlistLoader.removePlaylist(result, playlistId);
+                break;
+
+            case "swapSongsPosition":
+                playlistId = call.argument(keyPlaylistId);
+                m_playlistLoader.swapSongsPosition(result, playlistId,
+                        ((String) call.argument(keySongFromId) ),
+                        ((String)call.argument(keySongToId))
+                );
+                break;
+
             default:
                 result.notImplemented();
         }
-
     }
 
-
     private boolean canIbeDependency(MethodCall call, MethodChannel.Result result){
-
         if ( !setPendingMethodAndCall(call, result) ){
             return false;
         }
@@ -362,13 +379,13 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
     }
 
     private void finishWithAlreadyActiveError(MethodChannel.Result result){
-        result.error(ERROR_KEY_PENDING_RESULT,
+        result.error(ERROR_CODE_PENDING_RESULT,
                 "There is some result to be delivered", null);
     }
 
     private void finishWithError(String errorKey, String errorMsg, MethodChannel.Result result){
-        result.error(errorKey, errorMsg, null);
         clearPendencies();
+        result.error(errorKey, errorMsg, null);
     }
 
     @Override
@@ -384,7 +401,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
                     clearPendencies();
                 }
                 else {
-                    finishWithError(ERROR_KEY_PERMISSION_DENIAL,
+                    finishWithError(ERROR_CODE_PERMISSION_DENIED,
                             "READ EXTERNAL PERMISSION DENIED", m_pendingResult);
                 }
                 break;
@@ -397,7 +414,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
                 }
 
                 else {
-                    finishWithError(ERROR_KEY_PERMISSION_DENIAL,
+                    finishWithError(ERROR_CODE_PERMISSION_DENIED,
                             "WRITE EXTERNAL PERMISSION DENIED", m_pendingResult);
                 }
                 break;
