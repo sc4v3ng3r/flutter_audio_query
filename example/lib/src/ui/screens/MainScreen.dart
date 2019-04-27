@@ -28,6 +28,7 @@ class _MainScreenState extends State<MainScreen> {
   NavigationOptions _currentNavigationOption;
   ApplicationBloc bloc;
 
+
   static final Map<NavigationOptions, String> _titles = {
     NavigationOptions.ARTISTS : "Artists",
     NavigationOptions.ALBUMS : "Albums",
@@ -45,11 +46,11 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     bloc ??= BlocProvider.of<ApplicationBloc>(context);
-
     return Scaffold(
         appBar: AppBar(
           title: const Text('Flutter Audio Plugin Example'),
           actions: <Widget>[
+
             StreamBuilder<NavigationOptions>(
                 initialData: _currentNavigationOption,
                 stream: bloc.currentNavigationOption,

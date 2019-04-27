@@ -109,3 +109,27 @@ class PlaylistDetailScreenBloc extends BlocBase {
   }
 }
 
+class LittleBloc {
+  // Note that all stream already start with an initial value. In this case, false.
+
+  final BehaviorSubject<bool> _descriptionSubject = BehaviorSubject.seeded(false);
+  Observable<bool> get hasDescription => _descriptionSubject.stream;
+
+  final BehaviorSubject<bool> _checklistSubject = BehaviorSubject.seeded(false);
+  Observable<bool> get hasChecklist => _checklistSubject.stream;
+
+  final BehaviorSubject<bool> _locationSubject = BehaviorSubject.seeded(false);
+  Observable<bool> get hasLocation => _locationSubject.stream;
+
+  void changeDescription(final bool status) => _descriptionSubject.sink.add(status);
+  void changeChecklist(final bool status) => _checklistSubject.sink.add(status);
+  void changeLocation(final bool status) => _locationSubject.sink.add(status);
+
+
+  dispose(){
+    _descriptionSubject?.close();
+    _locationSubject?.close();
+    _checklistSubject?.close();
+  }
+
+}
