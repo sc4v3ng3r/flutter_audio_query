@@ -66,7 +66,16 @@ public class GenreLoader extends AbstractLoader {
     }
 
     public void getGenres(final MethodChannel.Result result, final GenreSortType sortType){
-        createLoadTask(result, null, null, parseSortOrder(sortType),0).execute();
+        createLoadTask(result, null, null, parseSortOrder(sortType),
+                QUERY_TYPE_DEFAULT).execute();
+    }
+
+    public void searchGenres(final MethodChannel.Result results, final String namedQuery,
+                            final GenreSortType sortType ){
+
+        String[] args = new String[]{ namedQuery + "%"};
+        createLoadTask(results, MediaStore.Audio.GenresColumns.NAME + " like ?", args,
+                parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
     }
 
     static class GenreLoadTask extends AbstractLoadTask<List<Map<String,Object>>>{

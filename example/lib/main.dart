@@ -6,7 +6,7 @@ import 'package:flutter_audio_query_example/src/ui/screens/MainScreen.dart';
 void main() => runApp( MyApp() );
 
 class MyApp extends StatelessWidget {
-  final ApplicationBloc bloc = ApplicationBloc();
+  final MainScreenBloc bloc = MainScreenBloc();
 
   @override
   Widget build(BuildContext context) {

@@ -4,8 +4,9 @@ import 'package:rxdart/rxdart.dart';
 
 
 enum NavigationOptions { ARTISTS, ALBUMS, SONGS, GENRES, PLAYLISTS }
+enum SearchBarState {COLLAPSED, EXPANDED }
 
-class ApplicationBloc extends BlocBase {
+class MainScreenBloc extends BlocBase {
 
   final FlutterAudioQuery audioQuery = FlutterAudioQuery();
 
@@ -29,8 +30,8 @@ class ApplicationBloc extends BlocBase {
     NavigationOptions.PLAYLISTS : _genreSortNames,
   };
 
-  ArtistSortType _artistSortTypeSelected = ArtistSortType.DEFAULT;
-  ArtistSortType get lastArtistSortTypeSelected => _artistSortTypeSelected;
+  ArtistSortType artistSortTypeSelected = ArtistSortType.DEFAULT;
+  ArtistSortType get lastArtistSortTypeSelected => artistSortTypeSelected;
 
   AlbumSortType _albumSortTypeSelected = AlbumSortType.DEFAULT;
   AlbumSortType get lastAlbumSortTypeSelected => _albumSortTypeSelected;
@@ -41,28 +42,35 @@ class ApplicationBloc extends BlocBase {
   GenreSortType _genreSortTypeSelected = GenreSortType.DEFAULT;
   GenreSortType get lastGenreSortTypeSelected => _genreSortTypeSelected;
 
-  final BehaviorSubject<NavigationOptions> _navigationSubject = BehaviorSubject();
-  Observable<NavigationOptions> get currentNavigationOption => _navigationSubject.stream;
+  // Navigation Stream controler
+  final BehaviorSubject<NavigationOptions> _navigationController = BehaviorSubject.seeded(NavigationOptions.ARTISTS);
+  Observable<NavigationOptions> get currentNavigationOption => _navigationController.stream;
 
-  final BehaviorSubject<ArtistSortType> _artistSortType =
-    BehaviorSubject.seeded( ArtistSortType.DEFAULT );
-  Observable<ArtistSortType> get artistSortTypeStream => _artistSortType.stream;
-
-  final BehaviorSubject<AlbumSortType> _albumSortType =
-    BehaviorSubject.seeded( AlbumSortType.DEFAULT );
-  Observable<AlbumSortType> get albumSortTypeStream => _albumSortType.stream;
-
-  final BehaviorSubject<SongSortType> _songSortType =
-    BehaviorSubject.seeded( SongSortType.DEFAULT);
-  Observable<SongSortType> get songSortTypeStream => _songSortType.stream;
-
-  final BehaviorSubject<GenreSortType> _genreSortType =
-    BehaviorSubject.seeded(GenreSortType.DEFAULT);
-  Observable<GenreSortType> get genreSortTypeStream => _genreSortType.stream;
 
   
+  //DATA QUERY STREAMS
+
+  final BehaviorSubject< List<ArtistInfo> > _artistController = BehaviorSubject();
+  Observable< List<ArtistInfo> > get artistStream => _artistController.stream;
+
+  final BehaviorSubject<List<AlbumInfo>> _albumController = BehaviorSubject();
+  Observable<List<AlbumInfo>> get albumStream => _albumController.stream;
+
+  final BehaviorSubject<List<GenreInfo>> _genreController = BehaviorSubject();
+  Observable< List<GenreInfo> > get genreStream => _genreController.stream;
+
+  final BehaviorSubject<List<SongInfo>> _songController = BehaviorSubject();
+  Observable<List<SongInfo>> get songStream => _songController.stream;
+
   final BehaviorSubject<List<PlaylistInfo>> _playlistDataController = BehaviorSubject();
-  Observable<List<PlaylistInfo>> get fetchPlaylist => _playlistDataController.stream;
+  Observable<List<PlaylistInfo>> get playlistStream => _playlistDataController.stream;
+  
+  final BehaviorSubject<SearchBarState> _searchBarController = BehaviorSubject.seeded(SearchBarState.COLLAPSED);
+  Observable<SearchBarState> get searchBarState => _searchBarController.stream;
+
+  MainScreenBloc(){
+    _navigationController.listen( onDataNavigationChangeCallback );
+  }
 
   void loadPlaylistData(){
     audioQuery.getPlaylists().then(
@@ -77,7 +85,7 @@ class ApplicationBloc extends BlocBase {
   int getLastSortSelectionChooseBasedInNavigation(NavigationOptions option){
     switch(option){
       case NavigationOptions.ARTISTS:
-        return _artistSortTypeSelected.index;
+        return artistSortTypeSelected.index;
 
       case NavigationOptions.ALBUMS:
         return _albumSortTypeSelected.index;
@@ -98,38 +106,147 @@ class ApplicationBloc extends BlocBase {
   }
 
   void changeArtistSortType(ArtistSortType type) {
-    _artistSortType.sink.add(type);
-    _artistSortTypeSelected = type;
+    artistSortTypeSelected = type;
+    _fetchArtistData();
   }
 
   void changeAlbumSortType(AlbumSortType type) {
-    _albumSortType.sink.add(type);
     _albumSortTypeSelected = type;
+    _fetchAlbumData();
   }
 
   void changeSongSortType(SongSortType type) {
-    _songSortType.sink.add(type);
     _songSortTypeSelected = type;
+    _fetchSongData();
   }
 
   void changeGenreSortType(GenreSortType type) {
-    _genreSortType.sink.add(type);
     _genreSortTypeSelected = type;
+    _fetchSongData();
   }
 
   void changePlaylistSortType(){}
 
-  void changeNavigation(final NavigationOptions option) {
-    _navigationSubject.sink.add(option);
+  void changeNavigation(final NavigationOptions option) => _navigationController.sink.add(option);
+
+  void _fetchArtistData({String query}){
+    if (query == null)
+      audioQuery.getArtists(sortType: artistSortTypeSelected)
+        .then( (data) => _artistController.sink.add(data))
+        .catchError( (error) => _artistController.sink.addError(error));
+    else
+      audioQuery.searchArtists(query: query).then((data) => _artistController.sink.add(data))
+          .catchError( (error) => _artistController.sink.addError(error));
   }
-  
+
+  void _fetchPlaylistData({String query}){
+    if (query == null)
+      audioQuery.getPlaylists()
+        .then( (playlistData) => _playlistDataController.sink.add(playlistData) )
+        .catchError( (error) => _playlistDataController.sink.addError(error) );
+
+    else
+      audioQuery.searchPlaylists(query: query)
+          .then( (playlistData) => _playlistDataController.sink.add(playlistData) )
+          .catchError( (error) => _playlistDataController.sink.addError(error) );
+  }
+
+  void _fetchAlbumData({String query}){
+    if (query == null)
+      audioQuery.getAlbums(sortType: _albumSortTypeSelected)
+        .then( (data) => _albumController.sink.add(data) )
+        .catchError((error) => _albumController.sink.addError(error));
+    else
+      audioQuery.searchAlbums(query: query)
+          .then( (data) => _albumController.sink.add(data) )
+          .catchError((error) => _albumController.sink.addError(error));
+  }
+
+  void _fetchSongData({String query}){
+    if (query == null)
+      audioQuery.getSongs(sortType: _songSortTypeSelected)
+        .then((songList) => _songController.sink.add( songList ))
+        .catchError( (error) => _songController.sink.addError(error) );
+    else
+      audioQuery.searchSongs(query: query)
+          .then((songList) => _songController.sink.add( songList ))
+          .catchError( (error) => _songController.sink.addError(error) );
+  }
+
+  void _fetchGenreData({String query}){
+    if (query == null)
+      audioQuery.getGenres(sortType: _genreSortTypeSelected)
+        .then( (data) => _genreController.sink.add(data))
+        .catchError((error) => _genreController.sink.addError(error));
+    else
+      audioQuery.searchGenres(query: query)
+          .then( (data) => _genreController.sink.add(data))
+          .catchError((error) => _genreController.sink.addError(error));
+  }
+
+  onDataNavigationChangeCallback(final NavigationOptions option){
+    switch(option){
+
+      case NavigationOptions.ARTISTS:
+        _fetchArtistData();
+        break;
+
+      case NavigationOptions.PLAYLISTS:
+       _fetchPlaylistData();
+        break;
+
+      case NavigationOptions.ALBUMS:
+        _fetchAlbumData();
+        break;
+
+      case NavigationOptions.SONGS:
+       _fetchSongData();
+        break;
+
+      case NavigationOptions.GENRES:
+        _fetchGenreData();
+        break;
+    }
+  }
+
+  void search({NavigationOptions option, final String query}){
+    switch(option){
+
+      case NavigationOptions.ARTISTS:
+        _fetchArtistData(query: query);
+        break;
+
+      case NavigationOptions.PLAYLISTS:
+        _fetchPlaylistData(query: query);
+        break;
+
+      case NavigationOptions.ALBUMS:
+        _fetchAlbumData(query: query);
+        break;
+
+      case NavigationOptions.SONGS:
+        _fetchSongData(query: query);
+        break;
+
+      case NavigationOptions.GENRES:
+        _fetchGenreData(query: query);
+        break;
+    }
+
+  }
+  void changeSearchBarState(final SearchBarState newState) => _searchBarController.sink.add(newState);
+
   @override
   void dispose() {
-    _navigationSubject?.close();
-    _artistSortType?.close();
-    _albumSortType?.close();
-    _songSortType?.close();
-    _genreSortType.close();
+    _navigationController?.close();
+    //_albumSortType?.close();
+    //_songSortType?.close();
+    //_genreSortType?.close();
+    _artistController?.close();
+    _albumController?.close();
+    _songController?.close();
+    _genreController?.close();
     _playlistDataController?.close();
+    _searchBarController?.close();
   }
 }

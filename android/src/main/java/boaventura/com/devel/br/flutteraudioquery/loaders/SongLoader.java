@@ -36,6 +36,7 @@ public class SongLoader extends AbstractLoader {
     //private static final String GENRE_NAME = "genre_name";
 
     private static final int QUERY_TYPE_GENRE_SONGS = 0x01;
+    private static final int QUERY_TYPE_ALBUM_SONGS = 0x02;
 
     //private static final String MOST_PLAYED = "most_played"; //undocumented column
     //private static final String RECENTLY_PLAYED = "recently_played"; // undocumented column
@@ -154,6 +155,15 @@ public class SongLoader extends AbstractLoader {
                 parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
     }
 
+    public void searchSongs(final MethodChannel.Result result, final String namedQuery,
+                            final SongSortType sortType){
+
+        String[] args =  new String[]{namedQuery + "%"};
+        createLoadTask(result, MediaStore.Audio.Media.TITLE + " like ?",
+                args, parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
+
+    }
+
     public void getSongsFromPlaylist(MethodChannel.Result result, final List<String> songIds){
         String[] values;
 
@@ -199,11 +209,14 @@ public class SongLoader extends AbstractLoader {
     }
 
     public void getSongsFromAlbum(final MethodChannel.Result result, final String albumId,
-                                  final SongSortType sortType){
+                                  final String artist, final SongSortType sortType){
 
-       createLoadTask( result, MediaStore.Audio.Media.ALBUM_ID + " =?",
-                new String[] {albumId},
-               parseSortOrder(sortType), QUERY_TYPE_DEFAULT ).execute();
+        Log.i("MFBG", "Art: " + artist + " album: " + albumId);
+        String selection = MediaStore.Audio.Media.ALBUM_ID + " =?"
+                + " and " + MediaStore.Audio.Media.ARTIST + " =?";
+
+       createLoadTask( result, selection, new String[] {albumId, artist},
+               parseSortOrder(sortType), QUERY_TYPE_ALBUM_SONGS).execute();
     }
 
     public void getSongsFromArtist(final MethodChannel.Result result, final String artistName,
@@ -275,6 +288,9 @@ public class SongLoader extends AbstractLoader {
                     } else
                         return  basicLoad(selection, selectionArgs, sortOrder);
 
+                case QUERY_TYPE_ALBUM_SONGS:
+                    Log.i("MDBG", "new way");
+                    return basicLoad(selection,selectionArgs,sortOrder);
 
                 case QUERY_TYPE_GENRE_SONGS:
                     List<String> songIds = getSongIdsFromGenre(selection);

@@ -28,6 +28,7 @@ import java.util.Map;
 
 import boaventura.com.devel.br.flutteraudioquery.loaders.tasks.AbstractLoadTask;
 import boaventura.com.devel.br.flutteraudioquery.sortingtypes.ArtistSortType;
+import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.MethodChannel;
 
 
@@ -113,6 +114,23 @@ public class ArtistLoader extends AbstractLoader {
                 parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
     }
 
+    public void searchArtistsByName(final MethodChannel.Result result,
+                             final String nameQuery, ArtistSortType sortType ){
+
+        String args = /*"%" +*/ nameQuery + "%";
+        Log.i("MDBG", "The arg is " + args);
+        createLoadTask(result, MediaStore.Audio.Artists.ARTIST +
+                        " like ?", new String[]{args},
+                parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
+
+    }
+
+    /**
+     * This methods queries Artists by a specific genre provided.
+     * @param result
+     * @param genreName The Genre name
+     * @param sortType The sort constraint that artist will come sorted.
+     */
     public void getArtistsFromGenre(final MethodChannel.Result result, final String genreName,
                                     ArtistSortType sortType) {
         createLoadTask(result, genreName, null,
@@ -128,7 +146,11 @@ public class ArtistLoader extends AbstractLoader {
                 selectionArgs, sortOrder, type);
     }
 
-
+    protected ArtistLoadTask createLoadTask(
+            final EventChannel eventChannel, final String selection,
+            final String[] selectionArgs, final String sortOrder, final int type){
+        return null;
+    }
 
     static class ArtistLoadTask extends AbstractLoadTask<List<Map<String, Object>>> {
         private ContentResolver m_resolver;

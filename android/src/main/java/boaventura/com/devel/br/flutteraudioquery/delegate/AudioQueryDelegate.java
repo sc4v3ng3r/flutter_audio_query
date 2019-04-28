@@ -256,6 +256,12 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
                         ArtistSortType.values()[(int)call.argument(SORT_TYPE)] );
                 break;
 
+            case "searchArtistsByName":
+                m_artistLoader.searchArtistsByName( result,
+                        (String)call.argument("query"),
+                        ArtistSortType.values()[(int)call.argument(SORT_TYPE)] );
+                break;
+
             //album calls section
             case "getAlbums":
                 m_albumLoader.getAlbums(result, AlbumSortType.values()[(int)call.argument(SORT_TYPE)] );
@@ -272,6 +278,11 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
                         AlbumSortType.values()[(int)call.argument(SORT_TYPE)] );
                 break;
 
+            case "searchAlbums":
+                m_albumLoader.searchAlbums(result, (String)call.argument("query"),
+                        AlbumSortType.values()[(int)call.argument(SORT_TYPE)] );
+                break;
+
             // song calls section
             case "getSongs":
                 m_songLoader.getSongs(result, SongSortType.values()[(int)call.argument(SORT_TYPE)] );
@@ -283,7 +294,9 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
                 break;
 
             case "getSongsFromAlbum":
-                m_songLoader.getSongsFromAlbum( result, (String) call.argument("album_id" ),
+                m_songLoader.getSongsFromAlbum( result,
+                        (String) call.argument("album_id" ),
+                        (String) call.argument("artist"),
                         SongSortType.values()[ (int)call.argument(SORT_TYPE) ] );
                 break;
 
@@ -297,15 +310,32 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
                 m_songLoader.getSongsFromPlaylist(result, ids);
                 break;
 
+            case "searchSongs":
+                m_songLoader.searchSongs(result, (String)call.argument("query"),
+                        SongSortType.values()[ (int)call.argument(SORT_TYPE) ]);
+                break;
+
             // genre calls section
             case "getGenres":
                 m_genreLoader.getGenres(result, GenreSortType.values()[ (int)call.argument(SORT_TYPE) ]);
+                break;
+
+            case "searchGenres":
+                m_genreLoader.searchGenres(result, (String) call.argument("query"),
+                        GenreSortType.values()[ (int)call.argument(SORT_TYPE) ] );
                 break;
 
                 // playlist read calls section
             case "getPlaylists":
                 m_playlistLoader.getPlaylists(result);
                 break;
+
+            case "searchPlaylists":
+                m_playlistLoader.searchPlaylists(result, (String)call.argument("query"));
+                break;
+
+            default:
+                result.notImplemented();
         }
 
     }

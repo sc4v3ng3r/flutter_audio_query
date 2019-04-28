@@ -38,13 +38,19 @@ public class PlaylistLoader extends AbstractLoader {
 
     public void getPlaylists(final MethodChannel.Result result){
         createLoadTask(result,null,null,
-                MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER,0).execute();
+                MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER,QUERY_TYPE_DEFAULT).execute();
     }
 
-    public void getPlaylistById(final MethodChannel.Result result, final String playlistId){
+    private void getPlaylistById(final MethodChannel.Result result, final String playlistId){
 
         createLoadTask(result, MediaStore.Audio.Playlists._ID + " =?", new String[]{playlistId},
-                MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER, 0).execute();
+                MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER, QUERY_TYPE_DEFAULT).execute();
+    }
+
+    public void searchPlaylists(final MethodChannel.Result results, final String namedQuery){
+        String[] args = new String[] { namedQuery + "%"};
+        createLoadTask(results,MediaStore.Audio.Playlists.NAME + " like ?", args,
+                MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER, QUERY_TYPE_DEFAULT ).execute();
     }
 
     public void createPlaylist(final MethodChannel.Result results, final String name) {

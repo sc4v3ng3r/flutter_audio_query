@@ -14,10 +14,7 @@ import 'package:flutter_audio_query_example/src/ui/widgets/PlaylistListWidget.da
 import 'package:flutter_audio_query_example/src/ui/widgets/SongListWidget.dart';
 import 'package:flutter_audio_query_example/src/ui/widgets/ChooseDialog.dart';
 
-
 class MainScreen extends StatefulWidget {
-  final FlutterAudioQuery audioQuery = FlutterAudioQuery();
-
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -26,8 +23,9 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
 
   NavigationOptions _currentNavigationOption;
-  ApplicationBloc bloc;
-
+  SearchBarState _currentSearchBarState;
+  TextEditingController _searchController;
+  MainScreenBloc bloc;
 
   static final Map<NavigationOptions, String> _titles = {
     NavigationOptions.ARTISTS : "Artists",
@@ -41,15 +39,59 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _currentNavigationOption = NavigationOptions.ARTISTS;
+    _currentSearchBarState = SearchBarState.COLLAPSED;
+    _searchController = TextEditingController();
   }
 
   @override
   Widget build(BuildContext context) {
-    bloc ??= BlocProvider.of<ApplicationBloc>(context);
+    bloc ??= BlocProvider.of<MainScreenBloc>(context);
+
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Flutter Audio Plugin Example'),
+          title: StreamBuilder<SearchBarState>(
+              initialData: _currentSearchBarState,
+              stream: bloc.searchBarState,
+              builder: (context, snapshot){
+                  if (snapshot.data == SearchBarState.EXPANDED)
+                    return TextField(
+                      controller: _searchController,
+                      autofocus: true,
+                      onChanged: (typed){
+                        print("make search for: ${_searchController.text}");
+                        bloc.search(option: _currentNavigationOption,
+                            query: _searchController.text );
+                      },
+                      style: new TextStyle(color: Colors.white,),
+                      decoration: new InputDecoration(
+                          prefixIcon: new Icon(Icons.search,color: Colors.white),
+                          hintText: "Search...",
+                          hintStyle: new TextStyle(color: Colors.grey)
+                      ),
+                    );
+
+                  return Text('Flutter AudioQuery Plugin');
+              }
+          ),
           actions: <Widget>[
+            StreamBuilder<SearchBarState>(
+                initialData: _currentSearchBarState,
+                stream: bloc.searchBarState,
+                builder: (context, snapshot) {
+                  switch(snapshot.data){
+                    case SearchBarState.COLLAPSED:
+                      return IconButton(icon: Icon(Icons.search,),
+                          tooltip: "Search for ${_titles[_currentNavigationOption]}",
+                          onPressed: () => bloc.changeSearchBarState(SearchBarState.EXPANDED)
+                      );
+
+                    case SearchBarState.EXPANDED:
+                      return IconButton(icon: Icon(Icons.close,),
+                        tooltip: "Search for ${_titles[_currentNavigationOption]}",
+                        onPressed: () => bloc.changeSearchBarState(SearchBarState.COLLAPSED)
+                      );
+                  }
+                }),
 
             StreamBuilder<NavigationOptions>(
                 initialData: _currentNavigationOption,
@@ -73,132 +115,84 @@ class _MainScreenState extends State<MainScreen> {
 
               switch(_currentNavigationOption){
                 case NavigationOptions.ARTISTS:
+                  return StreamBuilder< List<ArtistInfo> >(
+                    stream: bloc.artistStream,
+                    builder: (context, snapshot){
+                      if (snapshot.hasError)
+                        return Utility.createDefaultInfoWidget(
+                            Text("${snapshot.error}")
+                        );
 
-                  return StreamBuilder<ArtistSortType>(
-                    stream: bloc.artistSortTypeStream,
-                    builder: (context, streamSnapshot) {
-
-                      if (!streamSnapshot.hasData)
+                      if (!snapshot.hasData)
                         return Utility.createDefaultInfoWidget(CircularProgressIndicator());
 
-                      return FutureBuilder<List<ArtistInfo>>(
-                        future: widget.audioQuery.getArtists(sortType: streamSnapshot.data),
-                        builder: (context, futureSnapshot){
-                          if (futureSnapshot.hasError)
-                            return Utility.createDefaultInfoWidget(
-                                Text("${futureSnapshot.error}")
-                            );
-
-                          if (!futureSnapshot.hasData)
-                            return Utility.createDefaultInfoWidget(CircularProgressIndicator());
-
-                          return (futureSnapshot.data.isEmpty) ?
-                            NoDataWidget(title: "There is no Artists",) :
-
-                            ArtistListWidget(
-                              artistList: futureSnapshot.data,
-                              onArtistSelected: _openArtistPage,
-                          );
-                        },
+                      return (snapshot.data.isEmpty) ?
+                      NoDataWidget(title: "There is no Artists",) :
+                      ArtistListWidget(
+                          artistList: snapshot.data,
+                          onArtistSelected: _openArtistPage
                       );
                     },
                   );
 
                 case NavigationOptions.ALBUMS:
-                  return StreamBuilder<AlbumSortType>(
-                    stream: bloc.albumSortTypeStream,
-                    builder: (context, streamSnapshot) {
-                      print("album sort status: ${streamSnapshot.connectionState}");
+                  return StreamBuilder< List<AlbumInfo> >(
+                    stream: bloc.albumStream,
+                    builder: (context, snapshot){
+                      if (snapshot.hasError)
+                        return Utility.createDefaultInfoWidget(
+                            Text("${snapshot.error}")
+                        );
 
-                      if (!streamSnapshot.hasData)
+                      if (!snapshot.hasData)
                         return Utility.createDefaultInfoWidget(CircularProgressIndicator());
 
-                      return FutureBuilder<List<AlbumInfo>>(
-                        future: widget.audioQuery.getAlbums(sortType: streamSnapshot.data),
-                        builder: (context, snapshot){
-
-                          if (snapshot.hasError)
-                            return Utility.createDefaultInfoWidget(
-                                Text("${snapshot.error}")
-                            );
-
-                          if (!snapshot.hasData)
-                            return Utility.createDefaultInfoWidget(CircularProgressIndicator());
-
-                          return (snapshot.data.isEmpty) ?
-                            NoDataWidget(title: "There is no Albums",) :
-                            AlbumGridWidget(
-                              onAlbumClicked: _openAlbumPage,
-                              albumList: snapshot.data
-                            );
-                        },
-                      );
+                      return (snapshot.data.isEmpty) ?
+                      NoDataWidget(title: "There is no Albums",) :
+                      AlbumGridWidget(onAlbumClicked: _openAlbumPage,
+                          albumList: snapshot.data );
                     },
                   );
 
                 case NavigationOptions.GENRES:
-                  return StreamBuilder<GenreSortType>(
-                    stream: bloc.genreSortTypeStream,
-                    builder: (context, streamSnapshot) {
+                  return StreamBuilder<List<GenreInfo>>(
+                    stream: bloc.genreStream,
+                    builder: (context, snapshot){
+                      if (snapshot.hasError)
+                        return Utility.createDefaultInfoWidget(Text("${snapshot.error}"));
 
-                      print("genre sort status: ${streamSnapshot.connectionState}");
-                      if (!streamSnapshot.hasData)
-                        return Utility.createDefaultInfoWidget(CircularProgressIndicator());
+                      if (!snapshot.hasData)
+                        return Utility.createDefaultInfoWidget( CircularProgressIndicator() );
 
-                      return FutureBuilder<List<GenreInfo>>(
-                        future: widget.audioQuery.getGenres(sortType: streamSnapshot.data),
-                        builder: (context, snapshot){
-
-                          if (snapshot.hasError)
-                            return Utility.createDefaultInfoWidget(
-                                Text("${snapshot.error}")
-                            );
-
-                          if (!snapshot.hasData)
-                            return Utility.createDefaultInfoWidget(CircularProgressIndicator());
-
-                          return (snapshot.data.isEmpty) ?
-                            NoDataWidget(title: "There is no Genres",) :
-                            GenreListWidget(
-                              onTap: _openGenrePage,
-                              genreList: snapshot.data
-                            );
-                        },
+                      return (snapshot.data.isEmpty) ?
+                      NoDataWidget(title: "There is no Genres",) :
+                      GenreListWidget(
+                          onTap: _openGenrePage,
+                          genreList: snapshot.data
                       );
+
                     },
                   );
 
                 case NavigationOptions.SONGS:
-                  return StreamBuilder<SongSortType>(
-                    stream: bloc.songSortTypeStream,
-                    builder: (context, streamSnapshot) {
-                      print("songs sort status: ${streamSnapshot.connectionState}");
-                      if (!streamSnapshot.hasData)
-                        return Utility.createDefaultInfoWidget(CircularProgressIndicator());
+                  return StreamBuilder<List< SongInfo >>(
+                    stream: bloc.songStream,
+                    builder: (context, snapshot){
+                      if (snapshot.hasError)
+                        return Utility.createDefaultInfoWidget(Text("${snapshot.error}"));
 
-                      return FutureBuilder<List<SongInfo>>(
-                        future: widget.audioQuery.getSongs(sortType: streamSnapshot.data),
-                        builder: (context, snapshot){
+                      if (!snapshot.hasData)
+                        return Utility.createDefaultInfoWidget( CircularProgressIndicator() );
 
-                          if (snapshot.hasError)
-                            return Utility.createDefaultInfoWidget(Text("${snapshot.error}"));
-
-                          if (!snapshot.hasData)
-                            return Utility.createDefaultInfoWidget(CircularProgressIndicator());
-
-                          return ( snapshot.data.isEmpty) ?
-                            NoDataWidget(title: "There is no Songs",) :
-                            SongListWidget(songList: snapshot.data);
-                        },
-                      );
-                    },
+                      return (snapshot.data.isEmpty) ?
+                        NoDataWidget(title: "There is no Songs",) :
+                        SongListWidget(songList: snapshot.data);
+                    }
                   );
 
                 case NavigationOptions.PLAYLISTS:
-                  bloc.loadPlaylistData();
-
                   return StreamBuilder<List<PlaylistInfo>>(
-                    stream: bloc.fetchPlaylist,
+                    stream: bloc.playlistStream,
                     builder: (context, snapshot){
                       if (snapshot.hasError)
                         return Utility.createDefaultInfoWidget(Text("${snapshot.error}"));
@@ -208,10 +202,7 @@ class _MainScreenState extends State<MainScreen> {
 
                       return (snapshot.data.isEmpty) ?
                         NoDataWidget(title: "There is no Playlist",) :
-                        PlaylistListWidget(
-                            appBloc: bloc,
-                            dataList: snapshot.data
-                        );
+                        PlaylistListWidget( appBloc: bloc, dataList: snapshot.data);
                     },
                   );
               }
@@ -311,7 +302,7 @@ class _MainScreenState extends State<MainScreen> {
           return ChooseDialog(
             title: "${_titles[option]} Sort Options",
             initialSelectedIndex: bloc.getLastSortSelectionChooseBasedInNavigation(option),
-            options: ApplicationBloc.sortOptionsMap[option],
+            options: MainScreenBloc.sortOptionsMap[option],
 
             onChange: (index){
               switch(option){
@@ -346,6 +337,7 @@ class _MainScreenState extends State<MainScreen> {
         context: context,
         builder: (context) => NewPlaylistDialog()
     ).then((data) {
+
       if (data != null)
         bloc.loadPlaylistData();
     });
@@ -365,7 +357,7 @@ class _MainScreenState extends State<MainScreen> {
           appBarBackgroundImage: data.artistArtPath,
           appBarTitle: data.name,
           bodyContent: FutureBuilder<List<AlbumInfo>>(
-              future: widget.audioQuery.getAlbumsFromArtist(artist: data),
+              future: bloc.audioQuery.getAlbumsFromArtist(artist: data),
               builder:(context, snapshot){
 
                 if (!snapshot.hasData)
@@ -389,7 +381,7 @@ class _MainScreenState extends State<MainScreen> {
           appBarBackgroundImage: album.albumArt,
           appBarTitle: album.title,
           bodyContent: FutureBuilder<List<SongInfo>>(
-              future: widget.audioQuery.getSongsFromAlbum(
+              future: bloc.audioQuery.getSongsFromAlbum(
                   sortType: SongSortType.DISPLAY_NAME,
                   album: album
               ),
@@ -411,5 +403,9 @@ class _MainScreenState extends State<MainScreen> {
     Navigator.push(context, MaterialPageRoute(
         builder: (context) => GenreNavigationScreen(currentGenre: genre,))
     );
+  }
+
+  bool searchBarIsOpen(){
+    return _currentSearchBarState == SearchBarState.EXPANDED;
   }
 }

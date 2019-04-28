@@ -8,7 +8,7 @@ import 'package:flutter_audio_query_example/src/ui/widgets/ListItemWidget.dart';
 class PlaylistListWidget extends StatelessWidget {
   
   final List<PlaylistInfo> dataList;
-  final ApplicationBloc appBloc;
+  final MainScreenBloc appBloc;
   PlaylistListWidget({@required this.dataList, @required this.appBloc});
   
   @override

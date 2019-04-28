@@ -35,6 +35,7 @@ public class AlbumLoader extends AbstractLoader {
 
     //private final ContentResolver m_resolver;
     private static final int QUERY_TYPE_GENRE_ALBUM = 0x01;
+    private static final int QUERY_TYPE_ARTIST_ALBUM = 0x02;
 
     private static final String[] ALBUM_PROJECTION = {
             MediaStore.Audio.AudioColumns._ID,
@@ -58,10 +59,10 @@ public class AlbumLoader extends AbstractLoader {
     }
 
 
-    private String parseSortOrder(AlbumSortType sortType){
+    private String parseSortOrder(AlbumSortType sortType) {
         String sortOrder;
 
-        switch (sortType){
+        switch (sortType) {
 
             case LESS_SONGS_NUMBER_FIRST:
                 sortOrder = MediaStore.Audio.Albums.NUMBER_OF_SONGS + " ASC";
@@ -99,7 +100,7 @@ public class AlbumLoader extends AbstractLoader {
      */
     public void getAlbums(MethodChannel.Result result, AlbumSortType sortType) {
         createLoadTask(result, null, null,
-                parseSortOrder(sortType), 0).execute();
+                parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
     }
 
     /**
@@ -109,7 +110,7 @@ public class AlbumLoader extends AbstractLoader {
     public void getAlbumById(MethodChannel.Result result, long albumId) {
         createLoadTask(result, ALBUM_PROJECTION[0] + " = ? ",
                 new String[]{String.valueOf(albumId)},
-                MediaStore.Audio.Albums.DEFAULT_SORT_ORDER, 0).execute();
+                MediaStore.Audio.Albums.DEFAULT_SORT_ORDER, QUERY_TYPE_DEFAULT).execute();
     }
 
     public void getAlbumFromGenre(final MethodChannel.Result result, final String genre,
@@ -118,13 +119,22 @@ public class AlbumLoader extends AbstractLoader {
                 parseSortOrder(sortType), QUERY_TYPE_GENRE_ALBUM).execute();
     }
 
+
+    public void searchAlbums(final MethodChannel.Result results, final String namedQuery,
+                             AlbumSortType sortType) {
+        String[] args = new String[]{namedQuery + "%"};
+        createLoadTask(results, MediaStore.Audio.AlbumColumns.ALBUM + " like ?", args,
+                parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
+
+    }
+
     /**
      * @param result
      * @param artistName
      */
     public void getAlbumsFromArtist(MethodChannel.Result result, String artistName, AlbumSortType sortType) {
         createLoadTask(result, ALBUM_PROJECTION[3] + " = ? ",
-                new String[]{artistName}, parseSortOrder(sortType), 0).execute();
+                new String[]{artistName}, parseSortOrder(sortType), QUERY_TYPE_ARTIST_ALBUM).execute();
     }
 
 
@@ -195,6 +205,24 @@ public class AlbumLoader extends AbstractLoader {
                         }
                     }
 
+                case QUERY_TYPE_ARTIST_ALBUM:
+                    List<Map<String, Object>> data = basicDataLoad(selection, selectionArgs, sortOrder);
+
+                    //Sometimes the relationship album -> artist in Album "TABLE" are missing and I really
+                    //don't know why but I saw this happen on API level 19. So as work around, when we can't get
+                    //albums from a specific artist querying the Album "TABLE" doing something like
+                    //SELECT * FROM ALBUM WHERE artistName = "AndroidxRockAndRoll";
+                    //we go to Media "TABLE" in order to get name and id of the albums from that specific
+                    //artist and then we query all album info from Album "TABLE".
+
+                    //It's not the best way to do this, but we get the results.
+
+                    if (data.isEmpty()) {
+                        if (selectionArgs != null)
+                            return loadAlbumsInfoWithMediaSupport(selectionArgs[0]);
+                    } else
+                        return data;
+
                 default:
                     break;
             }
@@ -212,21 +240,9 @@ public class AlbumLoader extends AbstractLoader {
                     ALBUM_PROJECTION, selection, selectionArgs, sortOrder);
 
             if (cursor != null) {
-
-                //Sometimes the relationship album -> artist in Album "TABLE" are missing and I really
-                //don't know why but I saw this happen in API level 19.So as work around, when we can't get
-                //albums from a specific artist querying the Album "TABLE" doing something like
-                //SELECT * FROM ALBUM WHERE artistName = "AndroidxRockAndRoll";
-                //we go to Media "TABLE"to  get name and id of the albums from an specific
-                //artist and then we query all album info from Album "TABLE".
-
-                //It's not the best way to do this, but we get the results.
-
                 if (cursor.getCount() == 0) {
                     cursor.close();
-
-                    if (selectionArgs != null)
-                        dataList = loadAlbumsInfoWithMediaSupport( selectionArgs[0] );
+                    return dataList;
                 }
                 else {
                     while (cursor.moveToNext()) {
@@ -285,19 +301,15 @@ public class AlbumLoader extends AbstractLoader {
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     ALBUM_MEDIA_PROJECTION,
                     MediaStore.Audio.Albums.ARTIST + "=?" + " and "
-                            + MediaStore.Audio.Media.IS_MUSIC + "!=?"
+                            + MediaStore.Audio.Media.IS_MUSIC + "=?"
                             + ") GROUP BY (" + MediaStore.Audio.Albums.ALBUM,
                     new String[]{artistName, "1"},
                     MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
 
             if (artistAlbumsCursor != null) {
-                ///TODO tem que ter try catch
-                String albumId = artistAlbumsCursor.getString(
-                        artistAlbumsCursor.getColumnIndex(ALBUM_MEDIA_PROJECTION[0]));
-
-                // for earch album from desired artist we get all album info needed
-                // from Album "TABLE"
                 while (artistAlbumsCursor.moveToNext()) {
+                    String albumId = artistAlbumsCursor.getString(
+                            artistAlbumsCursor.getColumnIndex(ALBUM_MEDIA_PROJECTION[0]));
 
                     Cursor albumDataCursor = m_resolver.query(
                             MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
@@ -307,28 +319,72 @@ public class AlbumLoader extends AbstractLoader {
                             MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
 
                     if (albumDataCursor != null) {
+                        Cursor albumArtistSongsCountCursor =
+                                m_resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                                        new String[]{
+                                                MediaStore.Audio.Media._ID,
+                                                MediaStore.Audio.Media.ARTIST,
+                                                MediaStore.Audio.Media.IS_MUSIC
+                                        },
 
+                                MediaStore.Audio.Artists.ARTIST + " =?" + " and " +
+                                        MediaStore.Audio.Media.ALBUM_ID + " =?" + " and " +
+                                        MediaStore.Audio.Media.IS_MUSIC + "=?",
+                                new String[]{artistName, albumId, "1"},null);
+
+                        int songsNumber = -1;
+
+                        if (albumArtistSongsCountCursor != null){
+                            songsNumber = albumArtistSongsCountCursor.getCount();
+                            albumArtistSongsCountCursor.close();
+                        }
                         while (albumDataCursor.moveToNext()) {
                             try {
                                 Map<String, Object> albumData = new HashMap<>();
-                                for (String albumColumn : ALBUM_PROJECTION)
-                                    albumData.put(albumColumn, albumDataCursor.
-                                            getString(albumDataCursor.getColumnIndex(albumColumn)));
 
+                                //MediaStore.Audio.AudioColumns._ID,
+                                albumData.put(ALBUM_PROJECTION[0], albumDataCursor.
+                                        getString(albumDataCursor.getColumnIndex(ALBUM_PROJECTION[0]) ));
+
+                                //MediaStore.Audio.AlbumColumns.ALBUM,
+                                albumData.put(ALBUM_PROJECTION[1], albumDataCursor.
+                                        getString(albumDataCursor.getColumnIndex(ALBUM_PROJECTION[1]) ) );
+
+                                //MediaStore.Audio.AlbumColumns.ALBUM_ART,
+                                albumData.put(ALBUM_PROJECTION[2], albumDataCursor.
+                                        getString(albumDataCursor.getColumnIndex(ALBUM_PROJECTION[2]) ) );
+
+                                //MediaStore.Audio.AlbumColumns.ARTIST,
+                                albumData.put(ALBUM_PROJECTION[3], artistName);
+
+                                //MediaStore.Audio.AlbumColumns.FIRST_YEAR,
+                                albumData.put(ALBUM_PROJECTION[4], albumDataCursor.
+                                        getString(albumDataCursor.getColumnIndex(ALBUM_PROJECTION[4]) ) );
+
+                                //MediaStore.Audio.AlbumColumns.LAST_YEAR,
+                                albumData.put(ALBUM_PROJECTION[5], albumDataCursor.
+                                        getString(albumDataCursor.getColumnIndex(ALBUM_PROJECTION[5]) ) );
+
+                                //MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS
+                                albumData.put(ALBUM_PROJECTION[6], String.valueOf(songsNumber) );
+
+                                /*for(int i = 0; i < ALBUM_PROJECTION.length -1; i++)
+                                    albumData.put(ALBUM_PROJECTION[i], albumDataCursor.
+                                            getString(albumDataCursor.getColumnIndex(ALBUM_PROJECTION[i])));
+
+                                albumData.put(ALBUM_PROJECTION[ALBUM_PROJECTION.length-1],
+                                        String.valueOf(songsNumber));
+                               */
                                 dataList.add(albumData);
-                            }
-                            catch (Exception ex) {
+                            } catch (Exception ex) {
                                 Log.e("ERROR", "AlbumLoader::loadAlbumsInfoWithMediaSupport", ex);
                             }
                         }
                         albumDataCursor.close();
                     }
-
                 }
-
                 artistAlbumsCursor.close();
             }
-
             return dataList;
         }
 
