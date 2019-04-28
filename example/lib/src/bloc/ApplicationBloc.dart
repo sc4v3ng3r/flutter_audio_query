@@ -6,7 +6,7 @@ import 'package:rxdart/rxdart.dart';
 enum NavigationOptions { ARTISTS, ALBUMS, SONGS, GENRES, PLAYLISTS }
 enum SearchBarState {COLLAPSED, EXPANDED }
 
-class MainScreenBloc extends BlocBase {
+class ApplicationBloc extends BlocBase {
 
   final FlutterAudioQuery audioQuery = FlutterAudioQuery();
 
@@ -22,32 +22,27 @@ class MainScreenBloc extends BlocBase {
 
   static const List<String> _genreSortNames = ["DEFAULT"];
 
+  static const List<String> _playlistSortNames = ["DEFAULT", "NEWEST_FRIST", "OLDEST_FIRST"];
+
   static const Map<NavigationOptions, List<String> > sortOptionsMap = {
     NavigationOptions.ARTISTS : _artistSortNames,
     NavigationOptions.ALBUMS : _albumsSortNames,
     NavigationOptions.SONGS : _songsSortNames,
     NavigationOptions.GENRES : _genreSortNames,
-    NavigationOptions.PLAYLISTS : _genreSortNames,
+    NavigationOptions.PLAYLISTS : _playlistSortNames,
   };
 
-  ArtistSortType artistSortTypeSelected = ArtistSortType.DEFAULT;
-  ArtistSortType get lastArtistSortTypeSelected => artistSortTypeSelected;
-
+  ArtistSortType _artistSortTypeSelected = ArtistSortType.DEFAULT;
   AlbumSortType _albumSortTypeSelected = AlbumSortType.DEFAULT;
-  AlbumSortType get lastAlbumSortTypeSelected => _albumSortTypeSelected;
-
   SongSortType _songSortTypeSelected = SongSortType.DEFAULT;
-  SongSortType get lastSongSortTypeSelected => _songSortTypeSelected;
-
   GenreSortType _genreSortTypeSelected = GenreSortType.DEFAULT;
-  GenreSortType get lastGenreSortTypeSelected => _genreSortTypeSelected;
+  PlaylistSortType _playlistSortTypeSelected = PlaylistSortType.DEFAULT;
+
 
   // Navigation Stream controler
   final BehaviorSubject<NavigationOptions> _navigationController = BehaviorSubject.seeded(NavigationOptions.ARTISTS);
   Observable<NavigationOptions> get currentNavigationOption => _navigationController.stream;
 
-
-  
   //DATA QUERY STREAMS
 
   final BehaviorSubject< List<ArtistInfo> > _artistController = BehaviorSubject();
@@ -68,10 +63,10 @@ class MainScreenBloc extends BlocBase {
   final BehaviorSubject<SearchBarState> _searchBarController = BehaviorSubject.seeded(SearchBarState.COLLAPSED);
   Observable<SearchBarState> get searchBarState => _searchBarController.stream;
 
-  MainScreenBloc(){
+  ApplicationBloc(){
     _navigationController.listen( onDataNavigationChangeCallback );
   }
-
+  
   void loadPlaylistData(){
     audioQuery.getPlaylists().then(
             (playlist){
@@ -85,7 +80,7 @@ class MainScreenBloc extends BlocBase {
   int getLastSortSelectionChooseBasedInNavigation(NavigationOptions option){
     switch(option){
       case NavigationOptions.ARTISTS:
-        return artistSortTypeSelected.index;
+        return _artistSortTypeSelected.index;
 
       case NavigationOptions.ALBUMS:
         return _albumSortTypeSelected.index;
@@ -97,7 +92,7 @@ class MainScreenBloc extends BlocBase {
         return _genreSortTypeSelected.index;
 
       case NavigationOptions.PLAYLISTS:
-        return 0;
+        return _playlistSortTypeSelected.index;
 
       default:
         return 0;
@@ -106,7 +101,7 @@ class MainScreenBloc extends BlocBase {
   }
 
   void changeArtistSortType(ArtistSortType type) {
-    artistSortTypeSelected = type;
+    _artistSortTypeSelected = type;
     _fetchArtistData();
   }
 
@@ -125,26 +120,29 @@ class MainScreenBloc extends BlocBase {
     _fetchSongData();
   }
 
-  void changePlaylistSortType(){}
+  void changePlaylistSortType(final PlaylistSortType type){
+    _playlistSortTypeSelected = type;
+    _fetchPlaylistData();
+  }
 
   void changeNavigation(final NavigationOptions option) => _navigationController.sink.add(option);
 
   void _fetchArtistData({String query}){
     if (query == null)
-      audioQuery.getArtists(sortType: artistSortTypeSelected)
+      audioQuery.getArtists(sortType: _artistSortTypeSelected)
         .then( (data) => _artistController.sink.add(data))
         .catchError( (error) => _artistController.sink.addError(error));
-    else
+    else 
       audioQuery.searchArtists(query: query).then((data) => _artistController.sink.add(data))
           .catchError( (error) => _artistController.sink.addError(error));
   }
 
   void _fetchPlaylistData({String query}){
     if (query == null)
-      audioQuery.getPlaylists()
+      audioQuery.getPlaylists(sortType: _playlistSortTypeSelected)
         .then( (playlistData) => _playlistDataController.sink.add(playlistData) )
         .catchError( (error) => _playlistDataController.sink.addError(error) );
-
+    
     else
       audioQuery.searchPlaylists(query: query)
           .then( (playlistData) => _playlistDataController.sink.add(playlistData) )
@@ -178,7 +176,7 @@ class MainScreenBloc extends BlocBase {
       audioQuery.getGenres(sortType: _genreSortTypeSelected)
         .then( (data) => _genreController.sink.add(data))
         .catchError((error) => _genreController.sink.addError(error));
-    else
+    else 
       audioQuery.searchGenres(query: query)
           .then( (data) => _genreController.sink.add(data))
           .catchError((error) => _genreController.sink.addError(error));
@@ -210,8 +208,8 @@ class MainScreenBloc extends BlocBase {
   }
 
   void search({NavigationOptions option, final String query}){
-    switch(option){
 
+    switch(option){
       case NavigationOptions.ARTISTS:
         _fetchArtistData(query: query);
         break;
@@ -232,16 +230,13 @@ class MainScreenBloc extends BlocBase {
         _fetchGenreData(query: query);
         break;
     }
-
+    
   }
   void changeSearchBarState(final SearchBarState newState) => _searchBarController.sink.add(newState);
 
   @override
   void dispose() {
     _navigationController?.close();
-    //_albumSortType?.close();
-    //_songSortType?.close();
-    //_genreSortType?.close();
     _artistController?.close();
     _albumController?.close();
     _songController?.close();
@@ -249,4 +244,5 @@ class MainScreenBloc extends BlocBase {
     _playlistDataController?.close();
     _searchBarController?.close();
   }
+
 }

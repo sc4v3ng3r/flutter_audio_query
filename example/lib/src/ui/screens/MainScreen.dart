@@ -25,7 +25,7 @@ class _MainScreenState extends State<MainScreen> {
   NavigationOptions _currentNavigationOption;
   SearchBarState _currentSearchBarState;
   TextEditingController _searchController;
-  MainScreenBloc bloc;
+  ApplicationBloc bloc;
 
   static final Map<NavigationOptions, String> _titles = {
     NavigationOptions.ARTISTS : "Artists",
@@ -45,7 +45,7 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    bloc ??= BlocProvider.of<MainScreenBloc>(context);
+    bloc ??= BlocProvider.of<ApplicationBloc>(context);
 
     return Scaffold(
         appBar: AppBar(
@@ -302,7 +302,7 @@ class _MainScreenState extends State<MainScreen> {
           return ChooseDialog(
             title: "${_titles[option]} Sort Options",
             initialSelectedIndex: bloc.getLastSortSelectionChooseBasedInNavigation(option),
-            options: MainScreenBloc.sortOptionsMap[option],
+            options: ApplicationBloc.sortOptionsMap[option],
 
             onChange: (index){
               switch(option){
@@ -323,6 +323,7 @@ class _MainScreenState extends State<MainScreen> {
                   break;
 
                 case NavigationOptions.PLAYLISTS:
+                  bloc.changePlaylistSortType( PlaylistSortType.values[index] );
                   break;
               }
               Navigator.pop(context);
@@ -385,9 +386,7 @@ class _MainScreenState extends State<MainScreen> {
                   sortType: SongSortType.DISPLAY_NAME,
                   album: album
               ),
-
               builder:(context, snapshot){
-
                 if (!snapshot.hasData)
                   return Utility.createDefaultInfoWidget(CircularProgressIndicator());
 
