@@ -1,6 +1,5 @@
 part of flutter_audio_query;
 
-
 /// SongInfo class holds all information about a specific song audio file.
 class SongInfo extends DataModel {
   SongInfo._(Map<dynamic, dynamic> map) : super._(map);
@@ -12,7 +11,7 @@ class SongInfo extends DataModel {
   String get artistId => _data['artist_id'];
 
   /// Returns the artist name who create this audio file.
-  String get artist =>_data['artist'];
+  String get artist => _data['artist'];
 
   /// Returns the album title which this song appears.
   String get album => _data['album'];

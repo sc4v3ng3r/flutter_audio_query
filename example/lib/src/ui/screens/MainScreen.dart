@@ -19,20 +19,18 @@ class MainScreen extends StatefulWidget {
   _MainScreenState createState() => _MainScreenState();
 }
 
-
 class _MainScreenState extends State<MainScreen> {
-
   NavigationOptions _currentNavigationOption;
   SearchBarState _currentSearchBarState;
   TextEditingController _searchController;
   ApplicationBloc bloc;
 
   static final Map<NavigationOptions, String> _titles = {
-    NavigationOptions.ARTISTS : "Artists",
-    NavigationOptions.ALBUMS : "Albums",
-    NavigationOptions.SONGS : "Songs",
-    NavigationOptions.GENRES : "Genres",
-    NavigationOptions.PLAYLISTS : "Playlist",
+    NavigationOptions.ARTISTS: "Artists",
+    NavigationOptions.ALBUMS: "Albums",
+    NavigationOptions.SONGS: "Songs",
+    NavigationOptions.GENRES: "Genres",
+    NavigationOptions.PLAYLISTS: "Playlist",
   };
 
   @override
@@ -48,262 +46,274 @@ class _MainScreenState extends State<MainScreen> {
     bloc ??= BlocProvider.of<ApplicationBloc>(context);
 
     return Scaffold(
-        appBar: AppBar(
-          title: StreamBuilder<SearchBarState>(
+      appBar: AppBar(
+        title: StreamBuilder<SearchBarState>(
+            initialData: _currentSearchBarState,
+            stream: bloc.searchBarState,
+            builder: (context, snapshot) {
+              if (snapshot.data == SearchBarState.EXPANDED)
+                return TextField(
+                  controller: _searchController,
+                  autofocus: true,
+                  onChanged: (typed) {
+                    print("make search for: ${_searchController.text}");
+                    bloc.search(
+                        option: _currentNavigationOption,
+                        query: _searchController.text);
+                  },
+                  style: new TextStyle(
+                    color: Colors.white,
+                  ),
+                  decoration: new InputDecoration(
+                      prefixIcon: new Icon(Icons.search, color: Colors.white),
+                      hintText: "Search...",
+                      hintStyle: new TextStyle(color: Colors.grey)),
+                );
+
+              return Text('Flutter AudioQuery Plugin');
+            }),
+        actions: <Widget>[
+          StreamBuilder<SearchBarState>(
               initialData: _currentSearchBarState,
               stream: bloc.searchBarState,
-              builder: (context, snapshot){
-                  if (snapshot.data == SearchBarState.EXPANDED)
-                    return TextField(
-                      controller: _searchController,
-                      autofocus: true,
-                      onChanged: (typed){
-                        print("make search for: ${_searchController.text}");
-                        bloc.search(option: _currentNavigationOption,
-                            query: _searchController.text );
-                      },
-                      style: new TextStyle(color: Colors.white,),
-                      decoration: new InputDecoration(
-                          prefixIcon: new Icon(Icons.search,color: Colors.white),
-                          hintText: "Search...",
-                          hintStyle: new TextStyle(color: Colors.grey)
-                      ),
-                    );
+              builder: (context, snapshot) {
+                switch (snapshot.data) {
+                  case SearchBarState.COLLAPSED:
+                    return IconButton(
+                        icon: Icon(
+                          Icons.search,
+                        ),
+                        tooltip:
+                            "Search for ${_titles[_currentNavigationOption]}",
+                        onPressed: () =>
+                            bloc.changeSearchBarState(SearchBarState.EXPANDED));
 
-                  return Text('Flutter AudioQuery Plugin');
-              }
-          ),
-          actions: <Widget>[
-            StreamBuilder<SearchBarState>(
-                initialData: _currentSearchBarState,
-                stream: bloc.searchBarState,
-                builder: (context, snapshot) {
-                  switch(snapshot.data){
-                    case SearchBarState.COLLAPSED:
-                      return IconButton(icon: Icon(Icons.search,),
-                          tooltip: "Search for ${_titles[_currentNavigationOption]}",
-                          onPressed: () => bloc.changeSearchBarState(SearchBarState.EXPANDED)
-                      );
+                  case SearchBarState.EXPANDED:
+                    return IconButton(
+                        icon: Icon(
+                          Icons.close,
+                        ),
+                        tooltip:
+                            "Search for ${_titles[_currentNavigationOption]}",
+                        onPressed: () => bloc
+                            .changeSearchBarState(SearchBarState.COLLAPSED));
+                }
+              }),
+          StreamBuilder<NavigationOptions>(
+              initialData: _currentNavigationOption,
+              stream: bloc.currentNavigationOption,
+              builder: (context, snapshot) {
+                return IconButton(
+                  icon: Icon(
+                    Icons.sort,
+                  ),
+                  tooltip: "${_titles[snapshot.data]} Sort Type",
+                  onPressed: () => _displaySortChooseDialog(snapshot.data),
+                );
+              }),
+        ],
+      ),
+      body: StreamBuilder<NavigationOptions>(
+        initialData: _currentNavigationOption,
+        stream: bloc.currentNavigationOption,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            _currentNavigationOption = snapshot.data;
 
-                    case SearchBarState.EXPANDED:
-                      return IconButton(icon: Icon(Icons.close,),
-                        tooltip: "Search for ${_titles[_currentNavigationOption]}",
-                        onPressed: () => bloc.changeSearchBarState(SearchBarState.COLLAPSED)
-                      );
-                  }
-                }),
+            switch (_currentNavigationOption) {
+              case NavigationOptions.ARTISTS:
+                return StreamBuilder<List<ArtistInfo>>(
+                  stream: bloc.artistStream,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError)
+                      return Utility.createDefaultInfoWidget(
+                          Text("${snapshot.error}"));
 
-            StreamBuilder<NavigationOptions>(
-                initialData: _currentNavigationOption,
-                stream: bloc.currentNavigationOption,
-                builder: (context, snapshot) {
-                  return IconButton(icon: Icon(Icons.sort,),
-                    tooltip: "${_titles[snapshot.data]} Sort Type",
-                    onPressed: () => _displaySortChooseDialog(snapshot.data),
-                  );
-                }),
-          ],
-        ),
+                    if (!snapshot.hasData)
+                      return Utility.createDefaultInfoWidget(
+                          CircularProgressIndicator());
 
-        body: StreamBuilder<NavigationOptions>(
-          initialData: _currentNavigationOption,
-          stream: bloc.currentNavigationOption,
-          builder: (context, snapshot){
+                    return (snapshot.data.isEmpty)
+                        ? NoDataWidget(
+                            title: "There is no Artists",
+                          )
+                        : ArtistListWidget(
+                            artistList: snapshot.data,
+                            onArtistSelected: _openArtistPage);
+                  },
+                );
 
-            if (snapshot.hasData){
-              _currentNavigationOption = snapshot.data;
+              case NavigationOptions.ALBUMS:
+                return StreamBuilder<List<AlbumInfo>>(
+                  stream: bloc.albumStream,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError)
+                      return Utility.createDefaultInfoWidget(
+                          Text("${snapshot.error}"));
 
-              switch(_currentNavigationOption){
-                case NavigationOptions.ARTISTS:
-                  return StreamBuilder< List<ArtistInfo> >(
-                    stream: bloc.artistStream,
-                    builder: (context, snapshot){
-                      if (snapshot.hasError)
-                        return Utility.createDefaultInfoWidget(
-                            Text("${snapshot.error}")
-                        );
+                    if (!snapshot.hasData)
+                      return Utility.createDefaultInfoWidget(
+                          CircularProgressIndicator());
 
-                      if (!snapshot.hasData)
-                        return Utility.createDefaultInfoWidget(CircularProgressIndicator());
+                    return (snapshot.data.isEmpty)
+                        ? NoDataWidget(
+                            title: "There is no Albums",
+                          )
+                        : AlbumGridWidget(
+                            onAlbumClicked: _openAlbumPage,
+                            albumList: snapshot.data);
+                  },
+                );
 
-                      return (snapshot.data.isEmpty) ?
-                      NoDataWidget(title: "There is no Artists",) :
-                      ArtistListWidget(
-                          artistList: snapshot.data,
-                          onArtistSelected: _openArtistPage
-                      );
-                    },
-                  );
+              case NavigationOptions.GENRES:
+                return StreamBuilder<List<GenreInfo>>(
+                  stream: bloc.genreStream,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError)
+                      return Utility.createDefaultInfoWidget(
+                          Text("${snapshot.error}"));
 
-                case NavigationOptions.ALBUMS:
-                  return StreamBuilder< List<AlbumInfo> >(
-                    stream: bloc.albumStream,
-                    builder: (context, snapshot){
-                      if (snapshot.hasError)
-                        return Utility.createDefaultInfoWidget(
-                            Text("${snapshot.error}")
-                        );
+                    if (!snapshot.hasData)
+                      return Utility.createDefaultInfoWidget(
+                          CircularProgressIndicator());
 
-                      if (!snapshot.hasData)
-                        return Utility.createDefaultInfoWidget(CircularProgressIndicator());
+                    return (snapshot.data.isEmpty)
+                        ? NoDataWidget(
+                            title: "There is no Genres",
+                          )
+                        : GenreListWidget(
+                            onTap: _openGenrePage, genreList: snapshot.data);
+                  },
+                );
 
-                      return (snapshot.data.isEmpty) ?
-                      NoDataWidget(title: "There is no Albums",) :
-                      AlbumGridWidget(onAlbumClicked: _openAlbumPage,
-                          albumList: snapshot.data );
-                    },
-                  );
-
-                case NavigationOptions.GENRES:
-                  return StreamBuilder<List<GenreInfo>>(
-                    stream: bloc.genreStream,
-                    builder: (context, snapshot){
-                      if (snapshot.hasError)
-                        return Utility.createDefaultInfoWidget(Text("${snapshot.error}"));
-
-                      if (!snapshot.hasData)
-                        return Utility.createDefaultInfoWidget( CircularProgressIndicator() );
-
-                      return (snapshot.data.isEmpty) ?
-                      NoDataWidget(title: "There is no Genres",) :
-                      GenreListWidget(
-                          onTap: _openGenrePage,
-                          genreList: snapshot.data
-                      );
-
-                    },
-                  );
-
-                case NavigationOptions.SONGS:
-                  return StreamBuilder<List< SongInfo >>(
+              case NavigationOptions.SONGS:
+                return StreamBuilder<List<SongInfo>>(
                     stream: bloc.songStream,
-                    builder: (context, snapshot){
+                    builder: (context, snapshot) {
                       if (snapshot.hasError)
-                        return Utility.createDefaultInfoWidget(Text("${snapshot.error}"));
+                        return Utility.createDefaultInfoWidget(
+                            Text("${snapshot.error}"));
 
                       if (!snapshot.hasData)
-                        return Utility.createDefaultInfoWidget( CircularProgressIndicator() );
+                        return Utility.createDefaultInfoWidget(
+                            CircularProgressIndicator());
 
-                      return (snapshot.data.isEmpty) ?
-                        NoDataWidget(title: "There is no Songs",) :
-                        SongListWidget(songList: snapshot.data);
-                    }
-                  );
+                      return (snapshot.data.isEmpty)
+                          ? NoDataWidget(
+                              title: "There is no Songs",
+                            )
+                          : SongListWidget(songList: snapshot.data);
+                    });
 
-                case NavigationOptions.PLAYLISTS:
-                  return StreamBuilder<List<PlaylistInfo>>(
-                    stream: bloc.playlistStream,
-                    builder: (context, snapshot){
-                      if (snapshot.hasError)
-                        return Utility.createDefaultInfoWidget(Text("${snapshot.error}"));
+              case NavigationOptions.PLAYLISTS:
+                return StreamBuilder<List<PlaylistInfo>>(
+                  stream: bloc.playlistStream,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError)
+                      return Utility.createDefaultInfoWidget(
+                          Text("${snapshot.error}"));
 
-                      if (!snapshot.hasData)
-                        return Utility.createDefaultInfoWidget(CircularProgressIndicator());
+                    if (!snapshot.hasData)
+                      return Utility.createDefaultInfoWidget(
+                          CircularProgressIndicator());
 
-                      return (snapshot.data.isEmpty) ?
-                        NoDataWidget(title: "There is no Playlist",) :
-                        PlaylistListWidget( appBloc: bloc, dataList: snapshot.data);
-                    },
-                  );
-              }
+                    return (snapshot.data.isEmpty)
+                        ? NoDataWidget(
+                            title: "There is no Playlist",
+                          )
+                        : PlaylistListWidget(
+                            appBloc: bloc, dataList: snapshot.data);
+                  },
+                );
             }
-          },
-        ),
+          }
+        },
+      ),
       bottomNavigationBar: _createBottomBarNavigator(),
-
       floatingActionButton: StreamBuilder<NavigationOptions>(
         initialData: _currentNavigationOption,
         stream: bloc.currentNavigationOption,
-        builder: (context, snapshot){
-
-          switch(snapshot.data){
+        builder: (context, snapshot) {
+          switch (snapshot.data) {
             case NavigationOptions.PLAYLISTS:
               return FloatingActionButton(
-                child: Icon(Icons.add),
-                onPressed: () => _showNewPlaylistDialog()
-              );
+                  child: Icon(Icons.add),
+                  onPressed: () => _showNewPlaylistDialog());
             default:
               return Container();
           }
         },
-
       ),
     );
   }
 
   /// this method returns bottom bar navigator widget layout
-  Widget _createBottomBarNavigator(){
+  Widget _createBottomBarNavigator() {
     return Theme(
       data: Theme.of(context).copyWith(
         canvasColor: Theme.of(context).primaryColor,
       ),
-
       child: StreamBuilder<NavigationOptions>(
           initialData: _currentNavigationOption,
           stream: bloc.currentNavigationOption,
           builder: (context, snapshot) {
-
-            if (snapshot.hasData)
-              _currentNavigationOption = snapshot.data;
+            if (snapshot.hasData) _currentNavigationOption = snapshot.data;
 
             return BottomNavigationBar(
               currentIndex: _currentNavigationOption.index,
-              onTap: (indexSelected){
-                bloc.changeNavigation( NavigationOptions.values[indexSelected] );
+              onTap: (indexSelected) {
+                bloc.changeNavigation(NavigationOptions.values[indexSelected]);
               },
-
               type: BottomNavigationBarType.fixed,
               items: <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.account_box,  color: Colors.white),
-                  title: Text("Artists", style: TextStyle(
-                      color: Colors.white), ),
-                ),
-
-                BottomNavigationBarItem(
-                    icon: Icon(Icons.album, color: Colors.white,),
-                    title: Text("Albums", style: TextStyle(
-                        color: Colors.white),
-                    )
-                ),
-
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.library_music, color: Colors.white),
-                  title: Text("Songs", style: TextStyle(
-                      color: Colors.white),
+                  icon: Icon(Icons.account_box, color: Colors.white),
+                  title: Text(
+                    "Artists",
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
-
                 BottomNavigationBarItem(
-                    icon: Icon(Icons.music_note,color: Colors.white),
-                    title: Text("Genre", style: TextStyle(
-                        color: Colors.white
-                    ))
+                    icon: Icon(
+                      Icons.album,
+                      color: Colors.white,
+                    ),
+                    title: Text(
+                      "Albums",
+                      style: TextStyle(color: Colors.white),
+                    )),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.library_music, color: Colors.white),
+                  title: Text(
+                    "Songs",
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
-
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.music_note, color: Colors.white),
+                    title:
+                        Text("Genre", style: TextStyle(color: Colors.white))),
                 BottomNavigationBarItem(
                     icon: Icon(Icons.list, color: Colors.white),
-                    title: Text("Playlists", style: TextStyle(
-                        color: Colors.white
-                    ))
-                ),
+                    title: Text("Playlists",
+                        style: TextStyle(color: Colors.white))),
               ],
             );
-          }
-      ),
+          }),
     );
   }
 
-  void _displaySortChooseDialog(final NavigationOptions option){
-    showDialog<void>(context: context,
-        builder: (BuildContext context){
+  void _displaySortChooseDialog(final NavigationOptions option) {
+    showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
           return ChooseDialog(
             title: "${_titles[option]} Sort Options",
-            initialSelectedIndex: bloc.getLastSortSelectionChooseBasedInNavigation(option),
+            initialSelectedIndex:
+                bloc.getLastSortSelectionChooseBasedInNavigation(option),
             options: ApplicationBloc.sortOptionsMap[option],
-
-            onChange: (index){
-              switch(option){
+            onChange: (index) {
+              switch (option) {
                 case NavigationOptions.ARTISTS:
                   bloc.changeArtistSortType(ArtistSortType.values[index]);
                   break;
@@ -321,26 +331,20 @@ class _MainScreenState extends State<MainScreen> {
                   break;
 
                 case NavigationOptions.PLAYLISTS:
-                  bloc.changePlaylistSortType( PlaylistSortType.values[index] );
+                  bloc.changePlaylistSortType(PlaylistSortType.values[index]);
                   break;
               }
               Navigator.pop(context);
             },
           );
-        }
-    );
+        });
   }
 
   void _showNewPlaylistDialog() async {
-    showDialog(
-        context: context,
-        builder: (context) => NewPlaylistDialog()
-    ).then((data) {
-
-      if (data != null)
-        bloc.loadPlaylistData();
+    showDialog(context: context, builder: (context) => NewPlaylistDialog())
+        .then((data) {
+      if (data != null) bloc.loadPlaylistData();
     });
-
   }
 
   @override
@@ -349,60 +353,61 @@ class _MainScreenState extends State<MainScreen> {
     super.dispose();
   }
 
-  void _openArtistPage(final ArtistInfo data){
-    Navigator.push(context,
+  void _openArtistPage(final ArtistInfo data) {
+    Navigator.push(
+      context,
       MaterialPageRoute(
         builder: (context) => DetailsContentScreen(
-          appBarBackgroundImage: data.artistArtPath,
-          appBarTitle: data.name,
-          bodyContent: FutureBuilder<List<AlbumInfo>>(
-              future: bloc.audioQuery.getAlbumsFromArtist(artist: data),
-              builder:(context, snapshot){
+              appBarBackgroundImage: data.artistArtPath,
+              appBarTitle: data.name,
+              bodyContent: FutureBuilder<List<AlbumInfo>>(
+                  future: bloc.audioQuery.getAlbumsFromArtist(artist: data),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData)
+                      return Utility.createDefaultInfoWidget(
+                          CircularProgressIndicator());
 
-                if (!snapshot.hasData)
-                  return Utility.createDefaultInfoWidget(CircularProgressIndicator());
-
-                return AlbumGridWidget(
-                    onAlbumClicked: _openAlbumPage,
-                    albumList: snapshot.data
-                );
-              }
-          ),
-        ),
+                    return AlbumGridWidget(
+                        onAlbumClicked: _openAlbumPage,
+                        albumList: snapshot.data);
+                  }),
+            ),
       ),
     );
   }
 
-  void _openAlbumPage(final AlbumInfo album){
-    Navigator.push(context,
+  void _openAlbumPage(final AlbumInfo album) {
+    Navigator.push(
+      context,
       MaterialPageRoute(
         builder: (context) => DetailsContentScreen(
-          appBarBackgroundImage: album.albumArt,
-          appBarTitle: album.title,
-          bodyContent: FutureBuilder<List<SongInfo>>(
-              future: bloc.audioQuery.getSongsFromAlbum(
-                  sortType: SongSortType.DISPLAY_NAME,
-                  album: album
-              ),
-              builder:(context, snapshot){
-                if (!snapshot.hasData)
-                  return Utility.createDefaultInfoWidget(CircularProgressIndicator());
+              appBarBackgroundImage: album.albumArt,
+              appBarTitle: album.title,
+              bodyContent: FutureBuilder<List<SongInfo>>(
+                  future: bloc.audioQuery.getSongsFromAlbum(
+                      sortType: SongSortType.DISPLAY_NAME, album: album),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData)
+                      return Utility.createDefaultInfoWidget(
+                          CircularProgressIndicator());
 
-                return SongListWidget( songList: snapshot.data );
-              }
-          ),
-        ),
+                    return SongListWidget(songList: snapshot.data);
+                  }),
+            ),
       ),
     );
   }
 
-  void _openGenrePage(final GenreInfo genre){
-    Navigator.push(context, MaterialPageRoute(
-        builder: (context) => GenreNavigationScreen(currentGenre: genre,))
-    );
+  void _openGenrePage(final GenreInfo genre) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => GenreNavigationScreen(
+                  currentGenre: genre,
+                )));
   }
 
-  bool searchBarIsOpen(){
+  bool searchBarIsOpen() {
     return _currentSearchBarState == SearchBarState.EXPANDED;
   }
 }

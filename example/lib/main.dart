@@ -3,7 +3,7 @@ import './src/bloc/ApplicationBloc.dart';
 import './src/bloc/BlocProvider.dart';
 import './src/ui/screens/MainScreen.dart';
 
-void main() => runApp( MyApp() );
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   final ApplicationBloc bloc = ApplicationBloc();

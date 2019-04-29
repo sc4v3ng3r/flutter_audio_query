@@ -1,8 +1,6 @@
-
 part of flutter_audio_query;
 
 enum AlbumSortType {
-
   /// Returns the albums using the platform specific ordering mechanism.
   /// In android platform will return albms in alphabetical order
   /// using album [title] property as sort param.
@@ -29,5 +27,4 @@ enum AlbumSortType {
   /// Returns the albums sorted using [lastYear] property as sort param.
   /// In this case the albums with more oldest year value will come first.
   OLDEST_YEAR,
-
 }

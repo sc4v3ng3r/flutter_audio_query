@@ -10,7 +10,6 @@ import '../widgets/ListItemWidget.dart';
 import '../widgets/NoDataWidget.dart';
 
 class PlaylistDetailScreen extends StatefulWidget {
-
   @override
   _PlaylistDetailScreenState createState() => _PlaylistDetailScreenState();
 }
@@ -26,8 +25,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
       appBarTitle: bloc._playlist.name,
       bodyContent: StreamBuilder<List<SongInfo>>(
         stream: bloc.playlistSongs,
-        builder: (context, snapshot){
-
+        builder: (context, snapshot) {
           if (snapshot.hasError)
             return Utility.createDefaultInfoWidget(Text("${snapshot.error}"));
 
@@ -39,37 +37,36 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
 
           return ListView.builder(
               itemCount: snapshot.data.length,
-              itemBuilder: (context, index){
+              itemBuilder: (context, index) {
                 return ListItemWidget(
                   title: Text("${snapshot.data[index].title}"),
                   imagePath: snapshot.data[index].albumArtwork,
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text("Artist: ${snapshot.data[index].artist}",
+                      Text(
+                        "Artist: ${snapshot.data[index].artist}",
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
-
-                      Padding(padding: EdgeInsets.only(top: 1.0),),
-
-                      Text("Album: ${snapshot.data[index].album}",
+                      Padding(
+                        padding: EdgeInsets.only(top: 1.0),
+                      ),
+                      Text(
+                        "Album: ${snapshot.data[index].album}",
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
                     ],
                   ),
-
                   trailing: IconButton(
                     icon: Icon(Icons.delete),
-                    onPressed: (){
+                    onPressed: () {
                       bloc.removeSong(snapshot.data[index]);
                     },
                   ),
-
                 );
-              }
-          );
+              });
         },
       ),
     );
@@ -78,28 +75,30 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
 
 class PlaylistDetailScreenBloc extends BlocBase {
   final FlutterAudioQuery audioQuery = FlutterAudioQuery();
-  final StreamController<List<SongInfo>> _playlistSongsSubject = StreamController.broadcast();
+  final StreamController<List<SongInfo>> _playlistSongsSubject =
+      StreamController.broadcast();
 
   Stream<List<SongInfo>> get playlistSongs => _playlistSongsSubject.stream;
   PlaylistInfo _playlist;
 
-  PlaylistDetailScreenBloc(PlaylistInfo playlist) : _playlist = playlist
-  {
-
-    audioQuery.getSongsFromPlaylist(playlist: playlist)
-        .then( _addToSink )
-        .catchError( (error) => _playlistSongsSubject.sink.addError(error) );
+  PlaylistDetailScreenBloc(PlaylistInfo playlist) : _playlist = playlist {
+    audioQuery
+        .getSongsFromPlaylist(playlist: playlist)
+        .then(_addToSink)
+        .catchError((error) => _playlistSongsSubject.sink.addError(error));
   }
 
-  void _addToSink( List<SongInfo> songs){ _playlistSongsSubject.sink.add(songs);}
+  void _addToSink(List<SongInfo> songs) {
+    _playlistSongsSubject.sink.add(songs);
+  }
 
   void removeSong(SongInfo song) {
-    _playlist.removeSong(song: song).then(
-        (_){
-          audioQuery.getSongsFromPlaylist(playlist: _playlist)
-              .then( _addToSink )
-              .catchError((error) => _playlistSongsSubject.sink.addError(error) );
-        });
+    _playlist.removeSong(song: song).then((_) {
+      audioQuery
+          .getSongsFromPlaylist(playlist: _playlist)
+          .then(_addToSink)
+          .catchError((error) => _playlistSongsSubject.sink.addError(error));
+    });
   }
 
   @override

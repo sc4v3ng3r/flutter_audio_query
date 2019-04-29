@@ -20,23 +20,20 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //THE SOFTWARE.
 
-
 library flutter_audio_query;
 
-import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 
-part 'src/flutter_audio_query.dart';
-part 'src/data_model.dart';
-part 'src/artist_info.dart';
 part 'src/album_info.dart';
-part 'src/song_info.dart';
-part 'src/genre_info.dart';
-part 'src/playlist_info.dart';
-part 'src/artist_sort_type.dart';
 part 'src/album_sort_type.dart';
-part 'src/song_sort_type.dart';
+part 'src/artist_info.dart';
+part 'src/artist_sort_type.dart';
+part 'src/data_model.dart';
+part 'src/flutter_audio_query.dart';
+part 'src/genre_info.dart';
 part 'src/genre_sort_type.dart';
+part 'src/playlist_info.dart';
 part 'src/playlist_sort_type.dart';
-
-
+part 'src/song_info.dart';
+part 'src/song_sort_type.dart';

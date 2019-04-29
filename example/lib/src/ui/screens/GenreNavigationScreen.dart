@@ -23,17 +23,16 @@ class _GenreNavigationScreenState extends State<GenreNavigationScreen> {
       appBar: AppBar(
         title: Text("${widget.currentGenre.name}"),
       ),
-
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
             _createGenreArtistsWidget(
-                 /// getting all artists from genre
-                audioQuery.getArtistsFromGenre( genre: widget.currentGenre) ),
+                /// getting all artists from genre
+                audioQuery.getArtistsFromGenre(genre: widget.currentGenre)),
 
             ///getting all albums from current genre and show them
-            _createGenreAlbumsWidget( audioQuery.getAlbumsFromGenre(
-                genre: widget.currentGenre)),
+            _createGenreAlbumsWidget(
+                audioQuery.getAlbumsFromGenre(genre: widget.currentGenre)),
           ],
         ),
       ),
@@ -56,21 +55,22 @@ class _GenreNavigationScreenState extends State<GenreNavigationScreen> {
           case ConnectionState.active:
           case ConnectionState.done:
             if (snapshot.data.isEmpty)
-              return Utility.createDefaultInfoWidget(Text("There is no Artists data to show"));
+              return Utility.createDefaultInfoWidget(
+                  Text("There is no Artists data to show"));
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Container(
                   margin: EdgeInsets.only(top: 16.0, left: 16.0),
-                  child: Text("${widget.currentGenre.name} $artistLabel",
+                  child: Text(
+                    "${widget.currentGenre.name} $artistLabel",
                     style: TextStyle(
                       fontSize: 26.0,
                       color: Colors.black,
                     ),
                   ),
                 ),
-
                 Container(
                   height: 220,
                   alignment: Alignment.center,
@@ -79,14 +79,14 @@ class _GenreNavigationScreenState extends State<GenreNavigationScreen> {
                       padding: EdgeInsets.symmetric(vertical: 8.0),
                       shrinkWrap: true,
                       itemCount: snapshot.data.length,
-                      
                       itemBuilder: (context, index) {
                         ArtistInfo artist = snapshot.data[index];
                         return CardItemWidget(
                           width: 150.0,
                           height: 250.0,
                           title: "Artist: ${artist.name}",
-                          subtitle: "Number of Albums: ${artist.numberOfAlbums}",
+                          subtitle:
+                              "Number of Albums: ${artist.numberOfAlbums}",
                           infoText: "Number of Songs: ${artist.numberOfTracks}",
                           backgroundImage: artist.artistArtPath,
                         );
@@ -122,21 +122,22 @@ class _GenreNavigationScreenState extends State<GenreNavigationScreen> {
           case ConnectionState.active:
           case ConnectionState.done:
             if (snapshot.data.isEmpty)
-              return Utility.createDefaultInfoWidget(Text("There is no Albums data to show"));
+              return Utility.createDefaultInfoWidget(
+                  Text("There is no Albums data to show"));
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Container(
                   margin: EdgeInsets.only(top: 16.0, left: 16.0),
-                  child: Text("${widget.currentGenre.name} $albumsLabel",
+                  child: Text(
+                    "${widget.currentGenre.name} $albumsLabel",
                     style: TextStyle(
                       fontSize: 26.0,
                       color: Colors.black,
                     ),
                   ),
                 ),
-
                 Container(
                   height: 220,
                   alignment: Alignment.center,
@@ -145,7 +146,6 @@ class _GenreNavigationScreenState extends State<GenreNavigationScreen> {
                       padding: EdgeInsets.symmetric(vertical: 8.0),
                       shrinkWrap: true,
                       itemCount: snapshot.data.length,
-
                       itemBuilder: (context, index) {
                         AlbumInfo album = snapshot.data[index];
                         return CardItemWidget(

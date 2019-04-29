@@ -14,8 +14,8 @@ class ListItemWidget extends StatelessWidget {
   final Widget trailing;
   final OnTap onTap;
 
-  ListItemWidget( {this.title, this.subtitle,
-    this.imagePath, this.trailing, this.onTap} );
+  ListItemWidget(
+      {this.title, this.subtitle, this.imagePath, this.trailing, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -30,14 +30,13 @@ class ListItemWidget extends StatelessWidget {
           onTap: onTap,
           title: title ?? Container(),
           subtitle: subtitle ?? Container(),
-          trailing: trailing, //Text("${Utility.parseToMinutesSeconds(int.parse(song.duration))}",
+          trailing:
+              trailing, //Text("${Utility.parseToMinutesSeconds(int.parse(song.duration))}",
         ),
-
         Container(
           height: 1.0,
           color: Colors.grey[300],
         ),
-
       ],
     );
   }

@@ -1,8 +1,6 @@
-
 part of flutter_audio_query;
 
 class DataModel {
-
   /// unique database row register identify.
   static const String ID = "_id";
 

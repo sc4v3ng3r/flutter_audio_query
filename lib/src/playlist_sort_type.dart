@@ -2,7 +2,6 @@ part of flutter_audio_query;
 
 /// Options for playlist query sorting.
 enum PlaylistSortType {
-
   /// The Default sort order for playlist. DEFAULT value the playlist
   /// query will return playlists sorted by alphabetically
   DEFAULT,

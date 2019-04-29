@@ -10,7 +10,6 @@ class NewPlaylistDialog extends StatefulWidget {
 }
 
 class _NewPlaylistDialogState extends State<NewPlaylistDialog> {
-
   TextEditingController _textEditingController;
   final PlaylistDialogBloc bloc = PlaylistDialogBloc();
 
@@ -27,32 +26,28 @@ class _NewPlaylistDialogState extends State<NewPlaylistDialog> {
       title: Text("New Playlist"),
       actions: <Widget>[
         StreamBuilder<PlaylistInfo>(
-          stream: bloc.creationOutput,
-          builder: (context, snapshot){
-            return FlatButton(
-              child: Text("Create"),
-              onPressed: () async {
-                bloc.createPlaylist( _textEditingController.text, context );
-              },
-            );
-
-          }
-        ),
+            stream: bloc.creationOutput,
+            builder: (context, snapshot) {
+              return FlatButton(
+                child: Text("Create"),
+                onPressed: () async {
+                  bloc.createPlaylist(_textEditingController.text, context);
+                },
+              );
+            }),
       ],
-
       content: StreamBuilder<String>(
         stream: bloc.errorOutput,
-        builder: (context, snapshot){
+        builder: (context, snapshot) {
           return TextFormField(
             decoration: InputDecoration(
-                hintText: 'Playlist name',
-                errorText: snapshot.error,
+              hintText: 'Playlist name',
+              errorText: snapshot.error,
             ),
             autofocus: true,
             controller: _textEditingController,
             maxLines: 1,
             minLines: 1,
-
           );
         },
       ),
@@ -74,17 +69,14 @@ class PlaylistDialogBloc extends BlocBase {
   Stream<PlaylistInfo> get creationOutput => _creationController.stream;
 
   createPlaylist(final String playlistName, BuildContext context) async {
-
     if (playlistName.isEmpty)
       _errorController.sink.addError("Playlist name is empty!");
-
     else {
-      FlutterAudioQuery.createPlaylist(playlistName: playlistName)
-          .then((data) {
-            print('Playlist created ${data.name}');
-            Navigator.pop(context, data);
+      FlutterAudioQuery.createPlaylist(playlistName: playlistName).then((data) {
+        print('Playlist created ${data.name}');
+        Navigator.pop(context, data);
       }).catchError((error) {
-        print('creatoin error ${error.toString()}' );
+        print('creatoin error ${error.toString()}');
         _errorController.sink.addError(error?.toString());
       });
     }

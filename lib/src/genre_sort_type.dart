@@ -5,5 +5,4 @@ enum GenreSortType {
   /// In android platform will return genre in alphabetical order
   /// using genre [name] property as sort param
   DEFAULT,
-
 }

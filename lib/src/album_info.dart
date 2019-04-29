@@ -1,6 +1,5 @@
 part of flutter_audio_query;
 
-
 /// AlbumInfo class holds all information about a specific artist album.
 ///
 class AlbumInfo extends DataModel {
@@ -27,5 +26,4 @@ class AlbumInfo extends DataModel {
 
   /// Returns the number of songs that this album contains.
   String get numberOfSongs => _data['numsongs'];
-
 }

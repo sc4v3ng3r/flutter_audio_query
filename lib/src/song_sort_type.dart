@@ -1,8 +1,6 @@
-
 part of flutter_audio_query;
 
 enum SongSortType {
-
   /// Returns the song using the platform specific ordering mechanism.
   /// In android platform will return song in alphabetical order
   /// using song [title] property as sort param
@@ -57,6 +55,4 @@ enum SongSortType {
   /// Return the songs sorted using [display_name] property as sort param.
   /// Is a good option to be used when desired have the original album songs order.
   DISPLAY_NAME
-
-
 }
