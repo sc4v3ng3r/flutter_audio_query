@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_audio_query_example/src/bloc/ApplicationBloc.dart';
-import 'package:flutter_audio_query_example/src/bloc/BlocProvider.dart';
-import 'package:flutter_audio_query_example/src/ui/screens/MainScreen.dart';
+import './src/bloc/ApplicationBloc.dart';
+import './src/bloc/BlocProvider.dart';
+import './src/ui/screens/MainScreen.dart';
 
 void main() => runApp( MyApp() );
 

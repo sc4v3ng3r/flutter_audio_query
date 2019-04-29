@@ -1,6 +1,6 @@
 name: flutter_audio_query_example
 description: Demonstrates how to use the flutter_audio_query plugin.
-publish_to: 'none'
+author: Marcos Antonio Boaventura <scavenger.gnu@gmail.com>
 
 environment:
   sdk: ">=2.1.0-dev.68.0 <3.0.0"
@@ -9,19 +9,18 @@ dependencies:
   flutter:
     sdk: flutter
 
-  rxdart: ^0.21.0
+
   cupertino_icons: ^0.1.2
-
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-
   flutter_audio_query:
     path: ../
 
+dev_dependencies:
+  flutter_driver:
+    sdk: flutter
+  test: any
+
 
 flutter:
-
 
   uses-material-design: true
 

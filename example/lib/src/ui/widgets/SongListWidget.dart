@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
-import 'package:flutter_audio_query_example/src/Utility.dart';
-import 'package:flutter_audio_query_example/src/bloc/ApplicationBloc.dart';
-import 'package:flutter_audio_query_example/src/ui/widgets/ChooseDialog.dart';
-import 'package:flutter_audio_query_example/src/ui/widgets/ListItemWidget.dart';
-import 'package:flutter_audio_query_example/src/ui/widgets/NoDataWidget.dart';
+import '../../Utility.dart';
+import './ListItemWidget.dart';
+import './NoDataWidget.dart';
 
 class SongListWidget extends StatelessWidget {
   final List<SongInfo> songList;

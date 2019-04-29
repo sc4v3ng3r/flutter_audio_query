@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
-import 'package:flutter_audio_query_example/src/ui/widgets/CardItemWidget.dart';
+import './CardItemWidget.dart';
 
 /// widget that show a gridView with all albums of a specific artist
 class AlbumGridWidget extends StatelessWidget {

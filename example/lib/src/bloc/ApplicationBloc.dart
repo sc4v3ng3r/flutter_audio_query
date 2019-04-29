@@ -1,6 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter_audio_query/flutter_audio_query.dart';
-import 'package:flutter_audio_query_example/src/bloc/BlocBase.dart';
-import 'package:rxdart/rxdart.dart';
+import './BlocBase.dart';
+//import 'package:rxdart/rxdart.dart';
 
 
 enum NavigationOptions { ARTISTS, ALBUMS, SONGS, GENRES, PLAYLISTS }
@@ -40,31 +42,32 @@ class ApplicationBloc extends BlocBase {
 
 
   // Navigation Stream controler
-  final BehaviorSubject<NavigationOptions> _navigationController = BehaviorSubject.seeded(NavigationOptions.ARTISTS);
-  Observable<NavigationOptions> get currentNavigationOption => _navigationController.stream;
+  final StreamController<NavigationOptions> _navigationController = StreamController.broadcast(); // BehaviorSubject.seeded(NavigationOptions.ARTISTS);
+  Stream<NavigationOptions> get currentNavigationOption => _navigationController.stream;
 
   //DATA QUERY STREAMS
 
-  final BehaviorSubject< List<ArtistInfo> > _artistController = BehaviorSubject();
-  Observable< List<ArtistInfo> > get artistStream => _artistController.stream;
+  final StreamController< List<ArtistInfo> > _artistController = StreamController.broadcast();
+  Stream< List<ArtistInfo> > get artistStream => _artistController.stream;
 
-  final BehaviorSubject<List<AlbumInfo>> _albumController = BehaviorSubject();
-  Observable<List<AlbumInfo>> get albumStream => _albumController.stream;
+  final StreamController<List<AlbumInfo>> _albumController = StreamController.broadcast();
+  Stream<List<AlbumInfo>> get albumStream => _albumController.stream;
 
-  final BehaviorSubject<List<GenreInfo>> _genreController = BehaviorSubject();
-  Observable< List<GenreInfo> > get genreStream => _genreController.stream;
+  final StreamController<List<GenreInfo>> _genreController = StreamController.broadcast();
+  Stream< List<GenreInfo> > get genreStream => _genreController.stream;
 
-  final BehaviorSubject<List<SongInfo>> _songController = BehaviorSubject();
-  Observable<List<SongInfo>> get songStream => _songController.stream;
+  final StreamController<List<SongInfo>> _songController = StreamController.broadcast();
+  Stream<List<SongInfo>> get songStream => _songController.stream;
 
-  final BehaviorSubject<List<PlaylistInfo>> _playlistDataController = BehaviorSubject();
-  Observable<List<PlaylistInfo>> get playlistStream => _playlistDataController.stream;
+  final StreamController<List<PlaylistInfo>> _playlistDataController = StreamController.broadcast();
+  Stream<List<PlaylistInfo>> get playlistStream => _playlistDataController.stream;
   
-  final BehaviorSubject<SearchBarState> _searchBarController = BehaviorSubject.seeded(SearchBarState.COLLAPSED);
-  Observable<SearchBarState> get searchBarState => _searchBarController.stream;
+  final StreamController<SearchBarState> _searchBarController = StreamController.broadcast();
+  Stream<SearchBarState> get searchBarState => _searchBarController.stream;
 
   ApplicationBloc(){
-    _navigationController.listen( onDataNavigationChangeCallback );
+    _navigationController.stream.listen( onDataNavigationChangeCallback );
+    _navigationController.sink.add(NavigationOptions.ARTISTS);
   }
   
   void loadPlaylistData(){

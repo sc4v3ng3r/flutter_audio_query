@@ -1,5 +1,6 @@
 
 part of flutter_audio_query;
+
 class PlaylistInfo extends DataModel {
 
   /// Ids of songs that appears on this playlist.

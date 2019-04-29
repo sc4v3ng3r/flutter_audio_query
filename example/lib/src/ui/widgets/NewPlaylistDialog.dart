@@ -1,7 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
-import 'package:flutter_audio_query_example/src/bloc/BlocBase.dart';
-import 'package:rxdart/rxdart.dart';
+import '../../bloc/BlocBase.dart';
 
 class NewPlaylistDialog extends StatefulWidget {
   @override
@@ -66,11 +67,11 @@ class _NewPlaylistDialogState extends State<NewPlaylistDialog> {
 }
 
 class PlaylistDialogBloc extends BlocBase {
-  final PublishSubject<String> _errorController = new PublishSubject();
-  Observable<String> get errorOutput => _errorController.stream;
+  final StreamController<String> _errorController = new StreamController();
+  Stream<String> get errorOutput => _errorController.stream;
 
-  final PublishSubject<PlaylistInfo> _creationController = new PublishSubject();
-  Observable<PlaylistInfo> get creationOutput => _creationController.stream;
+  final StreamController<PlaylistInfo> _creationController = StreamController();
+  Stream<PlaylistInfo> get creationOutput => _creationController.stream;
 
   createPlaylist(final String playlistName, BuildContext context) async {
 

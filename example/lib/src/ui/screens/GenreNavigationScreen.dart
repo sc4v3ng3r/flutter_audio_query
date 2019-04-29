@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
-import 'package:flutter_audio_query_example/src/Utility.dart';
-import 'package:flutter_audio_query_example/src/ui/widgets/CardItemWidget.dart';
+import '../../Utility.dart';
+import '../widgets/CardItemWidget.dart';
 
 class GenreNavigationScreen extends StatefulWidget {
   final GenreInfo currentGenre;

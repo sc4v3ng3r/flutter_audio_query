@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'BlocBase.dart';
+import './BlocBase.dart';
 
 
 class BlocProvider<T extends BlocBase > extends StatefulWidget {

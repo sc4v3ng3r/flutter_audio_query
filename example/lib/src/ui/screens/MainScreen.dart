@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
-import 'package:flutter_audio_query_example/src/Utility.dart';
-import 'package:flutter_audio_query_example/src/bloc/ApplicationBloc.dart';
-import 'package:flutter_audio_query_example/src/bloc/BlocProvider.dart';
-import 'package:flutter_audio_query_example/src/ui/screens/DetailsContentScreen.dart';
-import 'package:flutter_audio_query_example/src/ui/screens/GenreNavigationScreen.dart';
-import 'package:flutter_audio_query_example/src/ui/widgets/AlbumGridWidget.dart';
-import 'package:flutter_audio_query_example/src/ui/widgets/ArtistListWidget.dart';
-import 'package:flutter_audio_query_example/src/ui/widgets/GenreListWidget.dart';
-import 'package:flutter_audio_query_example/src/ui/widgets/NewPlaylistDialog.dart';
-import 'package:flutter_audio_query_example/src/ui/widgets/NoDataWidget.dart';
-import 'package:flutter_audio_query_example/src/ui/widgets/PlaylistListWidget.dart';
-import 'package:flutter_audio_query_example/src/ui/widgets/SongListWidget.dart';
-import 'package:flutter_audio_query_example/src/ui/widgets/ChooseDialog.dart';
+import '../../Utility.dart';
+import '../../bloc/ApplicationBloc.dart';
+import '../../bloc/BlocProvider.dart';
+import './DetailsContentScreen.dart';
+import './GenreNavigationScreen.dart';
+import '../widgets/AlbumGridWidget.dart';
+import '../widgets/ArtistListWidget.dart';
+import '../widgets/GenreListWidget.dart';
+import '../widgets/NewPlaylistDialog.dart';
+import '../widgets/NoDataWidget.dart';
+import '../widgets/PlaylistListWidget.dart';
+import '../widgets/SongListWidget.dart';
+import '../widgets/ChooseDialog.dart';
 
 class MainScreen extends StatefulWidget {
   @override

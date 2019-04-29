@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
-import 'package:flutter_audio_query_example/src/Utility.dart';
-import 'package:flutter_audio_query_example/src/bloc/ApplicationBloc.dart';
-import 'package:flutter_audio_query_example/src/ui/widgets/CardItemWidget.dart';
+import './CardItemWidget.dart';
 
 
 class ArtistListWidget extends StatelessWidget {

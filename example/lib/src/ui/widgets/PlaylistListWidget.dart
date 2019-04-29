@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
-import 'package:flutter_audio_query_example/src/bloc/ApplicationBloc.dart';
-import 'package:flutter_audio_query_example/src/bloc/BlocProvider.dart';
-import 'package:flutter_audio_query_example/src/ui/screens/PlaylistDetailScreen.dart';
-import 'package:flutter_audio_query_example/src/ui/widgets/ListItemWidget.dart';
+import '../../bloc/ApplicationBloc.dart';
+import '../../bloc/BlocProvider.dart';
+import '../screens/PlaylistDetailScreen.dart';
+import './ListItemWidget.dart';
 
 class PlaylistListWidget extends StatelessWidget {
   

@@ -1,13 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
-import 'package:flutter_audio_query_example/src/Utility.dart';
-import 'package:flutter_audio_query_example/src/bloc/BlocBase.dart';
-import 'package:flutter_audio_query_example/src/bloc/BlocProvider.dart';
-import 'package:flutter_audio_query_example/src/ui/screens/DetailsContentScreen.dart';
-import 'package:flutter_audio_query_example/src/ui/widgets/ListItemWidget.dart';
-import 'package:flutter_audio_query_example/src/ui/widgets/NoDataWidget.dart';
-import 'package:rxdart/rxdart.dart';
-
+import '../../Utility.dart';
+import '../../bloc/BlocBase.dart';
+import '../../bloc/BlocProvider.dart';
+import './DetailsContentScreen.dart';
+import '../widgets/ListItemWidget.dart';
+import '../widgets/NoDataWidget.dart';
 
 class PlaylistDetailScreen extends StatefulWidget {
 
@@ -25,7 +25,7 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
     return DetailsContentScreen(
       appBarTitle: bloc._playlist.name,
       bodyContent: StreamBuilder<List<SongInfo>>(
-        stream: bloc._playlistSongsSubject,
+        stream: bloc.playlistSongs,
         builder: (context, snapshot){
 
           if (snapshot.hasError)
@@ -78,9 +78,9 @@ class _PlaylistDetailScreenState extends State<PlaylistDetailScreen> {
 
 class PlaylistDetailScreenBloc extends BlocBase {
   final FlutterAudioQuery audioQuery = FlutterAudioQuery();
-  final BehaviorSubject<List<SongInfo>> _playlistSongsSubject = BehaviorSubject();
+  final StreamController<List<SongInfo>> _playlistSongsSubject = StreamController.broadcast();
 
-  Observable<List<SongInfo>> get playlistSongs => _playlistSongsSubject.stream;
+  Stream<List<SongInfo>> get playlistSongs => _playlistSongsSubject.stream;
   PlaylistInfo _playlist;
 
   PlaylistDetailScreenBloc(PlaylistInfo playlist) : _playlist = playlist
@@ -107,29 +107,4 @@ class PlaylistDetailScreenBloc extends BlocBase {
     print("playlistdetails bloc dispose");
     _playlistSongsSubject?.close();
   }
-}
-
-class LittleBloc {
-  // Note that all stream already start with an initial value. In this case, false.
-
-  final BehaviorSubject<bool> _descriptionSubject = BehaviorSubject.seeded(false);
-  Observable<bool> get hasDescription => _descriptionSubject.stream;
-
-  final BehaviorSubject<bool> _checklistSubject = BehaviorSubject.seeded(false);
-  Observable<bool> get hasChecklist => _checklistSubject.stream;
-
-  final BehaviorSubject<bool> _locationSubject = BehaviorSubject.seeded(false);
-  Observable<bool> get hasLocation => _locationSubject.stream;
-
-  void changeDescription(final bool status) => _descriptionSubject.sink.add(status);
-  void changeChecklist(final bool status) => _checklistSubject.sink.add(status);
-  void changeLocation(final bool status) => _locationSubject.sink.add(status);
-
-
-  dispose(){
-    _descriptionSubject?.close();
-    _locationSubject?.close();
-    _checklistSubject?.close();
-  }
-
 }
