@@ -204,6 +204,7 @@ public class AlbumLoader extends AbstractLoader {
                                     MediaStore.Audio.Artists.DEFAULT_SORT_ORDER);
                         }
                     }
+                    break;
 
                 case QUERY_TYPE_ARTIST_ALBUM:
                     List<Map<String, Object>> data = basicDataLoad(selection, selectionArgs, sortOrder);
