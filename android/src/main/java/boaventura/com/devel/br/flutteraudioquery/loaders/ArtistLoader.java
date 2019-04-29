@@ -34,7 +34,6 @@ import io.flutter.plugin.common.MethodChannel;
 
 public class ArtistLoader extends AbstractLoader {
 
-    private static final String TAG = "MDBG";
     private static final int QUERY_TYPE_GENRE_ARTISTS = 0x01;
     //private static final int QUERY_TYPE_SEARCH_BY_NAME = 0x02;
 
@@ -108,7 +107,6 @@ public class ArtistLoader extends AbstractLoader {
      * @param result MethodChannel results
      */
     public void getArtists(final MethodChannel.Result result, ArtistSortType sortType) {
-        Log.i(TAG, "Artist sort type is: " + sortType );
 
         createLoadTask(result, null, null,
                 parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
@@ -146,11 +144,11 @@ public class ArtistLoader extends AbstractLoader {
                 selectionArgs, sortOrder, type);
     }
 
-    protected ArtistLoadTask createLoadTask(
+    /*protected ArtistLoadTask createLoadTask(
             final EventChannel eventChannel, final String selection,
             final String[] selectionArgs, final String sortOrder, final int type){
         return null;
-    }
+    }*/
 
     static class ArtistLoadTask extends AbstractLoadTask<List<Map<String, Object>>> {
         private ContentResolver m_resolver;
@@ -230,7 +228,6 @@ public class ArtistLoader extends AbstractLoader {
                         list.add(map);
                     }
                     catch (Exception ex) {
-                        Log.e(TAG_ERROR, "ArtistLoader::loadData method exception");
                         Log.e(TAG_ERROR, ex.getMessage());
                     }
                 }
@@ -267,7 +264,6 @@ public class ArtistLoader extends AbstractLoader {
                         list.add(map);
                     }
                     catch (Exception ex) {
-                        Log.e(TAG_ERROR, "ArtistLoader::basicDataLoad method exception");
                         Log.e(TAG_ERROR, ex.getMessage());
                     }
 
@@ -312,7 +308,6 @@ public class ArtistLoader extends AbstractLoader {
                                 break;
                         }
                         catch (Exception ex) {
-                            Log.e(TAG_ERROR, "ArtistLoader::getArtistPath method exception");
                             Log.e(TAG_ERROR, ex.getMessage());
                         }
                     }
@@ -348,7 +343,6 @@ public class ArtistLoader extends AbstractLoader {
                         artistsIds.add(artistName);
                     }
                     catch (Exception ex) {
-                        Log.e(TAG_ERROR, "ArtistLoader::loadArtistIdsGenre method exception");
                         Log.e(TAG_ERROR, ex.getMessage());
                     }
                 }

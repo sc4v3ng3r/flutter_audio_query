@@ -5,7 +5,9 @@ class PlaylistInfo extends DataModel {
   /// Ids of songs that appears on this playlist.
   List<String> _memberIds;
 
-  PlaylistInfo._(Map<dynamic, dynamic> map) : super._(map);
+  PlaylistInfo._(Map<dynamic, dynamic> map) : super._(map){
+   _memberIds = List<String>.from(_data["memberIds"]);
+  }
 
   /// Returns playlist name
   String get name => _data["name"];
@@ -15,7 +17,7 @@ class PlaylistInfo extends DataModel {
   /// that appears in this playlist. You can retrieve SongInfo objects that
   /// appears in this playlist with getSongsFromPlayList method.
   /// The list is empty if there is no songs in this playlist.
-  List<String> get memberIds => _memberIds ??= List<String>.from(_data["memberIds"]);
+  List<String> get memberIds => _memberIds;
 
   /// Returns a String with a number in milliseconds (ms) that represents the
   /// date which this playlist was created.
@@ -37,7 +39,6 @@ class PlaylistInfo extends DataModel {
 
     PlaylistInfo data = PlaylistInfo._(updatedData[0]);
     this._updatePlaylistData(data);
-    //return PlaylistInfo._(updatedPlaylist);
   }
 
   Future<void> removeSong({@required SongInfo song}) async {
@@ -59,26 +60,26 @@ class PlaylistInfo extends DataModel {
   // this method keep this playlist updated parsing updated data that comes
   // from native side.
   void _updatePlaylistData(PlaylistInfo playlist){
-    _memberIds = null;
+    _memberIds = List<String>.from(playlist._data["memberIds"]);
     this._data = playlist._data;
   }
 
   ///
-  void swapSongs({@required int from, @required int to}) async {
+  void moveSong({@required int from, @required int to}) async {
     if ((from >= 0 && from < (this._memberIds.length) ) && 
-        (to >= 0 && to < (this._memberIds.length)) ){
+        (to >= 0 && to < (this._memberIds.length) ) ){
       
-      var updatedPlaylist = await FlutterAudioQuery.channel.invokeMethod("swapSongsPosition", 
+      List<dynamic> updatedPlaylist = await FlutterAudioQuery.channel.invokeMethod("moveSong",
           {
-            FlutterAudioQuery.SORT_TYPE : FlutterAudioQuery.SOURCE_PLAYLIST,
+            FlutterAudioQuery.SOURCE_KEY : FlutterAudioQuery.SOURCE_PLAYLIST,
             FlutterAudioQuery.PLAYLIST_METHOD_TYPE : PlayListMethodType.WRITE.index,
             "playlist_id" : this.id,
-            "song_from_id" : this._memberIds[from],
-            "song_to_id" : this._memberIds[to],
+            "from" : from,
+            "to" : to,
           }
       );
 
-      PlaylistInfo data = PlaylistInfo._(updatedPlaylist);
+      PlaylistInfo data = PlaylistInfo._(updatedPlaylist[0]);
       this._updatePlaylistData(data);
     }
   }

@@ -220,9 +220,7 @@ class _MainScreenState extends State<MainScreen> {
             case NavigationOptions.PLAYLISTS:
               return FloatingActionButton(
                 child: Icon(Icons.add),
-                onPressed: (){
-                  _showNewPlaylistDialog();
-                },
+                onPressed: () => _showNewPlaylistDialog()
               );
             default:
               return Container();

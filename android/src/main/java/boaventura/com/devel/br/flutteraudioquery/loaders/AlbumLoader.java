@@ -376,7 +376,11 @@ public class AlbumLoader extends AbstractLoader {
                                         String.valueOf(songsNumber));
                                */
                                 dataList.add(albumData);
-                            } catch (Exception ex) {
+                            }
+
+                            catch (Exception ex) {
+                                //TODO should I exit with results.error() here??
+                                // think about it...
                                 Log.e("ERROR", "AlbumLoader::loadAlbumsInfoWithMediaSupport", ex);
                             }
                         }

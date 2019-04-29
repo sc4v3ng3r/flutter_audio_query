@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import boaventura.com.devel.br.flutteraudioquery.loaders.tasks.AbstractLoadTask;
+import boaventura.com.devel.br.flutteraudioquery.sortingtypes.PlaylistSortType;
 import io.flutter.plugin.common.MethodChannel;
 
 
@@ -24,11 +25,12 @@ public class PlaylistLoader extends AbstractLoader {
             MediaStore.Audio.Playlists._ID,
             MediaStore.Audio.Playlists.NAME,
             MediaStore.Audio.Playlists.DATA,
-            MediaStore.Audio.Playlists.DATE_ADDED,// creation data,
+            MediaStore.Audio.Playlists.DATE_ADDED,
     };
 
     private static final String[] PLAYLIST_MEMBERS_PROJECTION = {
             MediaStore.Audio.Playlists.Members.AUDIO_ID,
+            MediaStore.Audio.Playlists.Members.PLAY_ORDER
     };
 
     public PlaylistLoader(Context context) {
@@ -36,35 +38,62 @@ public class PlaylistLoader extends AbstractLoader {
     }
 
 
-    public void getPlaylists(final MethodChannel.Result result){
+    public void getPlaylists(final MethodChannel.Result result, final PlaylistSortType sortType){
         createLoadTask(result,null,null,
-                MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER,QUERY_TYPE_DEFAULT).execute();
+                parseSortType(sortType),QUERY_TYPE_DEFAULT).execute();
+    }
+
+    private String parseSortType(final PlaylistSortType sortType){
+        String sortOrder = null;
+
+        switch (sortType){
+            case DEFAULT:
+                sortOrder = MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER;
+                break;
+
+            case NEWEST_FIRST:
+                sortOrder = MediaStore.Audio.Playlists.DATE_ADDED + " DESC";
+                break;
+
+            case OLDEST_FIRST:
+                sortOrder = MediaStore.Audio.Playlists.DATE_ADDED + " ASC";
+                break;
+            default:
+                break;
+        }
+
+        return sortOrder;
     }
 
     private void getPlaylistById(final MethodChannel.Result result, final String playlistId){
 
         createLoadTask(result, MediaStore.Audio.Playlists._ID + " =?", new String[]{playlistId},
-                MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER, QUERY_TYPE_DEFAULT).execute();
+                null, QUERY_TYPE_DEFAULT).execute();
     }
 
-    public void searchPlaylists(final MethodChannel.Result results, final String namedQuery){
+    public void searchPlaylists(final MethodChannel.Result results, final String namedQuery,
+                                final PlaylistSortType sortType ){
         String[] args = new String[] { namedQuery + "%"};
         createLoadTask(results,MediaStore.Audio.Playlists.NAME + " like ?", args,
-                MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER, QUERY_TYPE_DEFAULT ).execute();
+                parseSortType(sortType), QUERY_TYPE_DEFAULT ).execute();
     }
 
     public void createPlaylist(final MethodChannel.Result results, final String name) {
         if (name != null && name.length() > 0) {
             ContentResolver resolver = getContentResolver();
-            final String selection =  PLAYLIST_PROJECTION[1] + " = '" + name + "'";
+            final String selection =  PLAYLIST_PROJECTION[1] + " =?";
 
-            if ( !verifyPlaylistExistence(new String[]{ PLAYLIST_PROJECTION[1] }, selection, null) ){
+            if ( !verifyPlaylistExistence(new String[]{ PLAYLIST_PROJECTION[1] }, selection,
+                    new String[]{name}) ){
                 ContentValues values = new ContentValues();
                 values.put(PLAYLIST_PROJECTION[1], name);
 
                 try {
                     Uri uri = resolver.insert(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, values);
-                    updateResolver();
+
+                    if (uri!=null)
+                        updateResolver();
+
                     Cursor cursor = resolver.query(
                             uri, PLAYLIST_PROJECTION, null, null,
                             MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER);
@@ -72,36 +101,36 @@ public class PlaylistLoader extends AbstractLoader {
                     if (cursor!= null){
                         Map<String, Object> data = new HashMap<>();
 
-                        while ( cursor.moveToNext() ){
+                        while(cursor.moveToNext()){
                             try{
                                 for (String key : PLAYLIST_PROJECTION) {
-                                    data.put(key, cursor.getString( cursor.getColumnIndex( key )));
+                                    String dataValue =  cursor.getString( cursor.getColumnIndex( key ));
+                                     data.put(key,dataValue);
                                 }
+                                data.put("memberIds", new ArrayList<String>());
                             }
+
                             catch(Exception ex){
-                                Log.i(TAG_ERROR, "PlaylistLoader::createPlaylist" + ex.getMessage());
-                                results.error("Something wrong in new playlist reading", ex.getMessage(), null);
+                                results.error("PLAYLIST_READING_FAIL", ex.getMessage(), null);
+                                cursor.close();
                             }
                         }
-
-                        results.success(data);
                         cursor.close();
+                        results.success(data);
                     }
                 }
 
                 catch (Exception ex){
-                    Log.i(TAG_ERROR, "PlaylistLoader::createPlaylist " + ex.getMessage() );
-                    results.error("Was not possible create a new playlist", ex.getMessage(), null);
+                    results.error("NAME_NOT_ACCEPTED", ex.getMessage(), null);
                 }
             }
 
             else
-                results.error("PLAYLIST_NAME_EXISTS", "Playlist named " + name + " already exists" ,null);
+                results.error("PLAYLIST_NAME_EXISTS", "Playlist " + name + " already exists" ,null);
         }
 
-        else {
-            results.error("PLAYLIST_NAME_NULL_OR_EMPTY","Playlist name can't be null or empty", null);
-        }
+        else
+            results.error("INVALID PLAYLIST NAME","Invalid name", null);
 
     }
 
@@ -115,11 +144,9 @@ public class PlaylistLoader extends AbstractLoader {
         try {
             int rows = resolver.delete(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
                     MediaStore.Audio.Playlists._ID + "=?", new String[]{playlistId});
-            Log.i("MDBG", "removed " + rows + " playlist");
             updateResolver();
             results.success("");
         }
-
         catch (Exception ex){
             results.error("PLAYLIST_DELETE_FAIL", "Was not possible remove playlist", null);
         }
@@ -145,7 +172,7 @@ public class PlaylistLoader extends AbstractLoader {
             values.put(MediaStore.Audio.Playlists.Members.AUDIO_ID, songId);
             values.put(MediaStore.Audio.Playlists.Members.PLAY_ORDER, base);
             resolver.insert(playlistUri, values);
-            updateResolver();
+            //updateResolver();
             getPlaylistById(results, playlistId);
         }
 
@@ -155,12 +182,12 @@ public class PlaylistLoader extends AbstractLoader {
     }
 
 
-    public void swapSongsPosition(final MethodChannel.Result results,
-                                  final String playlistId, final String fromSongId, final String toSongId){
+    public void moveSong(final MethodChannel.Result results,
+                         final String playlistId, final int from, final int to){
 
-        if ( (fromSongId!=null) && (toSongId != null) ){
+        if ( (from >= 0) && (to >= 0) ){
             boolean result = MediaStore.Audio.Playlists.Members.moveItem(getContentResolver(),
-                    Long.parseLong(playlistId), Integer.parseInt(fromSongId), Integer.parseInt(toSongId));
+                    Long.parseLong(playlistId), from, to);
 
             if (result){
                 updateResolver();
@@ -188,7 +215,6 @@ public class PlaylistLoader extends AbstractLoader {
             final String selection = PLAYLIST_PROJECTION[0] + " = '" + playlistId + "'";
 
             if ( !verifyPlaylistExistence( new String[]{PLAYLIST_PROJECTION[0]}, selection, null )){
-                Log.i("MDBG", "removeSongFromPlaylist::can't remove data on this playlist");
                 results.error("Unavailable playlist", "", null);
                 return;
             }
@@ -202,7 +228,6 @@ public class PlaylistLoader extends AbstractLoader {
                     new String[]{ songId } );
 
             if (deletedRows > 0 ){
-                Log.i("MDBG", "removeSongFromPlaylist::After call delete playlist");
                 updateResolver();
                 getPlaylistById(results, playlistId);
             }
@@ -223,7 +248,6 @@ public class PlaylistLoader extends AbstractLoader {
         if (cursor != null){
             cursor.moveToNext();
             base = cursor.getInt(0);
-            Log.i("MDBG", "Current playlist base " + base );
             base +=1;
             cursor.close();
         }
@@ -248,8 +272,7 @@ public class PlaylistLoader extends AbstractLoader {
     protected PlaylistLoadTask createLoadTask(
             MethodChannel.Result result, String selection, String[] selectionArgs, String sortOrder, int type) {
 
-        return new PlaylistLoadTask(result, getContentResolver(), selection, selectionArgs,
-                MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER);
+        return new PlaylistLoadTask(result, getContentResolver(), selection, selectionArgs, sortOrder);
     }
 
     static class PlaylistLoadTask extends AbstractLoadTask< List<Map<String, Object>> >{
@@ -285,7 +308,7 @@ public class PlaylistLoader extends AbstractLoader {
                         Map<String,Object> playlistData = new HashMap<>();
                         for (String key : PLAYLIST_PROJECTION){
                             String data = cursor.getString( cursor.getColumnIndex( key ));
-                            Log.d("MDBG"," READING " + key + " : " + data );
+                            //Log.d("MDBG"," READING " + key + " : " + data );
                             playlistData.put(key, data );
                         }
 
@@ -295,7 +318,6 @@ public class PlaylistLoader extends AbstractLoader {
                         dataList.add(playlistData);
                     }
                     catch (Exception ex){
-                        Log.e(TAG_ERROR, "PlaylistLoader::loadData method exception");
                         Log.e(TAG_ERROR, ex.getMessage());
                     }
                 }
@@ -327,8 +349,10 @@ public class PlaylistLoader extends AbstractLoader {
 
                  while ( membersCursor.moveToNext() ){
                      try{
+                         //for(String column : PLAYLIST_MEMBERS_PROJECTION)
+                         // only getting member id yet.
                          memberIds.add( membersCursor.getString(
-                                 membersCursor.getColumnIndex(PLAYLIST_MEMBERS_PROJECTION[0])) );
+                                 membersCursor.getColumnIndex(PLAYLIST_MEMBERS_PROJECTION[0] )) );
                      }
                      catch (Exception ex){
                          Log.e(TAG_ERROR, "PlaylistLoader::getPlaylistMembers method exception");

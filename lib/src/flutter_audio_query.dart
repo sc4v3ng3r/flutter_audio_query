@@ -16,7 +16,8 @@
 
 part of flutter_audio_query;
 
-
+/// Playlist methods can be read or write and this enum identify what kind
+/// of method it's.
 enum PlayListMethodType { READ, WRITE }
 
 class FlutterAudioQuery {
@@ -245,11 +246,12 @@ class FlutterAudioQuery {
 
   /// This method returns a list of PlaylistInfo with all playlists available
   /// in device storage.
-  Future< List<PlaylistInfo>> getPlaylists() async {
+  Future< List<PlaylistInfo>> getPlaylists({PlaylistSortType sortType = PlaylistSortType.DEFAULT}) async {
     List<dynamic> dataList = await channel.invokeListMethod("getPlaylists",
         {
           SOURCE_KEY : SOURCE_PLAYLIST,
           PLAYLIST_METHOD_TYPE : PlayListMethodType.READ.index,
+          SORT_TYPE : sortType.index
         } );
     return _parsePlaylistsDataList(dataList);
   }
@@ -258,12 +260,14 @@ class FlutterAudioQuery {
   /// It returns a List of [PlaylistInfo] instances or an empty list if no results.
   ///
   /// [query] String used to make the search
-  Future< List<PlaylistInfo> > searchPlaylists({@required final String query}) async {
+  Future< List<PlaylistInfo> > searchPlaylists({@required final String query,
+    PlaylistSortType sortType = PlaylistSortType.DEFAULT}) async {
     List<dynamic> dataList = await channel.invokeMethod("searchPlaylists",
         {
           SOURCE_KEY : SOURCE_PLAYLIST,
           PLAYLIST_METHOD_TYPE : PlayListMethodType.READ.index,
           QUERY_KEY : query,
+          SORT_TYPE: sortType.index,
         });
 
     return _parsePlaylistsDataList(dataList);

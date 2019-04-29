@@ -32,6 +32,7 @@ import boaventura.com.devel.br.flutteraudioquery.loaders.SongLoader;
 import boaventura.com.devel.br.flutteraudioquery.sortingtypes.AlbumSortType;
 import boaventura.com.devel.br.flutteraudioquery.sortingtypes.ArtistSortType;
 import boaventura.com.devel.br.flutteraudioquery.sortingtypes.GenreSortType;
+import boaventura.com.devel.br.flutteraudioquery.sortingtypes.PlaylistSortType;
 import boaventura.com.devel.br.flutteraudioquery.sortingtypes.SongSortType;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -327,11 +328,13 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
 
                 // playlist read calls section
             case "getPlaylists":
-                m_playlistLoader.getPlaylists(result);
+                m_playlistLoader.getPlaylists(result,
+                        PlaylistSortType.values()[(int)call.argument(SORT_TYPE)]);
                 break;
 
             case "searchPlaylists":
-                m_playlistLoader.searchPlaylists(result, (String)call.argument("query"));
+                m_playlistLoader.searchPlaylists(result, (String)call.argument("query"),
+                        PlaylistSortType.values()[(int)call.argument(SORT_TYPE)]);
                 break;
 
             default:
@@ -346,8 +349,9 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
         final String keyPlaylistName = "playlist_name";
         final String keyPlaylistId = "playlist_id";
         final String keySongId = "song_id";
-        final String keySongFromId = "song_from_id";
-        final String keySongToId = "song_to_id";
+
+        final String keyFromPosition = "from";
+        final String keyToPosition = "to";
 
         switch (call.method){
 
@@ -373,11 +377,11 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
                 m_playlistLoader.removePlaylist(result, playlistId);
                 break;
 
-            case "swapSongsPosition":
+            case "moveSong":
                 playlistId = call.argument(keyPlaylistId);
-                m_playlistLoader.swapSongsPosition(result, playlistId,
-                        ((String) call.argument(keySongFromId) ),
-                        ((String)call.argument(keySongToId))
+                m_playlistLoader.moveSong(result, playlistId,
+                        ((int) call.argument(keyFromPosition) ),
+                        ((int)call.argument(keyToPosition))
                 );
                 break;
 

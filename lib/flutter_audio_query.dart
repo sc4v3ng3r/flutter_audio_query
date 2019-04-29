@@ -31,5 +31,6 @@ part 'src/artist_sort_type.dart';
 part 'src/album_sort_type.dart';
 part 'src/song_sort_type.dart';
 part 'src/genre_sort_type.dart';
+part 'src/playlist_sort_type.dart';
 
 

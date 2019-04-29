@@ -12,10 +12,6 @@ enum AlbumSortType {
   /// property as sort parameter
   ALPHABETIC_ARTIST_NAME,
 
-
-  //static const String MOST_RECENT_FIRST_YEAR = "MOST_RECENT_FIRST_YEAR";
-  //static const String MOST_RECENT_LAST_YEAR = "MOST_RECENT_LAST_YEAR";
-
   /// Returns the albums sorted using [numberOfSongs] property as sort
   /// parameter. In This case the albums with greater number of songs will
   /// come first.

@@ -80,13 +80,11 @@ class PlaylistDialogBloc extends BlocBase {
     else {
       FlutterAudioQuery.createPlaylist(playlistName: playlistName)
           .then((data) {
-          Navigator.pop(context, data);
-      })
-          .catchError((error) {
-        _errorController.sink.addError(
-            "Was not able create the playlist. Maybe Already exists a"
-                " playlist with same name.");
-        // _errorController.sink.addError(error.toString());
+            print('Playlist created ${data.name}');
+            Navigator.pop(context, data);
+      }).catchError((error) {
+        print('creatoin error ${error.toString()}' );
+        _errorController.sink.addError(error?.toString());
       });
     }
   }

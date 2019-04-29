@@ -24,7 +24,7 @@ class SongListWidget extends StatelessWidget {
           SongInfo song = songList[songIndex];
           return ListItemWidget(
 
-            title: Text("${song.displayName}"),
+            title: Text("${song.title }"),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceAround,
