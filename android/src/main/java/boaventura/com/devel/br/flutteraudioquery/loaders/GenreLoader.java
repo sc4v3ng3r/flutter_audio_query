@@ -1,18 +1,3 @@
-//Copyright (C) <2019>  <Marcos Antonio Boaventura Feitoza> <scavenger.gnu@gmail.com>
-//
-//        This program is free software: you can redistribute it and/or modify
-//        it under the terms of the GNU General Public License as published by
-//        the Free Software Foundation, either version 3 of the License, or
-//        (at your option) any later version.
-//
-//        This program is distributed in the hope that it will be useful,
-//        but WITHOUT ANY WARRANTY; without even the implied warranty of
-//        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//        GNU General Public License for more details.
-//
-//        You should have received a copy of the GNU General Public License
-//        along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 package boaventura.com.devel.br.flutteraudioquery.loaders;
 
 import android.content.ContentResolver;
@@ -51,6 +36,12 @@ public class GenreLoader extends AbstractLoader {
     }
 
 
+    /**
+     * This method is used to parse GenreSortType object into a string
+     * that will be used in SQL to query data in a specific sort mode
+     * @param sortType GenreSortType The type of sort desired.
+     * @return A String for SQL language query usage.
+     */
     private String parseSortOrder(GenreSortType sortType){
         String sortOrder;
 
@@ -65,11 +56,23 @@ public class GenreLoader extends AbstractLoader {
         return sortOrder;
     }
 
+    /**
+     * This method queries for all genre available on device storage.
+     * @param result MethodChannel.Result object to send reply for dart
+     * @param sortType GenreSortType object to define sort type for data queried.
+     */
     public void getGenres(final MethodChannel.Result result, final GenreSortType sortType){
         createLoadTask(result, null, null, parseSortOrder(sortType),
                 QUERY_TYPE_DEFAULT).execute();
     }
 
+    /**
+     * This method makes a query that search genre by name with
+     * nameQuery as query String.
+     * @param results MethodChannel.Result object to send reply for dart
+     * @param namedQuery The query param that will match genre name
+     * @param sortType GenreSortType object to define sort type for data queried.
+     */
     public void searchGenres(final MethodChannel.Result results, final String namedQuery,
                             final GenreSortType sortType ){
 

@@ -1,18 +1,3 @@
-//Copyright (C) <2019>  <Marcos Antonio Boaventura Feitoza> <scavenger.gnu@gmail.com>
-//
-//        This program is free software: you can redistribute it and/or modify
-//        it under the terms of the GNU General Public License as published by
-//        the Free Software Foundation, either version 3 of the License, or
-//        (at your option) any later version.
-//
-//        This program is distributed in the hope that it will be useful,
-//        but WITHOUT ANY WARRANTY; without even the implied warranty of
-//        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//        GNU General Public License for more details.
-//
-//        You should have received a copy of the GNU General Public License
-//        along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 package boaventura.com.devel.br.flutteraudioquery.loaders;
 
 import android.content.ContentResolver;
@@ -31,7 +16,9 @@ import boaventura.com.devel.br.flutteraudioquery.sortingtypes.ArtistSortType;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.MethodChannel;
 
-
+/**
+ * ArtistLoader allows make queries for artists data info.
+ */
 public class ArtistLoader extends AbstractLoader {
 
     private static final int QUERY_TYPE_GENRE_ARTISTS = 0x01;
@@ -72,6 +59,12 @@ public class ArtistLoader extends AbstractLoader {
         );*/
     }
 
+    /**
+     * This method is used to parse ArtistSortType object into a string
+     * that will be used in SQL to query data in a specific sort mode
+     * @param sortType ArtistSortType The type of sort desired.
+     * @return A String for SQL language query usage.
+     */
     private String parseSortOrder(ArtistSortType sortType){
         String sortOrder;
 
@@ -102,21 +95,28 @@ public class ArtistLoader extends AbstractLoader {
     }
 
     /**
-     * This method queries in background all artists available in device storage.
-     *
-     * @param result MethodChannel results
+     * This method queries all artists available on device storage.
+     * @param result MethodChannel.Result object to send reply for dart
+     * @param sortType ArtistSortType object to define sort type for data queried
      */
     public void getArtists(final MethodChannel.Result result, ArtistSortType sortType) {
 
         createLoadTask(result, null, null,
                 parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
     }
-
+    /**
+     * This method makes a query that search artists by names with
+     * nameQuery query String.
+     *
+     * @param nameQuery The query param for match artists name
+     * @param result MethodChannel.Result object to send reply for dart
+     * @param sortType ArtistSortType object to define sort type for data queried.
+     *
+     */
     public void searchArtistsByName(final MethodChannel.Result result,
                              final String nameQuery, ArtistSortType sortType ){
 
         String args = /*"%" +*/ nameQuery + "%";
-        Log.i("MDBG", "The arg is " + args);
         createLoadTask(result, MediaStore.Audio.Artists.ARTIST +
                         " like ?", new String[]{args},
                 parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
@@ -124,10 +124,10 @@ public class ArtistLoader extends AbstractLoader {
     }
 
     /**
-     * This methods queries Artists by a specific genre provided.
-     * @param result
-     * @param genreName The Genre name
-     * @param sortType The sort constraint that artist will come sorted.
+     * This methods queries artists that appears in a specific genre
+     * @param result MethodChannel.Result object to send reply for dart
+     * @param genreName String with genre name that you want find artist
+     * @param sortType ArtistSortType object to define sort type for data queried.
      */
     public void getArtistsFromGenre(final MethodChannel.Result result, final String genreName,
                                     ArtistSortType sortType) {
@@ -135,6 +135,17 @@ public class ArtistLoader extends AbstractLoader {
                 parseSortOrder(sortType), QUERY_TYPE_GENRE_ARTISTS).execute();
     }
 
+    /**
+     * This method creates a new ArtistTaskLoader that is used to make
+     * a background query for data.
+     * @param result MethodChannel.Result object to send reply for dart
+     * @param selection String with SQL selection
+     * @param selectionArgs Values to match '?' wildcards in selection
+     * @param sortOrder ArtistSortType object to define sort type for data queried.
+     * @param type An integer number that can be used to identify what kind of task do you want
+     *             to create.
+     * @return ArtistLoadTask task ready to be executed.
+     */
     @Override
     protected ArtistLoadTask createLoadTask(
             final MethodChannel.Result result, final String selection,
@@ -173,6 +184,15 @@ public class ArtistLoader extends AbstractLoader {
             m_resolver = null;
         }
 
+        /**
+         * This method is called in background. Here is where the query job
+         * happens.
+         *
+         * @param selection Selection params [WHERE param = "?="].
+         * @param selectionArgs Selection args [paramValue].
+         * @param sortOrder SQL sort order.
+         * @return List<Map<String, Object>> with the query results.
+         */
         @Override
         protected List<Map<String, Object>> loadData(final String selection,
                                                      final String[] selectionArgs, final String sortOrder) {
@@ -238,6 +258,15 @@ public class ArtistLoader extends AbstractLoader {
             return list;
         }
 
+        /**
+         * This method makes the query for artists using contentResolver and
+         * can be utilized for many query variations.
+         *
+         * @param selection Selection params [WHERE param = "?="].
+         * @param selectionArgs Selection args [paramValue].
+         * @param sortOrder SQL sort order.
+         * @return List<Map<String, Object>> with the query results.
+         */
         private List<Map<String, Object>> basicDataLoad(
                 final String selection, final String[] selectionArgs, final String sortOrder) {
             Cursor artistCursor = m_resolver.query(

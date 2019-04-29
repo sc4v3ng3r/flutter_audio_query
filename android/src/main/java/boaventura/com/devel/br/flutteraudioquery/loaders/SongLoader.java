@@ -1,18 +1,3 @@
-//Copyright (C) <2019>  <Marcos Antonio Boaventura Feitoza> <scavenger.gnu@gmail.com>
-//
-//        This program is free software: you can redistribute it and/or modify
-//        it under the terms of the GNU General Public License as published by
-//        the Free Software Foundation, either version 3 of the License, or
-//        (at your option) any later version.
-//
-//        This program is distributed in the hope that it will be useful,
-//        but WITHOUT ANY WARRANTY; without even the implied warranty of
-//        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//        GNU General Public License for more details.
-//
-//        You should have received a copy of the GNU General Public License
-//        along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
 package boaventura.com.devel.br.flutteraudioquery.loaders;
 
 import android.content.ContentResolver;
@@ -97,6 +82,13 @@ public class SongLoader extends AbstractLoader {
                 );*/
     }
 
+    /**
+     * This method is used to parse SongSortType object into a string
+     * that will be used in SQL to query data in a specific sort mode.
+     *
+     * @param sortType SongSortType The type of sort desired.
+     * @return A String for SQL language query usage.
+     */
     private String parseSortOrder(SongSortType sortType){
         String sortOrder;
 
@@ -149,21 +141,42 @@ public class SongLoader extends AbstractLoader {
         return sortOrder;
     }
 
+    /**
+     * This method query for all songs available on device storage
+     * @param result MethodChannel.Result object to send reply for dart
+     * @param sortType SongSortType object to define sort type for data queried.
+     *
+     */
     public void getSongs(final MethodChannel.Result result, final SongSortType sortType){
 
         createLoadTask( result,null,null,
                 parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
     }
 
+    /**
+     *
+     * This method makes a query that search genre by name with
+     * nameQuery as query String.
+     *
+     * @param result MethodChannel.Result object to send reply for dart.
+     * @param namedQuery Query param to match song title.
+     * @param sortType SongSortType object to define sort type for data queried.
+     */
     public void searchSongs(final MethodChannel.Result result, final String namedQuery,
                             final SongSortType sortType){
 
         String[] args =  new String[]{namedQuery + "%"};
         createLoadTask(result, MediaStore.Audio.Media.TITLE + " like ?",
                 args, parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
-
     }
 
+    /**
+     * This method fetch songs by Ids. Here it is used to fetch
+     * songs that appears on specific playlist.
+     *
+     * @param result MethodChannel.Result object to send reply for dart.
+     * @param songIds Ids of songs that will be fetched.
+     */
     public void getSongsFromPlaylist(MethodChannel.Result result, final List<String> songIds){
         String[] values;
 
@@ -208,10 +221,18 @@ public class SongLoader extends AbstractLoader {
         return orderStr.toString();
     }
 
+    /**
+     * This method queries for songs that appears on specific album.
+     *
+     * @param result MethodChannel.Result object to send reply for dart.
+     * @param albumId Album id that we want fetch songs
+     * @param artist Artist name that appears in album
+     * @param sortType SongSortType object to define sort type for data queried.
+     */
     public void getSongsFromAlbum(final MethodChannel.Result result, final String albumId,
                                   final String artist, final SongSortType sortType){
 
-        Log.i("MFBG", "Art: " + artist + " album: " + albumId);
+       // Log.i("MFBG", "Art: " + artist + " album: " + albumId);
         String selection = MediaStore.Audio.Media.ALBUM_ID + " =?"
                 + " and " + MediaStore.Audio.Media.ARTIST + " =?";
 
@@ -219,6 +240,12 @@ public class SongLoader extends AbstractLoader {
                parseSortOrder(sortType), QUERY_TYPE_ALBUM_SONGS).execute();
     }
 
+    /**
+     * This method queries songs from a specific artist.
+     * @param result MethodChannel.Result object to send reply for dart.
+     * @param artistName Artist name that we want fetch songs.
+     * @param sortType SongSortType object to define sort type for data queried.
+     */
     public void getSongsFromArtist(final MethodChannel.Result result, final String artistName,
                                    final SongSortType sortType ){
 
@@ -227,6 +254,13 @@ public class SongLoader extends AbstractLoader {
                 .execute();
     }
 
+    /**
+     * This method queries songs that appears on specific genre.
+     *
+     * @param result MethodChannel.Result object to send reply for dart.
+     * @param genre Genre name that we want songs.
+     * @param sortType SongSortType object to define sort type for data queried.
+     */
     public void getSongsFromGenre(final MethodChannel.Result result, final String genre,
                                   final SongSortType sortType){
 
@@ -321,6 +355,11 @@ public class SongLoader extends AbstractLoader {
             return new ArrayList<>();
         }
 
+        /**
+         * This method fetch song ids that appears on specific genre.
+         * @param genre genre name
+         * @return List of ids in string.
+         */
         private List<String> getSongIdsFromGenre(final String genre){
            Cursor songIdsCursor = m_resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     new String[] {"Distinct " + MediaStore.Audio.Media._ID, "genre_name" },
@@ -404,6 +443,12 @@ public class SongLoader extends AbstractLoader {
             return dataList;
         }
 
+        /**
+         * This method the image of the album if exists. If there is no album artwork
+         * null is returned
+         * @param album Album name that we want the artwork
+         * @return String with image path or null if there is no image.
+         */
         private String getAlbumArtPathForSong(String album){
             Cursor artCursor = m_resolver.query(
                     MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,

@@ -38,11 +38,22 @@ public class PlaylistLoader extends AbstractLoader {
     }
 
 
+    /**
+     * This method get all playlists available on device storage
+     * @param result  MethodChannel.Result object to send reply for dart
+     * @param sortType PlaylistSortType object to define sort type for data queried.
+     */
     public void getPlaylists(final MethodChannel.Result result, final PlaylistSortType sortType){
         createLoadTask(result,null,null,
                 parseSortType(sortType),QUERY_TYPE_DEFAULT).execute();
     }
 
+    /**
+     * This method is used to parse PlaylistSortType object into a string
+     * that will be used in SQL to query data in a specific sort mode.
+     * @param sortType PlaylistSortType The type of sort desired.
+     * @return A String for SQL language query usage.
+     */
     private String parseSortType(final PlaylistSortType sortType){
         String sortOrder = null;
 
@@ -65,12 +76,23 @@ public class PlaylistLoader extends AbstractLoader {
         return sortOrder;
     }
 
+    /**
+     * This method gets a specific playlist using it id.
+     * @param result MethodChannel.Result object to send reply for dart.
+     * @param playlistId Id of playlist.
+     */
     private void getPlaylistById(final MethodChannel.Result result, final String playlistId){
 
         createLoadTask(result, MediaStore.Audio.Playlists._ID + " =?", new String[]{playlistId},
                 null, QUERY_TYPE_DEFAULT).execute();
     }
 
+    /**
+     * This method query playlist using name as qyery parameter.
+     * @param results MethodChannel.Result object to send reply for dart.
+     * @param namedQuery query param.
+     * @param sortType PlaylistSortType The type of sort desired.
+     */
     public void searchPlaylists(final MethodChannel.Result results, final String namedQuery,
                                 final PlaylistSortType sortType ){
         String[] args = new String[] { namedQuery + "%"};
@@ -78,6 +100,11 @@ public class PlaylistLoader extends AbstractLoader {
                 parseSortType(sortType), QUERY_TYPE_DEFAULT ).execute();
     }
 
+    /**
+     * This method creates a new playlist.
+     * @param results MethodChannel.Result object to send reply for dart.
+     * @param name playlist desired name.
+     */
     public void createPlaylist(final MethodChannel.Result results, final String name) {
         if (name != null && name.length() > 0) {
             ContentResolver resolver = getContentResolver();
@@ -136,7 +163,7 @@ public class PlaylistLoader extends AbstractLoader {
 
     /**
      * This method is used to remove an entire playlist.
-     * @param results
+     * @param results MethodChannel.Result object to send reply for dart.
      * @param playlistId Playlist Id that will be removed.
      */
     public void removePlaylist(final MethodChannel.Result results, final String playlistId){
@@ -153,10 +180,11 @@ public class PlaylistLoader extends AbstractLoader {
     }
 
     /**
-     * This method is used to add a song to playlist.
-     * @param results
-     * @param playlistId
-     * @param songId
+     * This method is used to add a song to playlist. After add song the updated playlist is
+     * sent to dart side code.
+     * @param results MethodChannel.Result object to send reply for dart.
+     * @param playlistId Id of the playlist that we want add song
+     * @param songId Id of the song that we will add to playlist..
      */
     public void addSongToPlaylist(final MethodChannel.Result results, final String playlistId,
                                   final String songId){
@@ -181,7 +209,13 @@ public class PlaylistLoader extends AbstractLoader {
         }
     }
 
-
+    /**
+     *
+     * @param results MethodChannel.Result object to send reply for dart.
+     * @param playlistId
+     * @param from
+     * @param to
+     */
     public void moveSong(final MethodChannel.Result results,
                          final String playlistId, final int from, final int to){
 
@@ -204,10 +238,17 @@ public class PlaylistLoader extends AbstractLoader {
 
     }
 
+
     private void updateResolver(){
         getContentResolver().notifyChange(Uri.parse("content://media"), null);
     }
 
+    /**
+     * This method
+     * @param results MethodChannel.Result object to send reply for dart.
+     * @param playlistId
+     * @param songId
+     */
     public void removeSongFromPlaylist(final MethodChannel.Result results, final String playlistId,
                                        final String songId){
 
@@ -240,6 +281,11 @@ public class PlaylistLoader extends AbstractLoader {
         }
     }
 
+    /**
+     *
+     * @param playlistUri
+     * @return
+     */
     private int getBase(final Uri playlistUri){
         String[] col = new String[]{ "count(*)"};
         int base = -1;
@@ -255,7 +301,13 @@ public class PlaylistLoader extends AbstractLoader {
     }
 
 
-
+    /**
+     * This method verify if a playlist already exists.
+     * @param projection
+     * @param selection
+     * @param args
+     * @return
+     */
     private boolean verifyPlaylistExistence(final String[] projection, final String selection, final String[] args){
         boolean flag = false;
         Cursor cursor = getContentResolver().query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
@@ -312,7 +364,7 @@ public class PlaylistLoader extends AbstractLoader {
                             playlistData.put(key, data );
                         }
 
-                        playlistData.put("memberIds", getPlaylistMembers(
+                        playlistData.put("memberIds", getPlaylistMembersId(
                                 Long.parseLong( (String)playlistData.get(PLAYLIST_PROJECTION[0]))) );
 
                         dataList.add(playlistData);
@@ -334,7 +386,15 @@ public class PlaylistLoader extends AbstractLoader {
             m_resolver = null;
         }
 
-        private List<String> getPlaylistMembers(final long playlistId){
+        /**
+         *
+         * This method fetch member ids of a specific playlist.
+         * @param playlistId Id of playlist
+         * @return List of strings with members Ids or empty list if
+         * the specified playlist has no members.
+         *
+         */
+        private List<String> getPlaylistMembersId(final long playlistId){
              Cursor membersCursor = m_resolver.query(MediaStore.Audio.Playlists.Members.getContentUri(
                      "external", playlistId),
                      PLAYLIST_MEMBERS_PROJECTION,
@@ -355,7 +415,7 @@ public class PlaylistLoader extends AbstractLoader {
                                  membersCursor.getColumnIndex(PLAYLIST_MEMBERS_PROJECTION[0] )) );
                      }
                      catch (Exception ex){
-                         Log.e(TAG_ERROR, "PlaylistLoader::getPlaylistMembers method exception");
+                         Log.e(TAG_ERROR, "PlaylistLoader::getPlaylistMembersId method exception");
                          Log.e(TAG_ERROR, ex.getMessage());
                      }
                  }

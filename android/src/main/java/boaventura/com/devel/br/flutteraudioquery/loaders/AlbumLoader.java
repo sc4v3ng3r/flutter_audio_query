@@ -1,19 +1,3 @@
-//Copyright (C) <2019>  <Marcos Antonio Boaventura Feitoza> <scavenger.gnu@gmail.com>
-//
-//        This program is free software: you can redistribute it and/or modify
-//        it under the terms of the GNU General Public License as published by
-//        the Free Software Foundation, either version 3 of the License, or
-//        (at your option) any later version.
-//
-//        This program is distributed in the hope that it will be useful,
-//        but WITHOUT ANY WARRANTY; without even the implied warranty of
-//        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//        GNU General Public License for more details.
-//
-//        You should have received a copy of the GNU General Public License
-//        along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
 package boaventura.com.devel.br.flutteraudioquery.loaders;
 
 import android.content.ContentResolver;
@@ -44,7 +28,8 @@ public class AlbumLoader extends AbstractLoader {
             MediaStore.Audio.AlbumColumns.ARTIST,
             MediaStore.Audio.AlbumColumns.FIRST_YEAR,
             MediaStore.Audio.AlbumColumns.LAST_YEAR,
-            MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS/*, MediaStore.Audio.AlbumColumns.ALBUM_ID*/
+            MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS
+            /*, MediaStore.Audio.AlbumColumns.ALBUM_ID*/
             //MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS_FOR_ARTIST,
     };
 
@@ -58,7 +43,12 @@ public class AlbumLoader extends AbstractLoader {
         super(context);
     }
 
-
+    /**
+     * This method is used to parse AlbumSortType object into a string
+     * that will be used in SQL to query data in a specific sort mode.
+     * @param sortType AlbumSortType The type of sort desired.
+     * @return A String for SQL language query usage.
+     */
     private String parseSortOrder(AlbumSortType sortType) {
         String sortOrder;
 
@@ -93,51 +83,86 @@ public class AlbumLoader extends AbstractLoader {
     }
 
     /**
-     * This method queries in background all albums available in device storage
-     *
-     * @param result MethodChannel results object to send to Dart side
-     *               the query results.
+     * This method queries all albums available on device storage
+     * @param result MethodChannel.Result object to send reply for dart
+     * @param sortType AlbumSortType object to define sort type for data queried.
      */
     public void getAlbums(MethodChannel.Result result, AlbumSortType sortType) {
         createLoadTask(result, null, null,
-                parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
+                parseSortOrder(sortType), QUERY_TYPE_DEFAULT)
+                .execute();
     }
 
     /**
+     *
      * @param result
      * @param albumId
      */
     public void getAlbumById(MethodChannel.Result result, long albumId) {
         createLoadTask(result, ALBUM_PROJECTION[0] + " = ? ",
                 new String[]{String.valueOf(albumId)},
-                MediaStore.Audio.Albums.DEFAULT_SORT_ORDER, QUERY_TYPE_DEFAULT).execute();
+                MediaStore.Audio.Albums.DEFAULT_SORT_ORDER, QUERY_TYPE_DEFAULT)
+                .execute();
     }
 
+    /**
+     * Method used to query albums that appears in a specific genre
+     * @param result MethodChannel.Result object to send reply for dart
+     * @param genre String with genre name that you want find artist
+     * @param sortType AlbumSortType object to define sort type for data queried.
+     */
     public void getAlbumFromGenre(final MethodChannel.Result result, final String genre,
                                   AlbumSortType sortType) {
         createLoadTask(result, genre, null,
-                parseSortOrder(sortType), QUERY_TYPE_GENRE_ALBUM).execute();
+                parseSortOrder(sortType), QUERY_TYPE_GENRE_ALBUM)
+                .execute();
     }
 
-
+    /**
+     *
+     * This method makes a query that search album by name with
+     * nameQuery as query String.
+     *
+     * @param results MethodChannel.Result object to send reply for dart
+     * @param namedQuery The query param for match album title.
+     * @param sortType AlbumSortType object to define sort type for data queried.
+     */
     public void searchAlbums(final MethodChannel.Result results, final String namedQuery,
                              AlbumSortType sortType) {
         String[] args = new String[]{namedQuery + "%"};
         createLoadTask(results, MediaStore.Audio.AlbumColumns.ALBUM + " like ?", args,
-                parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
+                parseSortOrder(sortType), QUERY_TYPE_DEFAULT)
+                .execute();
 
     }
 
     /**
-     * @param result
-     * @param artistName
+     *
+     * Method used to query albums from a specific artist
+     *
+     * @param result MethodChannel.Result object to send reply for dart
+     * @param artistName That artist name that you wanna fetch the albums.
+     * @param sortType AlbumSortType object to define sort type for data queried.
      */
     public void getAlbumsFromArtist(MethodChannel.Result result, String artistName, AlbumSortType sortType) {
         createLoadTask(result, ALBUM_PROJECTION[3] + " = ? ",
-                new String[]{artistName}, parseSortOrder(sortType), QUERY_TYPE_ARTIST_ALBUM).execute();
+                new String[]{artistName}, parseSortOrder(sortType), QUERY_TYPE_ARTIST_ALBUM)
+                .execute();
     }
 
 
+    /**
+     * This method creates a new AlbumTaskLoader that is used to make
+     * a background query for data.
+     *
+     * @param result MethodChannel.Result object to send reply for dart.
+     * @param selection String with SQL selection.
+     * @param selectionArgs Values to match '?' wildcards in selection.
+     * @param sortOrder AlbumSortType object to define sort type for data queried.
+     * @param type An integer number that can be used to identify what kind of task do you want to create.
+     *
+     * @return AlbumLoadTask object ready to be executed.
+     */
     @Override
     protected AlbumLoadTask createLoadTask(
             final MethodChannel.Result result, final String selection,
@@ -147,7 +172,6 @@ public class AlbumLoader extends AbstractLoader {
                 sortOrder, type);
 
     }
-
 
     static class AlbumLoadTask extends AbstractLoadTask<List<Map<String, Object>>> {
 
@@ -165,6 +189,12 @@ public class AlbumLoader extends AbstractLoader {
             m_queryType = type;
         }
 
+        /**
+         * Utility method do create a multiple selection argument string.
+         * By Example: "_id IN(?,?,?,?)".
+         * @param params
+         * @return String ready to multiple selection args matching.
+         */
         private String createMultipleValueSelectionArgs( /*String column */String[] params) {
 
             StringBuilder stringBuilder = new StringBuilder();
@@ -293,6 +323,12 @@ public class AlbumLoader extends AbstractLoader {
             return albumNames;
         }
 
+        /**
+         * This method is used to load albums from Media "Table" and not from Album "Table"
+         * as basicDataLoad do.
+         *
+         * @param artistName The name of the artists that we can query for albums.
+         */
         private List<Map<String, Object>> loadAlbumsInfoWithMediaSupport(final String artistName) {
 
             List<Map<String, Object>> dataList = new ArrayList<>();

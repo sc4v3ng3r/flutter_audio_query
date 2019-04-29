@@ -1,18 +1,24 @@
+//The MIT License
+//
 //Copyright (C) <2019>  <Marcos Antonio Boaventura Feitoza> <scavenger.gnu@gmail.com>
 //
-//This program is free software: you can redistribute it and/or modify
-//it under the terms of the GNU General Public License as published by
-//the Free Software Foundation, either version 3 of the License, or
-//(at your option) any later version.
+//Permission is hereby granted, free of charge, to any person obtaining a copy
+//of this software and associated documentation files (the "Software"), to deal
+//in the Software without restriction, including without limitation the rights
+//to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//copies of the Software, and to permit persons to whom the Software is
+//furnished to do so, subject to the following conditions:
 //
-//This program is distributed in the hope that it will be useful,
-//but WITHOUT ANY WARRANTY; without even the implied warranty of
-//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//GNU General Public License for more details.
+//The above copyright notice and this permission notice shall be included in
+//all copies or substantial portions of the Software.
 //
-//You should have received a copy of the GNU General Public License
-//along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//THE SOFTWARE.
 
 part of flutter_audio_query;
 
@@ -46,9 +52,9 @@ class FlutterAudioQuery {
     return _parseArtistDataList(dataList);
   }
 
-  ///This method returns a list with all artists that belongs to [genre]
+  ///This method returns a list with all artists that appears on specific genre.
   ///
-  /// [genre] must be non null
+  /// [genre] Genre that we want fetch artists. Must not be null
   Future< List<ArtistInfo> > getArtistsFromGenre({@required final GenreInfo genre,
     ArtistSortType sortType = ArtistSortType.DEFAULT}) async {
 
@@ -77,6 +83,7 @@ class FlutterAudioQuery {
   }
 
   /// This method returns a list of albums with all albums available in device storage.
+  /// [sortType] The type sorting.The default type is AlbumSortType.DEFAULT
   Future < List<AlbumInfo> > getAlbums({AlbumSortType sortType = AlbumSortType.DEFAULT}) async {
     List<dynamic> dataList = await channel.invokeMethod('getAlbums',
         {
@@ -86,9 +93,9 @@ class FlutterAudioQuery {
     return _parseAlbumDataList(dataList);
   }
 
-  ///This method returns a list with all albums that belongs to specific [genre]
+  ///This method returns a list with all albums that appears on specific [genre]
   ///
-  /// [genre] must be non null
+  /// [genre] Genre that we want fetch albums. Genre must not be null.
   Future < List<AlbumInfo> > getAlbumsFromGenre({@required final GenreInfo genre,
     AlbumSortType sortType = AlbumSortType.DEFAULT }) async {
     List<dynamic> dataList = await channel.invokeMethod('getAlbumsFromGenre',
@@ -287,6 +294,8 @@ class FlutterAudioQuery {
     return PlaylistInfo._(data);
   }
 
+  /// Removes an specific playlist.
+  /// [playlist] playlist to be removed.
   static Future<void> removePlaylist({@required PlaylistInfo playlist}) async {
     await channel.invokeMethod("removePlaylist",
         {

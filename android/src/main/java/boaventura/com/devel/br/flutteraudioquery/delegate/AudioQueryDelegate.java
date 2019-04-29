@@ -1,19 +1,3 @@
-//Copyright (C) <2019>  <Marcos Antonio Boaventura Feitoza> <scavenger.gnu@gmail.com>
-//
-//        This program is free software: you can redistribute it and/or modify
-//        it under the terms of the GNU General Public License as published by
-//        the Free Software Foundation, either version 3 of the License, or
-//        (at your option) any later version.
-//
-//        This program is distributed in the hope that it will be useful,
-//        but WITHOUT ANY WARRANTY; without even the implied warranty of
-//        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//        GNU General Public License for more details.
-//
-//        You should have received a copy of the GNU General Public License
-//        along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
 package boaventura.com.devel.br.flutteraudioquery.delegate;
 
 import android.Manifest;
@@ -223,7 +207,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
 
                     if (m_permissionManager.isPermissionGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE) ){
                         clearPendencies();
-                        handleWriteOnlyMethods(call, result);
+                        handleWriteMethods(call, result);
                     }
                     else
                         m_permissionManager.askForPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -343,7 +327,13 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
 
     }
 
-    private void handleWriteOnlyMethods(MethodCall call, MethodChannel.Result result){
+    /**
+     * This method handle all methods calls that need write something on
+     * device memory.
+     * @param call
+     * @param result
+     */
+    private void handleWriteMethods(MethodCall call, MethodChannel.Result result){
         String playlistId;
         String songId;
         final String keyPlaylistName = "playlist_name";
@@ -443,7 +433,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
 
             case REQUEST_CODE_PERMISSION_WRITE_EXTERNAL:
                 if (permissionGranted){
-                    handleWriteOnlyMethods(m_pendingCall, m_pendingResult);
+                    handleWriteMethods(m_pendingCall, m_pendingResult);
                     clearPendencies();
                 }
 
