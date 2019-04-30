@@ -1,6 +1,6 @@
 part of flutter_audio_query;
 
-/// Options for playlist query sorting.
+/// Enum that define values used to sort playlists.
 enum PlaylistSortType {
   /// The Default sort order for playlist. DEFAULT value the playlist
   /// query will return playlists sorted by alphabetically

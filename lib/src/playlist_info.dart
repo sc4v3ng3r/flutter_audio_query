@@ -8,10 +8,8 @@ class PlaylistInfo extends DataModel {
     _memberIds = List<String>.from(_data["memberIds"]);
   }
 
-  /// Returns playlist name
+  /// The playlist name
   String get name => _data["name"];
-
-  String get count => _data["_count"];
 
   /// Returns a list with id's of SongInfo which are songs
   /// that appears in this playlist. You can retrieve SongInfo objects that
@@ -40,6 +38,7 @@ class PlaylistInfo extends DataModel {
     this._updatePlaylistData(data);
   }
 
+  /// This method removes a specified [song] from this playlist.
   Future<void> removeSong({@required SongInfo song}) async {
     List<dynamic> updatedPlaylist =
         await FlutterAudioQuery.channel.invokeMethod("removeSongFromPlaylist", {
@@ -81,8 +80,4 @@ class PlaylistInfo extends DataModel {
     }
   }
 
-  @override
-  String toString() {
-    return "Name: $name\n creationDate: $creationDate members: $memberIds";
-  }
 }

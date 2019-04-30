@@ -1,6 +1,6 @@
 part of flutter_audio_query;
 
-/// Class that holds the type of Artist sorting mechanism
+/// Enumeration values that define artist sorting.
 enum ArtistSortType {
   /// Returns the artists using the platform specific ordering mechanism.
   /// In android platform will return artists in alphabetical order

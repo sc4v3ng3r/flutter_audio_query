@@ -1,5 +1,6 @@
 part of flutter_audio_query;
 
+/// Enum that define values used to sort Albums.
 enum AlbumSortType {
   /// Returns the albums using the platform specific ordering mechanism.
   /// In android platform will return albms in alphabetical order

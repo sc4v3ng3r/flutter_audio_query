@@ -22,10 +22,17 @@
 
 part of flutter_audio_query;
 
-/// Playlist methods can be read or write and this enum identify what kind
-/// of method it's.
-enum PlayListMethodType { READ, WRITE }
+/// Playlist enum that define values to describe what kind of method
+/// it's.
+enum PlayListMethodType {
+  /// Value used to describe READ methods.
+  READ,
 
+  /// Value used to describe WRITE methods.
+  WRITE
+}
+
+/// This class provides an interface for access audio data info.
 class FlutterAudioQuery {
   static const String _CHANNEL_NAME =
       "boaventura.com.devel.br.flutteraudioquery";

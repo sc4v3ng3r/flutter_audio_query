@@ -1,5 +1,6 @@
 part of flutter_audio_query;
 
+/// Enumeration that define values used to sort songs.
 enum SongSortType {
   /// Returns the song using the platform specific ordering mechanism.
   /// In android platform will return song in alphabetical order

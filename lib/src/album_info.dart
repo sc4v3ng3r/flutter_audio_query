@@ -1,7 +1,6 @@
 part of flutter_audio_query;
 
 /// AlbumInfo class holds all information about a specific artist album.
-///
 class AlbumInfo extends DataModel {
   AlbumInfo._(Map<dynamic, dynamic> map) : super._(map);
 
@@ -12,11 +11,6 @@ class AlbumInfo extends DataModel {
   /// or null if there is no one.
   String get albumArt => _data['album_art'];
 
-  /*
-  /// Return Id from this album
-  /// the method id return the id of database row register.
-  String get albumId => _data['album_id'];
-  */
   ///Returns the artist name that songs appears in this album.
   String get artist => _data['artist'];
 

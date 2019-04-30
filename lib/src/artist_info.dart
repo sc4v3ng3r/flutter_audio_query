@@ -1,8 +1,8 @@
 part of flutter_audio_query;
 
 /// ArtistInfo class holds all information about a specific artist.
-///
 class ArtistInfo extends DataModel {
+  /// ArtistInfo  private constructor
   ArtistInfo._(Map<dynamic, dynamic> map) : super._(map);
 
   /// Returns the name of artist

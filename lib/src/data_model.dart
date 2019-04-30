@@ -1,6 +1,7 @@
 part of flutter_audio_query;
 
-class DataModel {
+/// Abstract base class for model of Flutter Audio Query Plugin
+abstract class DataModel {
   /// unique database row register identify.
   static const String ID = "_id";
 
