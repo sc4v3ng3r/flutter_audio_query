@@ -167,16 +167,39 @@ class FlutterAudioQuery {
     return _parseSongDataList(dataList);
   }
 
-  /// This method returns a list with of songs info with all songs that appears in
-  /// specified[album].
+  /// This method returns a list of SongInfo with all songs that appears in
+  /// specified[album]. If you want to show all songs that
+  /// appears on [album] no matter what artist it belongs you should use this method.
+  /// But if you have an album that has multiple songs for multiple artists and you wanna
+  /// fetch only that songs that belongs to an specified [artist] you should use
+  /// getSongsFromArtistAlbum call.
   ///
-  /// [album] must be non null.
+  /// [album] Represents the album that we want to fetch all songs. Must be non null.
   Future<List<SongInfo>> getSongsFromAlbum(
       {@required final AlbumInfo album,
       SongSortType sortType = SongSortType.DEFAULT}) async {
     List<dynamic> dataList = await channel.invokeMethod("getSongsFromAlbum", {
       'album_id': album.id,
-      'artist': album.artist,
+      SOURCE_KEY: SOURCE_SONGS,
+      SORT_TYPE: sortType.index,
+    });
+    return _parseSongDataList(dataList);
+  }
+
+  /// This method should be used when we want to fetch [artist] specific songs
+  /// that appears in [album]. Sometimes we can have an album with multiple artists
+  /// songs if make senses show only the songs for a specific artist that appears on
+  /// [album] so this is the appropriated method. If you want to show all songs that
+  /// appears on [album] no matter what artist it belongs you should use getSongsFromAlbum method.
+  ///
+  /// [artist] The artist which that appears on [album]. Must be non null.
+  /// [album] The album. Must be non null.
+  Future<List<SongInfo>> getSongsFromArtistAlbum(
+      {@required final AlbumInfo album, @required final ArtistInfo artist,
+        SongSortType sortType = SongSortType.DEFAULT}) async {
+    List<dynamic> dataList = await channel.invokeMethod("getSongsFromArtistAlbum", {
+      'album_id': album.id,
+      'artist': artist.name,
       SOURCE_KEY: SOURCE_SONGS,
       SORT_TYPE: sortType.index,
     });
@@ -210,6 +233,12 @@ class FlutterAudioQuery {
     return _parseSongDataList(dataList);
   }
 
+  /// This method fetch songs by Id.
+  /// To return data sorted in the same order that ids appears on [ids] list
+  /// parameter use [sortType] param with SongSortType.CURRENT_IDs_ORDER value.
+  ///
+  /// [ids] List of IDs.
+  /// [sortType] Data sort Type.
   Future< List<SongInfo> > getSongsById({@required List<String> ids,
     SongSortType sortType = SongSortType.DEFAULT }) async {
 

@@ -222,24 +222,38 @@ public class SongLoader extends AbstractLoader {
     }
 
     /**
-     * This method queries for songs that appears on specific album.
+     * This method queries for all songs that appears on specific album.
+     *
+     * @param result MethodChannel.Result object to send reply for dart.
+     * @param albumId Album id that we want fetch songs
+     * @param sortType SongSortType object to define sort type for data queried.
+     */
+    public void getSongsFromAlbum(final MethodChannel.Result result, final String albumId,
+                                  final SongSortType sortType){
+
+       // Log.i("MFBG", "Art: " + artist + " album: " + albumId);
+        String selection = MediaStore.Audio.Media.ALBUM_ID + " =?";
+
+       createLoadTask( result, selection, new String[] {albumId},
+               parseSortOrder(sortType), QUERY_TYPE_ALBUM_SONGS).execute();
+    }
+
+    /**
+     * This method queries for songs from specific artist that appears on specific album.
      *
      * @param result MethodChannel.Result object to send reply for dart.
      * @param albumId Album id that we want fetch songs
      * @param artist Artist name that appears in album
      * @param sortType SongSortType object to define sort type for data queried.
      */
-    public void getSongsFromAlbum(final MethodChannel.Result result, final String albumId,
-                                  final String artist, final SongSortType sortType){
-
-       // Log.i("MFBG", "Art: " + artist + " album: " + albumId);
+    public void getSongsFromArtistAlbum(final MethodChannel.Result result, final String albumId,
+                                        final String artist, final SongSortType sortType){
         String selection = MediaStore.Audio.Media.ALBUM_ID + " =?"
                 + " and " + MediaStore.Audio.Media.ARTIST + " =?";
 
-       createLoadTask( result, selection, new String[] {albumId, artist},
-               parseSortOrder(sortType), QUERY_TYPE_ALBUM_SONGS).execute();
+        createLoadTask( result, selection, new String[] {albumId, artist},
+                parseSortOrder(sortType), QUERY_TYPE_ALBUM_SONGS).execute();
     }
-
     /**
      * This method queries songs from a specific artist.
      * @param result MethodChannel.Result object to send reply for dart.
@@ -269,6 +283,12 @@ public class SongLoader extends AbstractLoader {
                 .execute();
     }
 
+    /**
+     * This method fetch songs with specified Ids.
+     * @param result MethodChannel.Result object to send reply for dart.
+     * @param ids Songs Ids.
+     * @param sortType SongSortType object to define sort type for data queried.
+     */
     public void getSongsById(final MethodChannel.Result result, final List<String> ids,
                              final SongSortType sortType){
 
