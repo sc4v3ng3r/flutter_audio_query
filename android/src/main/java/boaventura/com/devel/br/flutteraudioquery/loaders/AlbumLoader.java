@@ -83,6 +83,39 @@ public class AlbumLoader extends AbstractLoader {
     }
 
     /**
+     * Fetch albums by id.
+     * @param result
+     * @param ids
+     * @param sortType
+     */
+    public void getAlbumsById(final MethodChannel.Result result, final List<String> ids,
+                             final AlbumSortType sortType){
+
+        String[] selectionArgs;
+        String sortOrder = null;
+
+        if (ids == null || ids.isEmpty()) {
+            result.error("NO_ALBUM_IDS", "No Ids was provided", null);
+            return;
+        }
+
+        if (ids.size() > 1){
+            selectionArgs = ids.toArray( new String[ ids.size() ]);
+
+            if(sortType == AlbumSortType.CURRENT_IDs_ORDER)
+                sortOrder = prepareIDsSortOrder( ids );
+        }
+
+        else{
+            sortOrder = parseSortOrder(sortType);
+            selectionArgs = new String[]{ ids.get(0) };
+        }
+
+        createLoadTask(result, MediaStore.Audio.Albums._ID, selectionArgs,
+                sortOrder, QUERY_TYPE_DEFAULT).execute();
+    }
+
+    /**
      * This method queries all albums available on device storage
      * @param result MethodChannel.Result object to send reply for dart
      * @param sortType AlbumSortType object to define sort type for data queried.
@@ -90,18 +123,6 @@ public class AlbumLoader extends AbstractLoader {
     public void getAlbums(MethodChannel.Result result, AlbumSortType sortType) {
         createLoadTask(result, null, null,
                 parseSortOrder(sortType), QUERY_TYPE_DEFAULT)
-                .execute();
-    }
-
-    /**
-     *
-     * @param result
-     * @param albumId
-     */
-    public void getAlbumById(MethodChannel.Result result, long albumId) {
-        createLoadTask(result, ALBUM_PROJECTION[0] + " = ? ",
-                new String[]{String.valueOf(albumId)},
-                MediaStore.Audio.Albums.DEFAULT_SORT_ORDER, QUERY_TYPE_DEFAULT)
                 .execute();
     }
 
@@ -150,6 +171,37 @@ public class AlbumLoader extends AbstractLoader {
                 .execute();
     }
 
+    /**
+     * This method creates a SQL CASE WHEN THEN in order to get specific elements
+     * where the query results is sorted matching [IDs] list values order.
+     *
+     * @param idList Song IDs list
+     * @return Sql String case when then or null if idList size is not greater then 1.
+     */
+    private String prepareIDsSortOrder(final List<String> idList){
+        if (idList.size() == 1)
+            return null;
+
+        StringBuilder orderStr = new StringBuilder("CASE ")
+                .append(MediaStore.MediaColumns._ID)
+                .append(" WHEN '")
+                .append(idList.get(0))
+                .append("'")
+                .append(" THEN 0");
+
+        for(int i = 1; i < idList.size(); i++){
+            orderStr.append(" WHEN '")
+                    .append( idList.get(i) )
+                    .append("'")
+                    .append(" THEN ")
+                    .append(i);
+        }
+
+        orderStr.append(" END, ")
+                .append(MediaStore.MediaColumns._ID)
+                .append(" ASC");
+        return orderStr.toString();
+    }
 
     /**
      * This method creates a new AlbumTaskLoader that is used to make
@@ -214,7 +266,15 @@ public class AlbumLoader extends AbstractLoader {
 
             switch (m_queryType) {
                 case QUERY_TYPE_DEFAULT:
-                    return this.basicDataLoad(selection, selectionArgs, sortOrder);
+                    // In this case the selection will be always by id.
+                    // used for fetch songs for playlist or songs by id.
+                    if ( (selectionArgs!=null) && (selectionArgs.length > 1) ){
+                        return basicDataLoad(
+                                createMultipleValueSelectionArgs(selection, selectionArgs),
+                                selectionArgs, sortOrder);
+
+                    } else
+                        return this.basicDataLoad(selection, selectionArgs, sortOrder);
 
                 case QUERY_TYPE_GENRE_ALBUM:
                     List<String> albumsFromGenre = getAlbumNamesFromGenre(selection);

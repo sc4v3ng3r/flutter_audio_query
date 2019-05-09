@@ -28,4 +28,8 @@ enum AlbumSortType {
   /// Returns the albums sorted using [lastYear] property as sort param.
   /// In this case the albums with more oldest year value will come first.
   OLDEST_YEAR,
+
+  /// Return the songs sorted by Ids using the same order that IDs appears
+  /// in IDs query argument list.
+  CURRENT_IDs_ORDER
 }

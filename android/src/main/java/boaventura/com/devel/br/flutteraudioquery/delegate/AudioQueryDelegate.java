@@ -229,6 +229,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
      */
     private void handleReadOnlyMethods(MethodCall call, MethodChannel.Result result){
 
+        List<String> idList = null;
         switch (call.method){
 
             // artists calls section
@@ -252,6 +253,11 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
                 m_albumLoader.getAlbums(result, AlbumSortType.values()[(int)call.argument(SORT_TYPE)] );
                 break;
 
+            case "getAlbumsById":
+                idList =  call.argument("album_ids");
+                m_albumLoader.getAlbumsById(result, idList,
+                        AlbumSortType.values()[(int)call.argument(SORT_TYPE)]);
+                break;
             case "getAlbumsFromArtist":
                 String artist = call.argument("artist" );
                 m_albumLoader.getAlbumsFromArtist(result, artist,
@@ -274,7 +280,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
                 break;
 
             case "getSongsById":
-                final List<String> idList = call.argument("song_ids");
+                idList = call.argument("song_ids");
                 m_songLoader.getSongsById(result, idList,
                         SongSortType.values()[(int)call.argument(SORT_TYPE)]);
                 break;

@@ -99,6 +99,21 @@ class FlutterAudioQuery {
     return _parseAlbumDataList(dataList);
   }
 
+  /// Fetch album by IDs.
+  /// To return data sorted in the same order that ids appears on [ids] list
+  /// parameter use [sortType] param with AlbumSortType.CURRENT_IDs_ORDER value.
+  Future<List<AlbumInfo>> getAlbumsById(
+      {@required final List<String> ids,
+      AlbumSortType sortType = AlbumSortType.DEFAULT}) async {
+    List<dynamic> dataList = await channel.invokeMethod("getAlbumsById", {
+      SOURCE_KEY: SOURCE_ALBUM,
+      SORT_TYPE: sortType.index,
+      "album_ids": ids,
+    });
+
+    return _parseAlbumDataList(dataList);
+  }
+
   ///This method returns a list with all albums that appears on specific [genre]
   ///
   /// [genre] Genre that we want fetch albums. Genre must not be null.
@@ -195,9 +210,11 @@ class FlutterAudioQuery {
   /// [artist] The artist which that appears on [album]. Must be non null.
   /// [album] The album. Must be non null.
   Future<List<SongInfo>> getSongsFromArtistAlbum(
-      {@required final AlbumInfo album, @required final ArtistInfo artist,
-        SongSortType sortType = SongSortType.DEFAULT}) async {
-    List<dynamic> dataList = await channel.invokeMethod("getSongsFromArtistAlbum", {
+      {@required final AlbumInfo album,
+      @required final ArtistInfo artist,
+      SongSortType sortType = SongSortType.DEFAULT}) async {
+    List<dynamic> dataList =
+        await channel.invokeMethod("getSongsFromArtistAlbum", {
       'album_id': album.id,
       'artist': artist.name,
       SOURCE_KEY: SOURCE_SONGS,
@@ -239,15 +256,14 @@ class FlutterAudioQuery {
   ///
   /// [ids] List of IDs.
   /// [sortType] Data sort Type.
-  Future< List<SongInfo> > getSongsById({@required List<String> ids,
-    SongSortType sortType = SongSortType.DEFAULT }) async {
-
-    List<dynamic> dataList = await channel.invokeMethod("getSongsById",
-        {
-          SOURCE_KEY : SOURCE_SONGS,
-          SORT_TYPE : sortType.index,
-          'song_ids' : ids,
-        });
+  Future<List<SongInfo>> getSongsById(
+      {@required List<String> ids,
+      SongSortType sortType = SongSortType.DEFAULT}) async {
+    List<dynamic> dataList = await channel.invokeMethod("getSongsById", {
+      SOURCE_KEY: SOURCE_SONGS,
+      SORT_TYPE: sortType.index,
+      'song_ids': ids,
+    });
     return _parseSongDataList(dataList);
   }
 

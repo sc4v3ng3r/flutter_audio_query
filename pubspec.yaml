@@ -1,7 +1,7 @@
 name: flutter_audio_query
 description: Flutter plugin to query data about artists, albums, songs, genres and playlists
   from device storage.
-version: 0.1.1
+version: 0.2.1
 author: Marcos Antonio Boaventura <scavenger.gnu@gmail.com>
 homepage: https://github.com/sc4v3ng3r/flutter_audio_query
 

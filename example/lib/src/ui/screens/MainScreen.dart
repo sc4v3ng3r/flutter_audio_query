@@ -368,7 +368,7 @@ class _MainScreenState extends State<MainScreen> {
                           CircularProgressIndicator());
 
                     return AlbumGridWidget(
-                        onAlbumClicked: (album){
+                        onAlbumClicked: (album) {
                           _openArtistAlbumPage(artist, album);
                         },
                         albumList: snapshot.data);
@@ -378,27 +378,30 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  void _openArtistAlbumPage(final ArtistInfo artist, final AlbumInfo album ){
+  void _openArtistAlbumPage(final ArtistInfo artist, final AlbumInfo album) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => DetailsContentScreen(
-          appBarBackgroundImage: album.albumArt,
-          appBarTitle: album.title,
-          bodyContent: FutureBuilder<List<SongInfo>>(
-              future: bloc.audioQuery.getSongsFromArtistAlbum(
-                artist: artist, sortType: SongSortType.DISPLAY_NAME, album: album),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData)
-                  return Utility.createDefaultInfoWidget(
-                      CircularProgressIndicator());
+              appBarBackgroundImage: album.albumArt,
+              appBarTitle: album.title,
+              bodyContent: FutureBuilder<List<SongInfo>>(
+                  future: bloc.audioQuery.getSongsFromArtistAlbum(
+                      artist: artist,
+                      sortType: SongSortType.DISPLAY_NAME,
+                      album: album),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData)
+                      return Utility.createDefaultInfoWidget(
+                          CircularProgressIndicator());
 
-                return SongListWidget(songList: snapshot.data);
-              }),
-        ),
+                    return SongListWidget(songList: snapshot.data);
+                  }),
+            ),
       ),
     );
   }
+
   void _openAlbumPage(final AlbumInfo album) {
     Navigator.push(
       context,
