@@ -210,6 +210,18 @@ class FlutterAudioQuery {
     return _parseSongDataList(dataList);
   }
 
+  Future< List<SongInfo> > getSongsById({@required List<String> ids,
+    SongSortType sortType = SongSortType.DEFAULT }) async {
+
+    List<dynamic> dataList = await channel.invokeMethod("getSongsById",
+        {
+          SOURCE_KEY : SOURCE_SONGS,
+          SORT_TYPE : sortType.index,
+          'song_ids' : ids,
+        });
+    return _parseSongDataList(dataList);
+  }
+
   /// This method search for songs which [title] property starts or match with [query] string.
   /// It returns a List of [SongInfo] objects or an empty list if no results.
   ///

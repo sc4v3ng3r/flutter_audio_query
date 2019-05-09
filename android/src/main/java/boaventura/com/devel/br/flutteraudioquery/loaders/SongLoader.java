@@ -183,7 +183,7 @@ public class SongLoader extends AbstractLoader {
         if ( (songIds != null) && (songIds.size() > 0) ){
              values = songIds.toArray(new String[songIds.size()] );
              this.
-             createLoadTask(result, SONG_PROJECTION[0] + " =?", values, preparePlaylistSongsSortOrder(songIds), QUERY_TYPE_DEFAULT)
+             createLoadTask(result, SONG_PROJECTION[0] + " =?", values, prepareIDsSongsSortOrder(songIds), QUERY_TYPE_DEFAULT)
                      .execute();
         }
         else result.success( new ArrayList<Map<String,Object>>() );
@@ -196,7 +196,7 @@ public class SongLoader extends AbstractLoader {
      * @param songIds Song ids list
      * @return Sql String case when then or null if songIds size is not greater then 1.
      */
-    private String preparePlaylistSongsSortOrder(final List<String> songIds){
+    private String prepareIDsSongsSortOrder(final List<String> songIds){
         if (songIds.size() == 1)
             return null;
 
@@ -269,6 +269,35 @@ public class SongLoader extends AbstractLoader {
                 .execute();
     }
 
+    public void getSongsById(final MethodChannel.Result result, final List<String> ids,
+                             final SongSortType sortType){
+
+        String[] selectionArgs;
+        String sortOrder = null;
+
+        if (ids == null || ids.isEmpty()) {
+            result.error("NO_SONG_IDS", "No Ids was provided", null);
+            return;
+        }
+
+        if (ids.size() > 1){
+            selectionArgs = ids.toArray( new String[ ids.size() ]);
+
+            if(sortType == SongSortType.CURRENT_IDs_ORDER)
+                sortOrder = prepareIDsSongsSortOrder( ids );
+        }
+
+        else{
+            sortOrder = parseSortOrder(sortType);
+            selectionArgs = new String[]{ ids.get(0) };
+        }
+
+        createLoadTask(result, MediaStore.Audio.Media._ID, selectionArgs,
+                sortOrder, QUERY_TYPE_DEFAULT).execute();
+    }
+
+
+
     @Override
     protected SongTaskLoad createLoadTask(MethodChannel.Result result, final String selection, final String [] selectionArgs,
                                 final String sortOrder, final int type){
@@ -315,6 +344,8 @@ public class SongLoader extends AbstractLoader {
 
             switch (m_queryType){
                 case QUERY_TYPE_DEFAULT:
+                    // In this case the selection will be always by id.
+                    // used for fetch songs for playlist or songs by id.
                     if ( (selectionArgs!=null) && (selectionArgs.length > 1) ){
                         return basicLoad( createMultipleValueSelectionArgs(MediaStore.Audio.Media._ID,
                                 selectionArgs), selectionArgs, sortOrder);
@@ -323,7 +354,7 @@ public class SongLoader extends AbstractLoader {
                         return  basicLoad(selection, selectionArgs, sortOrder);
 
                 case QUERY_TYPE_ALBUM_SONGS:
-                    Log.i("MDBG", "new way");
+                    //Log.i("MDBG", "new way");
                     return basicLoad(selection,selectionArgs,sortOrder);
 
                 case QUERY_TYPE_GENRE_SONGS:
@@ -395,7 +426,6 @@ public class SongLoader extends AbstractLoader {
                 songsCursor = m_resolver.query(
                         MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                         SongLoader.SONG_PROJECTION, selection, selectionArgs, sortOrder );
-
             }
 
             catch (RuntimeException ex){

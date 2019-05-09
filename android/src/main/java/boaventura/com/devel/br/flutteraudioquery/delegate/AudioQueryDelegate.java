@@ -273,6 +273,12 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
                 m_songLoader.getSongs(result, SongSortType.values()[(int)call.argument(SORT_TYPE)] );
                 break;
 
+            case "getSongsById":
+                final List<String> idList = call.argument("song_ids");
+                m_songLoader.getSongsById(result, idList,
+                        SongSortType.values()[(int)call.argument(SORT_TYPE)]);
+                break;
+
             case "getSongsFromArtist":
                 m_songLoader.getSongsFromArtist( result, (String) call.argument("artist" ),
                         SongSortType.values()[ (int)call.argument(SORT_TYPE) ] );

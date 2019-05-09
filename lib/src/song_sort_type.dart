@@ -55,5 +55,9 @@ enum SongSortType {
 
   /// Return the songs sorted using [display_name] property as sort param.
   /// Is a good option to be used when desired have the original album songs order.
-  DISPLAY_NAME
+  DISPLAY_NAME,
+
+  /// Return the songs sorted by Ids using the same order that IDs appears
+  /// in IDs query argument list.
+  CURRENT_IDs_ORDER
 }
