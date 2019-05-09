@@ -19,7 +19,8 @@ import io.flutter.plugin.common.MethodChannel;
 public class GenreLoader extends AbstractLoader {
 
     private static final String[] GENRE_PROJECTION = {
-            MediaStore.Audio.GenresColumns.NAME
+            "genre_name",
+            //MediaStore.Audio.GenresColumns.NAME,
     };
 
     public GenreLoader(Context context) {
@@ -49,7 +50,8 @@ public class GenreLoader extends AbstractLoader {
 
             default:
             case DEFAULT:
-                sortOrder = MediaStore.Audio.Genres.DEFAULT_SORT_ORDER;
+                sortOrder = "genre_name ASC";
+                //sortOrder = MediaStore.Audio.Genres.DEFAULT_SORT_ORDER;
                 break;
         }
 
@@ -77,7 +79,7 @@ public class GenreLoader extends AbstractLoader {
                             final GenreSortType sortType ){
 
         String[] args = new String[]{ namedQuery + "%"};
-        createLoadTask(results, MediaStore.Audio.GenresColumns.NAME + " like ?", args,
+        createLoadTask(results, GENRE_PROJECTION[0] + " like ?", args,
                 parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
     }
 
@@ -106,17 +108,21 @@ public class GenreLoader extends AbstractLoader {
                                                      String sortOrder) {
 
             List<Map<String, Object>> dataList= new ArrayList<>();
+            Cursor genreCursor = m_resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    new String[] {"Distinct " + GENRE_PROJECTION[0] }, selection,
+                    selectionArgs, sortOrder);
 
-            Cursor genreCursor = m_resolver.query(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI,
-                    GENRE_PROJECTION, selection, selectionArgs, sortOrder);
+//            Cursor genreCursor = m_resolver.query(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI,
+//                    GENRE_PROJECTION, selection, selectionArgs, sortOrder);
 
             if (genreCursor != null){
                 while ( genreCursor.moveToNext() ){
                     try {
                         Map<String, Object> data = new HashMap<>();
                         for (String column : genreCursor.getColumnNames()) {
-                            data.put(column, genreCursor.getString(
-                                    genreCursor.getColumnIndex(column)));
+                            String genreName = genreCursor.getString(
+                                    genreCursor.getColumnIndex(column));
+                            data.put(MediaStore.Audio.GenresColumns.NAME, genreName);
                         }
                         dataList.add(data);
                     }

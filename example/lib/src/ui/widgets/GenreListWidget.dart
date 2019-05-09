@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
 import './ListItemWidget.dart';
 
-typedef GenreItemTap = void Function(final GenreInfo);
+typedef GenreItemTap = void Function(GenreInfo);
 
 class GenreListWidget extends StatelessWidget {
   final List<GenreInfo> dataList;

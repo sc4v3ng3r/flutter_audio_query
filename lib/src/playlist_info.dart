@@ -53,10 +53,10 @@ class PlaylistInfo extends DataModel {
     //return PlaylistInfo._(updatedPlaylist);
   }
 
-  //This method updates the playlist itself.
-  // when some playlist data changes like songs order, or song members
-  // this method keep this playlist updated parsing updated data that comes
-  // from native side.
+  /// This method updates the playlist itself.
+  /// when some playlist data changes like songs order, or song members
+  /// this method keep this playlist updated parsing updated data that comes
+  /// from native side.
   void _updatePlaylistData(PlaylistInfo playlist) {
     _memberIds = List<String>.from(playlist._data["memberIds"]);
     this._data = playlist._data;
@@ -79,5 +79,4 @@ class PlaylistInfo extends DataModel {
       this._updatePlaylistData(data);
     }
   }
-
 }
