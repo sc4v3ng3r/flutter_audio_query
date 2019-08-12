@@ -32,7 +32,7 @@ class _GenreNavigationScreenState extends State<GenreNavigationScreen> {
 
             ///getting all albums from current genre and show them
             _createGenreAlbumsWidget(
-                audioQuery.getAlbumsFromGenre(genre: widget.currentGenre)),
+                audioQuery.getAlbumsFromGenre(genre: widget.currentGenre.name)),
           ],
         ),
       ),

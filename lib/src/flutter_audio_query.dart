@@ -73,9 +73,10 @@ class FlutterAudioQuery {
     return _parseArtistDataList(dataList);
   }
 
+  // TODO change GenreInfo to String genreName
   ///This method returns a list with all artists that appears on specific genre.
   ///
-  /// [genre] Genre that we want fetch artists. Must not be null
+  /// [genre] Genre name that we want fetch artists. Must not be null
   Future<List<ArtistInfo>> getArtistsFromGenre(
       {@required final GenreInfo genre,
       ArtistSortType sortType = ArtistSortType.DEFAULT}) async {
@@ -130,7 +131,7 @@ class FlutterAudioQuery {
 
   ///This method returns a list with all albums that appears on specific [genre]
   ///
-  /// [genre] Genre that we want fetch albums. Genre must not be null.
+  /// [genre] Genre name that we want fetch albums. Genre must not be null.
   Future<List<AlbumInfo>> getAlbumsFromGenre(
       {@required final String genre,
       AlbumSortType sortType = AlbumSortType.DEFAULT}) async {
@@ -142,9 +143,9 @@ class FlutterAudioQuery {
     return _parseAlbumDataList(dataList);
   }
 
-  /// This method returns all albums info from a specific artist.
-  ///
-  /// [artist] must be non null.
+  /// This method returns all albums info from a specific artist
+  /// using his name.
+  /// [artist] Artist name must be non null.
   Future<List<AlbumInfo>> getAlbumsFromArtist(
       {@required final String artist,
       AlbumSortType sortType = AlbumSortType.DEFAULT}) async {
@@ -182,8 +183,8 @@ class FlutterAudioQuery {
   }
 
   /// This method returns list with  all songs info from a specific artist.
-  ///
-  /// [artist] must be non null
+  /// using his name.
+  /// [artist] Artist name must be non null
   Future<List<SongInfo>> getSongsFromArtist(
       {@required final String artist,
       SongSortType sortType = SongSortType.DEFAULT}) async {
@@ -221,7 +222,7 @@ class FlutterAudioQuery {
   /// [album] so this is the appropriated method. If you want to show all songs that
   /// appears on [album] no matter what artist it belongs you should use getSongsFromAlbum method.
   ///
-  /// [artist] The artist which that appears on [album]. Must be non null.
+  /// [artist] The artist name which that appears on [album]. Must be non null.
   /// [album] The album. Must be non null.
   Future<List<SongInfo>> getSongsFromArtistAlbum(
       {@required final String albumId,
@@ -238,9 +239,9 @@ class FlutterAudioQuery {
   }
 
   /// This method returns a list fo songs info which all songs are from
-  /// specified [genre].
+  /// specified [genre] name.
   ///
-  /// [genre] must be non null.
+  /// [genre] Genre name must be non null.
   Future<List<SongInfo>> getSongsFromGenre(
       {@required final String genre,
       SongSortType sortType = SongSortType.DEFAULT}) async {

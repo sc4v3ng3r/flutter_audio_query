@@ -361,7 +361,7 @@ class _MainScreenState extends State<MainScreen> {
               appBarBackgroundImage: artist.artistArtPath,
               appBarTitle: artist.name,
               bodyContent: FutureBuilder<List<AlbumInfo>>(
-                  future: bloc.audioQuery.getAlbumsFromArtist(artist: artist),
+                  future: bloc.audioQuery.getAlbumsFromArtist(artist: artist.name),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData)
                       return Utility.createDefaultInfoWidget(
@@ -387,9 +387,9 @@ class _MainScreenState extends State<MainScreen> {
               appBarTitle: album.title,
               bodyContent: FutureBuilder<List<SongInfo>>(
                   future: bloc.audioQuery.getSongsFromArtistAlbum(
-                      artist: artist,
+                      artist: artist.name,
                       sortType: SongSortType.DISPLAY_NAME,
-                      album: album),
+                      albumId: album.id),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData)
                       return Utility.createDefaultInfoWidget(
@@ -411,7 +411,7 @@ class _MainScreenState extends State<MainScreen> {
               appBarTitle: album.title,
               bodyContent: FutureBuilder<List<SongInfo>>(
                   future: bloc.audioQuery.getSongsFromAlbum(
-                      sortType: SongSortType.DISPLAY_NAME, album: album),
+                      sortType: SongSortType.DISPLAY_NAME, albumId: album.id),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData)
                       return Utility.createDefaultInfoWidget(
