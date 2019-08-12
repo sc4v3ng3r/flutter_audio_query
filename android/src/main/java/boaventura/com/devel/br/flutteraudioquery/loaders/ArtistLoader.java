@@ -104,6 +104,38 @@ public class ArtistLoader extends AbstractLoader {
         createLoadTask(result, null, null,
                 parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
     }
+
+    /**
+     * Fetch Artists by id.
+     * @param result
+     * @param ids
+     * @param sortType
+     */
+    public void getArtistsById(final MethodChannel.Result result, List<String> ids,
+                               ArtistSortType sortType){
+        String[] selectionArgs;
+        String sortOrder = null;
+
+        if (ids == null || ids.isEmpty()) {
+            result.error("NO_ARTIST_IDS", "No Ids was provided", null);
+            return;
+        }
+
+        if (ids.size() > 1){
+            selectionArgs = ids.toArray( new String[ ids.size() ]);
+
+            if(sortType == ArtistSortType.CURRENT_IDs_ORDER)
+                sortOrder = prepareIDsSortOrder( ids );
+        }
+
+        else{
+            sortOrder = parseSortOrder(sortType);
+            selectionArgs = new String[]{ ids.get(0) };
+        }
+
+        createLoadTask(result, MediaStore.Audio.Artists._ID, selectionArgs,
+                sortOrder, QUERY_TYPE_DEFAULT).execute();
+    }
     /**
      * This method makes a query that search artists by names with
      * nameQuery query String.
@@ -160,6 +192,39 @@ public class ArtistLoader extends AbstractLoader {
             final String[] selectionArgs, final String sortOrder, final int type){
         return null;
     }*/
+
+
+    /**
+     * This method creates a SQL CASE WHEN THEN in order to get specific elements
+     * where the query results is sorted matching [IDs] list values order.
+     *
+     * @param idList Song IDs list
+     * @return Sql String case when then or null if idList size is not greater then 1.
+     */
+    private String prepareIDsSortOrder(final List<String> idList){
+        if (idList.size() == 1)
+            return null;
+
+        StringBuilder orderStr = new StringBuilder("CASE ")
+                .append(MediaStore.MediaColumns._ID)
+                .append(" WHEN '")
+                .append(idList.get(0))
+                .append("'")
+                .append(" THEN 0");
+
+        for(int i = 1; i < idList.size(); i++){
+            orderStr.append(" WHEN '")
+                    .append( idList.get(i) )
+                    .append("'")
+                    .append(" THEN ")
+                    .append(i);
+        }
+
+        orderStr.append(" END, ")
+                .append(MediaStore.MediaColumns._ID)
+                .append(" ASC");
+        return orderStr.toString();
+    }
 
     static class ArtistLoadTask extends AbstractLoadTask<List<Map<String, Object>>> {
         private ContentResolver m_resolver;

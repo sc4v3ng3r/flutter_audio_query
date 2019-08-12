@@ -22,4 +22,9 @@ enum ArtistSortType {
   /// Returns the artists sorted using the number of tracks as sorting parameter.
   /// In this case the artists with less number of tracks comes first.
   LESS_TRACKS_NUMBER_FIRST,
+
+  /// Return the songs sorted by Ids using the same order that IDs appears
+  /// in IDs query argument list.
+  CURRENT_IDs_ORDER
+
 }

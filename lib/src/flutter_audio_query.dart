@@ -59,6 +59,20 @@ class FlutterAudioQuery {
     return _parseArtistDataList(dataList);
   }
 
+  /// Fetch artist by IDs.
+  /// To return data sorted in the same order that ids appears on [ids] list
+  /// parameter use [sortType] param with ArtistSortType.CURRENT_IDs_ORDER value.
+  Future<List<ArtistInfo>> getArtistsById({@required final List<String> ids,
+    ArtistSortType sortType = ArtistSortType.DEFAULT}) async {
+    List<dynamic> dataList = await channel.invokeMethod("getArtistsById", {
+      SOURCE_KEY : SOURCE_ARTIST,
+      'artist_ids' : ids,
+      SORT_TYPE : sortType.index,
+    });
+
+    return _parseArtistDataList(dataList);
+  }
+
   ///This method returns a list with all artists that appears on specific genre.
   ///
   /// [genre] Genre that we want fetch artists. Must not be null
