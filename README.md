@@ -77,7 +77,7 @@ artists.forEach( (artist){
  List<AlbumInfo> albumList = await audioQuery.getAlbums();
 
 /// getting all albums available from a specific artist
-List<AlbumInfo> albums = await audioQuery.getAlbumsFromArtist(artist: artist);
+List<AlbumInfo> albums = await audioQuery.getAlbumsFromArtist(artist: artist.name);
     albums.forEach( (artistAlbum) {
       print(artistAlbum); //print all album property values
     });
@@ -89,13 +89,13 @@ List<AlbumInfo> albums = await audioQuery.getAlbumsFromArtist(artist: artist);
 
  genreList.foreach( (genre){
    /// getting all artists available from specific genre.
-   await audioQuery.getArtistsFromGenre(genre: genre);
+   await audioQuery.getArtistsFromGenre(genre: genre.name);
 
    /// getting all albums which appears on genre [genre].
-   await audioQuery.getAlbumsFromGenre(genre: genre);
+   await audioQuery.getAlbumsFromGenre(genre: genre.name);
 
    /// getting all songs which appears on genre [genre]
-   await audioQuery.getSongsFromGenre(genre: genre);
+   await audioQuery.getSongsFromGenre(genre: genre.name);
  } );
  ```
  ### Getting songs data
@@ -105,7 +105,7 @@ List<SongInfo> songs = await audioQuery.getSongs();
 
 albumList.foreach( (album){
   /// getting songs from specific album
-  audioQuery.getSongsFromAlbum(album: album);
+  audioQuery.getSongsFromAlbum(album: album.name);
  } );
 ```
 
