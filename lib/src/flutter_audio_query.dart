@@ -73,16 +73,15 @@ class FlutterAudioQuery {
     return _parseArtistDataList(dataList);
   }
 
-  // TODO change GenreInfo to String genreName
   ///This method returns a list with all artists that appears on specific genre.
   ///
   /// [genre] Genre name that we want fetch artists. Must not be null
   Future<List<ArtistInfo>> getArtistsFromGenre(
-      {@required final GenreInfo genre,
+      {@required final String genre,
       ArtistSortType sortType = ArtistSortType.DEFAULT}) async {
     List<dynamic> dataList = await channel.invokeMethod('getArtistsFromGenre', {
       SOURCE_KEY: SOURCE_ARTIST,
-      'genre_name': genre.name,
+      'genre_name': genre,
       SORT_TYPE: sortType.index,
     });
     return _parseArtistDataList(dataList);

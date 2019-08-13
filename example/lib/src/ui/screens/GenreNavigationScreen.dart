@@ -28,7 +28,7 @@ class _GenreNavigationScreenState extends State<GenreNavigationScreen> {
           children: <Widget>[
             _createGenreArtistsWidget(
                 /// getting all artists from genre
-                audioQuery.getArtistsFromGenre(genre: widget.currentGenre)),
+                audioQuery.getArtistsFromGenre(genre: widget.currentGenre.name)),
 
             ///getting all albums from current genre and show them
             _createGenreAlbumsWidget(
@@ -44,10 +44,6 @@ class _GenreNavigationScreenState extends State<GenreNavigationScreen> {
       future: future,
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
-          case ConnectionState.none:
-            return Center(
-              child: Text("No future response..."),
-            );
 
           case ConnectionState.waiting:
             return Utility.createDefaultInfoWidget(CircularProgressIndicator());
@@ -94,6 +90,10 @@ class _GenreNavigationScreenState extends State<GenreNavigationScreen> {
                 ),
               ],
             );
+
+            default:
+              return Center(child: Text("No future response..."),
+        );
         }
       },
     );
@@ -106,11 +106,6 @@ class _GenreNavigationScreenState extends State<GenreNavigationScreen> {
       future: future,
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
-          case ConnectionState.none:
-            return Center(
-              child: Text("No future response..."),
-            );
-
           case ConnectionState.waiting:
             return Column(
               children: <Widget>[
@@ -159,6 +154,11 @@ class _GenreNavigationScreenState extends State<GenreNavigationScreen> {
                       }),
                 ),
               ],
+            );
+
+          default:
+            return Center(
+              child: Text("No future response..."),
             );
         }
       },

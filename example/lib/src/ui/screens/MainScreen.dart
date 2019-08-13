@@ -78,15 +78,6 @@ class _MainScreenState extends State<MainScreen> {
               stream: bloc.searchBarState,
               builder: (context, snapshot) {
                 switch (snapshot.data) {
-                  case SearchBarState.COLLAPSED:
-                    return IconButton(
-                        icon: Icon(
-                          Icons.search,
-                        ),
-                        tooltip:
-                            "Search for ${_titles[_currentNavigationOption]}",
-                        onPressed: () =>
-                            bloc.changeSearchBarState(SearchBarState.EXPANDED));
 
                   case SearchBarState.EXPANDED:
                     return IconButton(
@@ -97,6 +88,16 @@ class _MainScreenState extends State<MainScreen> {
                             "Search for ${_titles[_currentNavigationOption]}",
                         onPressed: () => bloc
                             .changeSearchBarState(SearchBarState.COLLAPSED));
+                  default:
+                  //case SearchBarState.COLLAPSED:
+                    return IconButton(
+                        icon: Icon(
+                          Icons.search,
+                        ),
+                        tooltip:
+                        "Search for ${_titles[_currentNavigationOption]}",
+                        onPressed: () =>
+                            bloc.changeSearchBarState(SearchBarState.EXPANDED));
                 }
               }),
           StreamBuilder<NavigationOptions>(
@@ -104,9 +105,7 @@ class _MainScreenState extends State<MainScreen> {
               stream: bloc.currentNavigationOption,
               builder: (context, snapshot) {
                 return IconButton(
-                  icon: Icon(
-                    Icons.sort,
-                  ),
+                  icon: Icon( Icons.sort,),
                   tooltip: "${_titles[snapshot.data]} Sort Type",
                   onPressed: () => _displaySortChooseDialog(snapshot.data),
                 );
@@ -227,8 +226,12 @@ class _MainScreenState extends State<MainScreen> {
                 );
             }
           }
+
+          return NoDataWidget(title: "Something goes wrong!",);
+
         },
       ),
+
       bottomNavigationBar: _createBottomBarNavigator(),
       floatingActionButton: StreamBuilder<NavigationOptions>(
         initialData: _currentNavigationOption,
