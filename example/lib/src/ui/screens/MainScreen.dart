@@ -78,7 +78,6 @@ class _MainScreenState extends State<MainScreen> {
               stream: bloc.searchBarState,
               builder: (context, snapshot) {
                 switch (snapshot.data) {
-
                   case SearchBarState.EXPANDED:
                     return IconButton(
                         icon: Icon(
@@ -89,13 +88,13 @@ class _MainScreenState extends State<MainScreen> {
                         onPressed: () => bloc
                             .changeSearchBarState(SearchBarState.COLLAPSED));
                   default:
-                  //case SearchBarState.COLLAPSED:
+                    //case SearchBarState.COLLAPSED:
                     return IconButton(
                         icon: Icon(
                           Icons.search,
                         ),
                         tooltip:
-                        "Search for ${_titles[_currentNavigationOption]}",
+                            "Search for ${_titles[_currentNavigationOption]}",
                         onPressed: () =>
                             bloc.changeSearchBarState(SearchBarState.EXPANDED));
                 }
@@ -105,7 +104,9 @@ class _MainScreenState extends State<MainScreen> {
               stream: bloc.currentNavigationOption,
               builder: (context, snapshot) {
                 return IconButton(
-                  icon: Icon( Icons.sort,),
+                  icon: Icon(
+                    Icons.sort,
+                  ),
                   tooltip: "${_titles[snapshot.data]} Sort Type",
                   onPressed: () => _displaySortChooseDialog(snapshot.data),
                 );
@@ -227,11 +228,11 @@ class _MainScreenState extends State<MainScreen> {
             }
           }
 
-          return NoDataWidget(title: "Something goes wrong!",);
-
+          return NoDataWidget(
+            title: "Something goes wrong!",
+          );
         },
       ),
-
       bottomNavigationBar: _createBottomBarNavigator(),
       floatingActionButton: StreamBuilder<NavigationOptions>(
         initialData: _currentNavigationOption,
@@ -361,22 +362,22 @@ class _MainScreenState extends State<MainScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => DetailsContentScreen(
-              appBarBackgroundImage: artist.artistArtPath,
-              appBarTitle: artist.name,
-              bodyContent: FutureBuilder<List<AlbumInfo>>(
-                  future: bloc.audioQuery.getAlbumsFromArtist(artist: artist.name),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData)
-                      return Utility.createDefaultInfoWidget(
-                          CircularProgressIndicator());
+          appBarBackgroundImage: artist.artistArtPath,
+          appBarTitle: artist.name,
+          bodyContent: FutureBuilder<List<AlbumInfo>>(
+              future: bloc.audioQuery.getAlbumsFromArtist(artist: artist.name),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData)
+                  return Utility.createDefaultInfoWidget(
+                      CircularProgressIndicator());
 
-                    return AlbumGridWidget(
-                        onAlbumClicked: (album) {
-                          _openArtistAlbumPage(artist, album);
-                        },
-                        albumList: snapshot.data);
-                  }),
-            ),
+                return AlbumGridWidget(
+                    onAlbumClicked: (album) {
+                      _openArtistAlbumPage(artist, album);
+                    },
+                    albumList: snapshot.data);
+              }),
+        ),
       ),
     );
   }
@@ -386,21 +387,21 @@ class _MainScreenState extends State<MainScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => DetailsContentScreen(
-              appBarBackgroundImage: album.albumArt,
-              appBarTitle: album.title,
-              bodyContent: FutureBuilder<List<SongInfo>>(
-                  future: bloc.audioQuery.getSongsFromArtistAlbum(
-                      artist: artist.name,
-                      sortType: SongSortType.DISPLAY_NAME,
-                      albumId: album.id),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData)
-                      return Utility.createDefaultInfoWidget(
-                          CircularProgressIndicator());
+          appBarBackgroundImage: album.albumArt,
+          appBarTitle: album.title,
+          bodyContent: FutureBuilder<List<SongInfo>>(
+              future: bloc.audioQuery.getSongsFromArtistAlbum(
+                  artist: artist.name,
+                  sortType: SongSortType.DISPLAY_NAME,
+                  albumId: album.id),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData)
+                  return Utility.createDefaultInfoWidget(
+                      CircularProgressIndicator());
 
-                    return SongListWidget(songList: snapshot.data);
-                  }),
-            ),
+                return SongListWidget(songList: snapshot.data);
+              }),
+        ),
       ),
     );
   }
@@ -410,19 +411,19 @@ class _MainScreenState extends State<MainScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => DetailsContentScreen(
-              appBarBackgroundImage: album.albumArt,
-              appBarTitle: album.title,
-              bodyContent: FutureBuilder<List<SongInfo>>(
-                  future: bloc.audioQuery.getSongsFromAlbum(
-                      sortType: SongSortType.DISPLAY_NAME, albumId: album.id),
-                  builder: (context, snapshot) {
-                    if (!snapshot.hasData)
-                      return Utility.createDefaultInfoWidget(
-                          CircularProgressIndicator());
+          appBarBackgroundImage: album.albumArt,
+          appBarTitle: album.title,
+          bodyContent: FutureBuilder<List<SongInfo>>(
+              future: bloc.audioQuery.getSongsFromAlbum(
+                  sortType: SongSortType.DISPLAY_NAME, albumId: album.id),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData)
+                  return Utility.createDefaultInfoWidget(
+                      CircularProgressIndicator());
 
-                    return SongListWidget(songList: snapshot.data);
-                  }),
-            ),
+                return SongListWidget(songList: snapshot.data);
+              }),
+        ),
       ),
     );
   }
