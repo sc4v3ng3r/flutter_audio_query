@@ -8,7 +8,7 @@
     
 * Now is possible fetch multiple ArtistInfo objects using the method "getArtistsById".
 
-* **BUG FIX**: Fixing IsMusic and methods like cast issue.
+* **BUG FIX**: Fixing isMusic and methods like cast issue.
 
 ## 0.2.1
 
