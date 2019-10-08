@@ -1,4 +1,5 @@
 
+
 ## 0.3.2
 * **Breaking change**: The methods "getAlbumsFromGenre", "getAlbumsFromArtist", "getSongsFromArtist",
     "getSongsFromAlbum", "getSongsFromArtistAlbum", "getSongsFromGenre" and "getArtistsFromGenre"
@@ -6,6 +7,8 @@
     ArtistInfo and AlbumInfo.
     
 * Now is possible fetch multiple ArtistInfo objects using the method "getArtistsById".
+
+* **BUG FIX**: Fixing IsMusic and methods like cast issue.
 
 ## 0.2.1
 

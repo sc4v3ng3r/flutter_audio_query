@@ -461,8 +461,23 @@ public class SongLoader extends AbstractLoader {
                     try {
 
                         Map<String, Object> songData = new HashMap<>();
-                        for (String column : songsCursor.getColumnNames())
-                            songData.put(column, songsCursor.getString( songsCursor.getColumnIndex(column)) );
+
+                        for (String column : songsCursor.getColumnNames()){
+                            switch (column ){
+                                case MediaStore.Audio.Media.IS_MUSIC:
+                                case MediaStore.Audio.Media.IS_PODCAST:
+                                case MediaStore.Audio.Media.IS_RINGTONE:
+                                case MediaStore.Audio.Media.IS_ALARM:
+                                case MediaStore.Audio.Media.IS_NOTIFICATION:
+                                    songData.put(column,
+                                            (songsCursor.getInt(songsCursor.getColumnIndex(column)) != 0));
+                                    break;
+                                default:
+                                    songData.put(column, songsCursor.getString( songsCursor.getColumnIndex(column)) );
+                            }
+
+                        }
+
 
                         String albumKey = songsCursor.getString(
                                 songsCursor.getColumnIndex(SONG_PROJECTION[4]));
