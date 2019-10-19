@@ -154,7 +154,6 @@ public class AlbumLoader extends AbstractLoader {
         createLoadTask(results, MediaStore.Audio.AlbumColumns.ALBUM + " like ?", args,
                 parseSortOrder(sortType), QUERY_TYPE_DEFAULT)
                 .execute();
-
     }
 
     /**
@@ -162,7 +161,7 @@ public class AlbumLoader extends AbstractLoader {
      * Method used to query albums from a specific artist
      *
      * @param result MethodChannel.Result object to send reply for dart
-     * @param artistName That artist name that you wanna fetch the albums.
+     * @param artistName That artist id that you wanna fetch the albums.
      * @param sortType AlbumSortType object to define sort type for data queried.
      */
     public void getAlbumsFromArtist(MethodChannel.Result result, String artistName, AlbumSortType sortType) {
@@ -297,22 +296,7 @@ public class AlbumLoader extends AbstractLoader {
                     break;
 
                 case QUERY_TYPE_ARTIST_ALBUM:
-                    List<Map<String, Object>> data = basicDataLoad(selection, selectionArgs, sortOrder);
-
-                    //Sometimes the relationship album -> artist in Album "TABLE" are missing and I really
-                    //don't know why but I saw this happen on API level 19. So as work around, when we can't get
-                    //albums from a specific artist querying the Album "TABLE" doing something like
-                    //SELECT * FROM ALBUM WHERE artistName = "AndroidxRockAndRoll";
-                    //we go to Media "TABLE" in order to get name and id of the albums from that specific
-                    //artist and then we query all album info from Album "TABLE".
-
-                    //It's not the best way to do this, but we get the results.
-
-                    if (data.isEmpty()) {
-                        if (selectionArgs != null)
-                            return loadAlbumsInfoWithMediaSupport(selectionArgs[0]);
-                    } else
-                        return data;
+                    return loadAlbumsInfoWithMediaSupport(selectionArgs[0]);
 
                 default:
                     break;
@@ -320,7 +304,6 @@ public class AlbumLoader extends AbstractLoader {
 
             return new ArrayList<>();
         }
-
 
         private List<Map<String, Object>> basicDataLoad(final String selection, final String[] selectionArgs,
                                                         final String sortOrder) {
@@ -336,7 +319,7 @@ public class AlbumLoader extends AbstractLoader {
                     return dataList;
                 }
                 else {
-                    while (cursor.moveToNext()) {
+                    while ( cursor.moveToNext() ) {
                         try {
                             Map<String, Object> dataMap = new HashMap<>();
                             for (String albumColumn : ALBUM_PROJECTION) {

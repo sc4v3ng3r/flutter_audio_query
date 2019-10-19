@@ -148,6 +148,7 @@ class FlutterAudioQuery {
   /// [artist] Artist name must be non null.
   Future<List<AlbumInfo>> getAlbumsFromArtist(
       {@required final String artist,
+
       AlbumSortType sortType = AlbumSortType.DEFAULT}) async {
     List<dynamic> dataList = await channel.invokeMethod('getAlbumsFromArtist', {
       'artist': artist,

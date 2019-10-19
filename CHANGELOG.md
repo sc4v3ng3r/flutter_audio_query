@@ -1,4 +1,7 @@
 
+## 0.3.3
+* **Bug fix**: Fixing the wrong 'numberOfSongs' property value when 
+    load albums using getAlbumsFromArtist method.    
 
 ## 0.3.2
 * **Breaking change**: The methods "getAlbumsFromGenre", "getAlbumsFromArtist", "getSongsFromArtist",
