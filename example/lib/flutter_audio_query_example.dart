@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import './src/bloc/ApplicationBloc.dart';
 import './src/bloc/BlocProvider.dart';
 import './src/ui/screens/MainScreen.dart';
