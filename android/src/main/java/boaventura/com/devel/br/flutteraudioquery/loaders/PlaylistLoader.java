@@ -14,6 +14,7 @@ import java.util.Map;
 
 import boaventura.com.devel.br.flutteraudioquery.loaders.tasks.AbstractLoadTask;
 import boaventura.com.devel.br.flutteraudioquery.sortingtypes.PlaylistSortType;
+import boaventura.com.devel.br.flutteraudioquery.sortingtypes.StorageType;
 import io.flutter.plugin.common.MethodChannel;
 
 
@@ -43,9 +44,9 @@ public class PlaylistLoader extends AbstractLoader {
      * @param result  MethodChannel.Result object to send reply for dart
      * @param sortType PlaylistSortType object to define sort type for data queried.
      */
-    public void getPlaylists(final MethodChannel.Result result, final PlaylistSortType sortType){
+    public void getPlaylists(final MethodChannel.Result result, final PlaylistSortType sortType, StorageType storageType){
         createLoadTask(result,null,null,
-                parseSortType(sortType),QUERY_TYPE_DEFAULT).execute();
+                parseSortType(sortType),QUERY_TYPE_DEFAULT, storageType).execute();
     }
 
     /**
@@ -81,10 +82,10 @@ public class PlaylistLoader extends AbstractLoader {
      * @param result MethodChannel.Result object to send reply for dart.
      * @param playlistId Id of playlist.
      */
-    private void getPlaylistById(final MethodChannel.Result result, final String playlistId){
+    private void getPlaylistById(final MethodChannel.Result result, final String playlistId, StorageType storageType){
 
         createLoadTask(result, MediaStore.Audio.Playlists._ID + " =?", new String[]{playlistId},
-                null, QUERY_TYPE_DEFAULT).execute();
+                null, QUERY_TYPE_DEFAULT, storageType).execute();
     }
 
     /**
@@ -94,10 +95,10 @@ public class PlaylistLoader extends AbstractLoader {
      * @param sortType PlaylistSortType The type of sort desired.
      */
     public void searchPlaylists(final MethodChannel.Result results, final String namedQuery,
-                                final PlaylistSortType sortType ){
+                                final PlaylistSortType sortType, StorageType storageType){
         String[] args = new String[] { namedQuery + "%"};
         createLoadTask(results,MediaStore.Audio.Playlists.NAME + " like ?", args,
-                parseSortType(sortType), QUERY_TYPE_DEFAULT ).execute();
+                parseSortType(sortType), QUERY_TYPE_DEFAULT, storageType ).execute();
     }
 
     /**
@@ -201,7 +202,7 @@ public class PlaylistLoader extends AbstractLoader {
             values.put(MediaStore.Audio.Playlists.Members.PLAY_ORDER, base);
             resolver.insert(playlistUri, values);
             //updateResolver();
-            getPlaylistById(results, playlistId);
+            getPlaylistById(results, playlistId, StorageType.DEFAULT);
         }
 
         else {
@@ -225,7 +226,7 @@ public class PlaylistLoader extends AbstractLoader {
 
             if (result){
                 updateResolver();
-                getPlaylistById(results, playlistId);
+                getPlaylistById(results, playlistId, StorageType.DEFAULT);
             }
 
             else
@@ -270,7 +271,7 @@ public class PlaylistLoader extends AbstractLoader {
 
             if (deletedRows > 0 ){
                 updateResolver();
-                getPlaylistById(results, playlistId);
+                getPlaylistById(results, playlistId, StorageType.DEFAULT);
             }
 
             else results.error("Was not possible delete song data from this playlist","",null);
@@ -322,7 +323,7 @@ public class PlaylistLoader extends AbstractLoader {
 
     @Override
     protected PlaylistLoadTask createLoadTask(
-            MethodChannel.Result result, String selection, String[] selectionArgs, String sortOrder, int type) {
+            MethodChannel.Result result, String selection, String[] selectionArgs, String sortOrder, int type, StorageType storage) {
 
         return new PlaylistLoadTask(result, getContentResolver(), selection, selectionArgs, sortOrder);
     }

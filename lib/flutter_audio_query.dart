@@ -37,3 +37,4 @@ part 'src/playlist_info.dart';
 part 'src/playlist_sort_type.dart';
 part 'src/song_info.dart';
 part 'src/song_sort_type.dart';
+part 'src/storage_type.dart';

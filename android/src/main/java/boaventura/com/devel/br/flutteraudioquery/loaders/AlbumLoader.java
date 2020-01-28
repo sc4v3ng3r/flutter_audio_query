@@ -13,6 +13,7 @@ import java.util.Map;
 
 import boaventura.com.devel.br.flutteraudioquery.loaders.tasks.AbstractLoadTask;
 import boaventura.com.devel.br.flutteraudioquery.sortingtypes.AlbumSortType;
+import boaventura.com.devel.br.flutteraudioquery.sortingtypes.StorageType;
 import io.flutter.plugin.common.MethodChannel;
 
 public class AlbumLoader extends AbstractLoader {
@@ -89,7 +90,7 @@ public class AlbumLoader extends AbstractLoader {
      * @param sortType
      */
     public void getAlbumsById(final MethodChannel.Result result, final List<String> ids,
-                             final AlbumSortType sortType){
+                             final AlbumSortType sortType, StorageType storageType){
 
         String[] selectionArgs;
         String sortOrder = null;
@@ -112,7 +113,7 @@ public class AlbumLoader extends AbstractLoader {
         }
 
         createLoadTask(result, MediaStore.Audio.Albums._ID, selectionArgs,
-                sortOrder, QUERY_TYPE_DEFAULT).execute();
+                sortOrder, QUERY_TYPE_DEFAULT, storageType).execute();
     }
 
     /**
@@ -120,9 +121,9 @@ public class AlbumLoader extends AbstractLoader {
      * @param result MethodChannel.Result object to send reply for dart
      * @param sortType AlbumSortType object to define sort type for data queried.
      */
-    public void getAlbums(MethodChannel.Result result, AlbumSortType sortType) {
+    public void getAlbums(MethodChannel.Result result, AlbumSortType sortType, StorageType storageType) {
         createLoadTask(result, null, null,
-                parseSortOrder(sortType), QUERY_TYPE_DEFAULT)
+                parseSortOrder(sortType), QUERY_TYPE_DEFAULT, storageType)
                 .execute();
     }
 
@@ -133,9 +134,9 @@ public class AlbumLoader extends AbstractLoader {
      * @param sortType AlbumSortType object to define sort type for data queried.
      */
     public void getAlbumFromGenre(final MethodChannel.Result result, final String genre,
-                                  AlbumSortType sortType) {
+                                  AlbumSortType sortType, StorageType storageType) {
         createLoadTask(result, genre, null,
-                parseSortOrder(sortType), QUERY_TYPE_GENRE_ALBUM)
+                parseSortOrder(sortType), QUERY_TYPE_GENRE_ALBUM, storageType)
                 .execute();
     }
 
@@ -149,10 +150,10 @@ public class AlbumLoader extends AbstractLoader {
      * @param sortType AlbumSortType object to define sort type for data queried.
      */
     public void searchAlbums(final MethodChannel.Result results, final String namedQuery,
-                             AlbumSortType sortType) {
+                             AlbumSortType sortType, StorageType storageType) {
         String[] args = new String[]{namedQuery + "%"};
         createLoadTask(results, MediaStore.Audio.AlbumColumns.ALBUM + " like ?", args,
-                parseSortOrder(sortType), QUERY_TYPE_DEFAULT)
+                parseSortOrder(sortType), QUERY_TYPE_DEFAULT, storageType)
                 .execute();
     }
 
@@ -164,9 +165,9 @@ public class AlbumLoader extends AbstractLoader {
      * @param artistName That artist id that you wanna fetch the albums.
      * @param sortType AlbumSortType object to define sort type for data queried.
      */
-    public void getAlbumsFromArtist(MethodChannel.Result result, String artistName, AlbumSortType sortType) {
+    public void getAlbumsFromArtist(MethodChannel.Result result, String artistName, AlbumSortType sortType, StorageType storageType) {
         createLoadTask(result, ALBUM_PROJECTION[3] + " = ? ",
-                new String[]{artistName}, parseSortOrder(sortType), QUERY_TYPE_ARTIST_ALBUM)
+                new String[]{artistName}, parseSortOrder(sortType), QUERY_TYPE_ARTIST_ALBUM, storageType)
                 .execute();
     }
 
@@ -217,7 +218,7 @@ public class AlbumLoader extends AbstractLoader {
     @Override
     protected AlbumLoadTask createLoadTask(
             final MethodChannel.Result result, final String selection,
-            final String[] selectionArgs, final String sortOrder, final int type) {
+            final String[] selectionArgs, final String sortOrder, final int type,  final StorageType storage) {
 
         return new AlbumLoadTask(result, getContentResolver(), selection, selectionArgs,
                 sortOrder, type);

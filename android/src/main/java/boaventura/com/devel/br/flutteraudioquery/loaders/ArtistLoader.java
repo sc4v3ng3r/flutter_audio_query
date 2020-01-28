@@ -13,6 +13,7 @@ import java.util.Map;
 
 import boaventura.com.devel.br.flutteraudioquery.loaders.tasks.AbstractLoadTask;
 import boaventura.com.devel.br.flutteraudioquery.sortingtypes.ArtistSortType;
+import boaventura.com.devel.br.flutteraudioquery.sortingtypes.StorageType;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.MethodChannel;
 
@@ -99,10 +100,10 @@ public class ArtistLoader extends AbstractLoader {
      * @param result MethodChannel.Result object to send reply for dart
      * @param sortType ArtistSortType object to define sort type for data queried
      */
-    public void getArtists(final MethodChannel.Result result, ArtistSortType sortType) {
+    public void getArtists(final MethodChannel.Result result, ArtistSortType sortType, StorageType storageType) {
 
         createLoadTask(result, null, null,
-                parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
+                parseSortOrder(sortType), QUERY_TYPE_DEFAULT, storageType).execute();
     }
 
     /**
@@ -112,7 +113,7 @@ public class ArtistLoader extends AbstractLoader {
      * @param sortType
      */
     public void getArtistsById(final MethodChannel.Result result, List<String> ids,
-                               ArtistSortType sortType){
+                               ArtistSortType sortType, StorageType storageType){
         String[] selectionArgs;
         String sortOrder = null;
 
@@ -134,7 +135,7 @@ public class ArtistLoader extends AbstractLoader {
         }
 
         createLoadTask(result, MediaStore.Audio.Artists._ID, selectionArgs,
-                sortOrder, QUERY_TYPE_DEFAULT).execute();
+                sortOrder, QUERY_TYPE_DEFAULT, storageType).execute();
     }
     /**
      * This method makes a query that search artists by names with
@@ -146,12 +147,12 @@ public class ArtistLoader extends AbstractLoader {
      *
      */
     public void searchArtistsByName(final MethodChannel.Result result,
-                             final String nameQuery, ArtistSortType sortType ){
+                             final String nameQuery, ArtistSortType sortType, StorageType storageType){
 
         String args = /*"%" +*/ nameQuery + "%";
         createLoadTask(result, MediaStore.Audio.Artists.ARTIST +
                         " like ?", new String[]{args},
-                parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
+                parseSortOrder(sortType), QUERY_TYPE_DEFAULT, storageType).execute();
 
     }
 
@@ -162,9 +163,9 @@ public class ArtistLoader extends AbstractLoader {
      * @param sortType ArtistSortType object to define sort type for data queried.
      */
     public void getArtistsFromGenre(final MethodChannel.Result result, final String genreName,
-                                    ArtistSortType sortType) {
+                                    ArtistSortType sortType, StorageType storageType) {
         createLoadTask(result, genreName, null,
-                parseSortOrder(sortType), QUERY_TYPE_GENRE_ARTISTS).execute();
+                parseSortOrder(sortType), QUERY_TYPE_GENRE_ARTISTS, storageType).execute();
     }
 
     /**
@@ -181,7 +182,7 @@ public class ArtistLoader extends AbstractLoader {
     @Override
     protected ArtistLoadTask createLoadTask(
             final MethodChannel.Result result, final String selection,
-            final String[] selectionArgs, final String sortOrder, final int type) {
+            final String[] selectionArgs, final String sortOrder, final int type, final StorageType storage) {
 
         return new ArtistLoadTask(result, getContentResolver(), selection,
                 selectionArgs, sortOrder, type);

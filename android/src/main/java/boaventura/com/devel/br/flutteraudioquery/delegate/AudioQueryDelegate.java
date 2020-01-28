@@ -18,6 +18,7 @@ import boaventura.com.devel.br.flutteraudioquery.sortingtypes.ArtistSortType;
 import boaventura.com.devel.br.flutteraudioquery.sortingtypes.GenreSortType;
 import boaventura.com.devel.br.flutteraudioquery.sortingtypes.PlaylistSortType;
 import boaventura.com.devel.br.flutteraudioquery.sortingtypes.SongSortType;
+import boaventura.com.devel.br.flutteraudioquery.sortingtypes.StorageType;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.PluginRegistry;
@@ -48,6 +49,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
     private static final String ERROR_CODE_PERMISSION_DENIED = "PERMISSION DENIED";
     private static final String SORT_TYPE = "sort_type";
     private static final String PLAYLIST_METHOD_TYPE = "method_type";
+    private static final String STORAGE_TYPE = "storage_type";
     private static final int REQUEST_CODE_PERMISSION_READ_EXTERNAL = 0x01;
     private static final int REQUEST_CODE_PERMISSION_WRITE_EXTERNAL = 0x02;
 
@@ -234,115 +236,139 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
 
             // artists calls section
             case "getArtists":
-                m_artistLoader.getArtists(result, ArtistSortType.values()[(int)call.argument(SORT_TYPE)] );
+                m_artistLoader.getArtists(
+                        result,
+                        ArtistSortType.values()[(int)call.argument(SORT_TYPE)],
+                        StorageType.values()[(int)call.argument(STORAGE_TYPE)]
+                        );
                 break;
 
             case "getArtistsById":
                 idList = call.argument("artist_ids");
                 m_artistLoader.getArtistsById(result, idList,
-                        ArtistSortType.values()[(int)call.argument(SORT_TYPE)]);
+                        ArtistSortType.values()[(int)call.argument(SORT_TYPE)],
+                        StorageType.values()[(int)call.argument(STORAGE_TYPE)]);
                 break;
 
             case "getArtistsFromGenre":
                 m_artistLoader.getArtistsFromGenre(result, (String)call.argument("genre_name"),
-                        ArtistSortType.values()[(int)call.argument(SORT_TYPE)] );
+                        ArtistSortType.values()[(int)call.argument(SORT_TYPE)],
+                        StorageType.values()[(int)call.argument(STORAGE_TYPE)] );
                 break;
 
             case "searchArtistsByName":
                 m_artistLoader.searchArtistsByName( result,
                         (String)call.argument("query"),
-                        ArtistSortType.values()[(int)call.argument(SORT_TYPE)] );
+                        ArtistSortType.values()[(int)call.argument(SORT_TYPE)],
+                        StorageType.values()[(int)call.argument(STORAGE_TYPE)] );
                 break;
 
             //album calls section
             case "getAlbums":
-                m_albumLoader.getAlbums(result, AlbumSortType.values()[(int)call.argument(SORT_TYPE)] );
+                m_albumLoader.getAlbums(result, AlbumSortType.values()[(int)call.argument(SORT_TYPE)],
+                        StorageType.values()[(int)call.argument(STORAGE_TYPE)] );
                 break;
 
             case "getAlbumsById":
                 idList =  call.argument("album_ids");
                 m_albumLoader.getAlbumsById(result, idList,
-                        AlbumSortType.values()[(int)call.argument(SORT_TYPE)]);
+                        AlbumSortType.values()[(int)call.argument(SORT_TYPE)],
+                        StorageType.values()[(int)call.argument(STORAGE_TYPE)]);
                 break;
             case "getAlbumsFromArtist":
                 String artist = call.argument("artist" );
                 m_albumLoader.getAlbumsFromArtist(result, artist,
-                        AlbumSortType.values()[(int)call.argument(SORT_TYPE)]);
+                        AlbumSortType.values()[(int)call.argument(SORT_TYPE)],
+                        StorageType.values()[(int)call.argument(STORAGE_TYPE)]);
                 break;
 
             case "getAlbumsFromGenre":
                 m_albumLoader.getAlbumFromGenre(result, (String)call.argument("genre_name"),
-                        AlbumSortType.values()[(int)call.argument(SORT_TYPE)] );
+                        AlbumSortType.values()[(int)call.argument(SORT_TYPE)],
+                        StorageType.values()[(int)call.argument(STORAGE_TYPE)] );
                 break;
 
             case "searchAlbums":
                 m_albumLoader.searchAlbums(result, (String)call.argument("query"),
-                        AlbumSortType.values()[(int)call.argument(SORT_TYPE)] );
+                        AlbumSortType.values()[(int)call.argument(SORT_TYPE)],
+                        StorageType.values()[(int)call.argument(STORAGE_TYPE)] );
                 break;
 
             // song calls section
             case "getSongs":
-                m_songLoader.getSongs(result, SongSortType.values()[(int)call.argument(SORT_TYPE)] );
+                m_songLoader.getSongs(result, SongSortType.values()[(int)call.argument(SORT_TYPE)],
+                        StorageType.values()[(int)call.argument(STORAGE_TYPE)] );
                 break;
 
             case "getSongsById":
                 idList = call.argument("song_ids");
                 m_songLoader.getSongsById(result, idList,
-                        SongSortType.values()[(int)call.argument(SORT_TYPE)]);
+                        SongSortType.values()[(int)call.argument(SORT_TYPE)],
+                        StorageType.values()[(int)call.argument(STORAGE_TYPE)]);
                 break;
 
             case "getSongsFromArtist":
                 m_songLoader.getSongsFromArtist( result, (String) call.argument("artist" ),
-                        SongSortType.values()[ (int)call.argument(SORT_TYPE) ] );
+                        SongSortType.values()[(int)call.argument(SORT_TYPE)],
+                        StorageType.values()[(int)call.argument(STORAGE_TYPE)] );
                 break;
 
             case "getSongsFromAlbum":
                 m_songLoader.getSongsFromAlbum( result,
                         (String) call.argument("album_id" ),
-                        SongSortType.values()[ (int)call.argument(SORT_TYPE) ] );
+                        SongSortType.values()[(int)call.argument(SORT_TYPE)],
+                        StorageType.values()[(int)call.argument(STORAGE_TYPE)] );
                 break;
 
             case "getSongsFromArtistAlbum":
                 m_songLoader.getSongsFromArtistAlbum( result,
                         (String) call.argument("album_id" ),
                         (String) call.argument("artist"),
-                        SongSortType.values()[ (int)call.argument(SORT_TYPE) ] );
+                        SongSortType.values()[(int)call.argument(SORT_TYPE)],
+                        StorageType.values()[(int)call.argument(STORAGE_TYPE)] );
                 break;
 
             case "getSongsFromGenre":
                 m_songLoader.getSongsFromGenre(result, (String) call.argument("genre_name"),
-                        SongSortType.values()[ (int)call.argument(SORT_TYPE) ] );
+                        SongSortType.values()[ (int)call.argument(SORT_TYPE) ],
+                        StorageType.values()[(int)call.argument(STORAGE_TYPE)] );
                 break;
 
             case "getSongsFromPlaylist":
                 final List<String> ids = call.argument("memberIds");
-                m_songLoader.getSongsFromPlaylist(result, ids);
+                m_songLoader.getSongsFromPlaylist(result, ids,
+                        StorageType.values()[(int)call.argument(STORAGE_TYPE)]);
                 break;
 
             case "searchSongs":
                 m_songLoader.searchSongs(result, (String)call.argument("query"),
-                        SongSortType.values()[ (int)call.argument(SORT_TYPE) ]);
+                        SongSortType.values()[ (int)call.argument(SORT_TYPE) ],
+                        StorageType.values()[(int)call.argument(STORAGE_TYPE)]);
                 break;
 
             // genre calls section
             case "getGenres":
-                m_genreLoader.getGenres(result, GenreSortType.values()[ (int)call.argument(SORT_TYPE) ]);
+                m_genreLoader.getGenres(result, GenreSortType.values()[ (int)call.argument(SORT_TYPE) ],
+                        StorageType.values()[(int)call.argument(STORAGE_TYPE)]);
                 break;
 
             case "searchGenres":
                 m_genreLoader.searchGenres(result, (String) call.argument("query"),
-                        GenreSortType.values()[ (int)call.argument(SORT_TYPE) ] );
+                        GenreSortType.values()[ (int)call.argument(SORT_TYPE) ],
+                        StorageType.values()[(int)call.argument(STORAGE_TYPE)] );
                 break;
 
                 // playlist read calls section
             case "getPlaylists":
                 m_playlistLoader.getPlaylists(result,
-                        PlaylistSortType.values()[(int)call.argument(SORT_TYPE)]);
+                        PlaylistSortType.values()[(int)call.argument(SORT_TYPE)],
+                        StorageType.values()[(int)call.argument(STORAGE_TYPE)]);
                 break;
 
             case "searchPlaylists":
                 m_playlistLoader.searchPlaylists(result, (String)call.argument("query"),
-                        PlaylistSortType.values()[(int)call.argument(SORT_TYPE)]);
+                        PlaylistSortType.values()[(int)call.argument(SORT_TYPE)],
+                        StorageType.values()[(int)call.argument(STORAGE_TYPE)]);
                 break;
 
             default:
