@@ -1,3 +1,6 @@
+## 0.3.4+1
+* **QUICK FIX** Using V2 embedding Flutter API.
+
 
 ## 0.3.3
 * **Bug fix**: Fixing the wrong 'numberOfSongs' property value when 

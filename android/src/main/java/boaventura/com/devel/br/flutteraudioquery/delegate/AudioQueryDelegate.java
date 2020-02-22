@@ -1,12 +1,15 @@
 package boaventura.com.devel.br.flutteraudioquery.delegate;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.Log;
 
 import java.util.List;
 
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import boaventura.com.devel.br.flutteraudioquery.loaders.AlbumLoader;
 import boaventura.com.devel.br.flutteraudioquery.loaders.ArtistLoader;
@@ -41,6 +44,7 @@ import io.flutter.view.FlutterNativeView;
 // *
 // */
 
+
 public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResultListener,
     AudioQueryDelegateInterface {
 
@@ -62,10 +66,33 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
     private final GenreLoader m_genreLoader;
     private final PlaylistLoader m_playlistLoader;
 
+
+    public AudioQueryDelegate(final Context context, final Activity activity){
+        m_artistLoader = new ArtistLoader(context );
+        m_albumLoader = new AlbumLoader(context );
+        m_songLoader = new SongLoader( context );
+        m_genreLoader = new GenreLoader( context );
+        m_playlistLoader = new PlaylistLoader( context );
+
+        m_permissionManager = new PermissionManager() {
+            @Override
+            public boolean isPermissionGranted(String permissionName) {
+
+                return (ContextCompat.checkSelfPermission( activity, permissionName)
+                        == PackageManager.PERMISSION_GRANTED);
+            }
+
+            @Override
+            public void askForPermission(String permissionName, int requestCode) {
+                ActivityCompat.requestPermissions(activity, new String[] {permissionName}, requestCode);
+            }
+        };
+    }
+
     public AudioQueryDelegate(final PluginRegistry.Registrar registrar){
 
-        m_artistLoader = new ArtistLoader(registrar.context());
-        m_albumLoader = new AlbumLoader(registrar.context());
+        m_artistLoader = new ArtistLoader(registrar.context() );
+        m_albumLoader = new AlbumLoader(registrar.context() );
         m_songLoader = new SongLoader( registrar.context() );
         m_genreLoader = new GenreLoader( registrar.context() );
         m_playlistLoader = new PlaylistLoader( registrar.context() );
@@ -73,7 +100,8 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
         m_permissionManager = new PermissionManager() {
             @Override
             public boolean isPermissionGranted(String permissionName) {
-                return (ActivityCompat.checkSelfPermission( registrar.activity(), permissionName)
+
+                return (ContextCompat.checkSelfPermission( registrar.activity(), permissionName)
                     == PackageManager.PERMISSION_GRANTED);
             }
 

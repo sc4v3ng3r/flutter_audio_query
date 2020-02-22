@@ -21,20 +21,46 @@
 //        THE SOFTWARE.
 package boaventura.com.devel.br.flutteraudioquery;
 
+import android.app.Application;
+import android.app.Activity;
+import android.os.Bundle;
+import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.DefaultLifecycleObserver;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
 
 import boaventura.com.devel.br.flutteraudioquery.delegate.AudioQueryDelegate;
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
+
+
+import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
+//import io.flutter.embedding.engine.plugins.lifecycle.FlutterLifecycleAdapter;
+import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 /** FlutterAudioQueryPlugin */
-public class FlutterAudioQueryPlugin implements MethodCallHandler {
+public class FlutterAudioQueryPlugin implements MethodCallHandler, FlutterPlugin, ActivityAware {
 
   private static final String CHANNEL_NAME = "boaventura.com.devel.br.flutteraudioquery";
-  private final AudioQueryDelegate m_delegate;
+  private AudioQueryDelegate m_delegate;
+  private FlutterPluginBinding m_pluginBinding;
+  private ActivityPluginBinding m_activityBinding;
+  private MethodChannel channel;
+  private Application application;
 
+
+
+  // This is null when not using v2 embedding;
+  //private Lifecycle lifecycle;
+  private LifeCycleObserver observer;
 
   private FlutterAudioQueryPlugin(AudioQueryDelegate delegate){
       m_delegate = delegate;
@@ -44,10 +70,18 @@ public class FlutterAudioQueryPlugin implements MethodCallHandler {
     if (registrar.activity() == null)
       return;
 
-    final MethodChannel channel = new MethodChannel(registrar.messenger(), CHANNEL_NAME);
-    final AudioQueryDelegate delegate = new AudioQueryDelegate( registrar );
-    channel.setMethodCallHandler( new FlutterAudioQueryPlugin(delegate) );
+
+      Application application = null;
+      if (registrar.context() != null) {
+          application = (Application) (registrar.context().getApplicationContext());
+      }
+
+      final FlutterAudioQueryPlugin plugin = new FlutterAudioQueryPlugin();
+      plugin.setup(registrar.messenger(), application, registrar.activity(), registrar, null);
   }
+
+  public FlutterAudioQueryPlugin(){}
+
 
   @Override
   public void onMethodCall(MethodCall call, Result result) {
@@ -89,4 +123,148 @@ public class FlutterAudioQueryPlugin implements MethodCallHandler {
       }
   }
 
-}
+  // embeding V2 implementation
+  @Override
+  public void onAttachedToEngine(FlutterPluginBinding binding) {  m_pluginBinding = binding; }
+
+  @Override
+  public void onDetachedFromEngine(FlutterPluginBinding binding) { tearDown();}
+
+  @Override
+  public void onAttachedToActivity(ActivityPluginBinding binding) {
+        m_activityBinding = binding;
+        setup(
+                m_pluginBinding.getBinaryMessenger(),
+                (Application) m_pluginBinding.getApplicationContext(),
+                m_activityBinding.getActivity(),
+                null,
+                m_activityBinding);
+    }
+
+
+  @Override
+  public void onDetachedFromActivityForConfigChanges() {
+
+  }
+
+  @Override
+  public void onReattachedToActivityForConfigChanges(ActivityPluginBinding binding) {
+      onAttachedToActivity(binding);
+  }
+
+  @Override
+  public void onDetachedFromActivity() {
+  }
+
+  private void setup(
+            final BinaryMessenger messenger,
+            final Application application,
+            final Activity activity, final PluginRegistry.Registrar registrar,
+            final ActivityPluginBinding activityBinding){
+
+        this.application = application;
+        channel = new MethodChannel(messenger, CHANNEL_NAME);
+
+
+        if (registrar != null) {
+            Log.i("AUDIO_QUERY", "Using V1 EMBEDDING");
+            // V1 embedding  delegate creation
+            m_delegate = new AudioQueryDelegate(registrar);
+            observer = new LifeCycleObserver(activity);
+            application.registerActivityLifecycleCallbacks(observer);
+
+        }
+
+        else {
+            Log.i("AUDIO_QUERY", "Using V2 EMBEDDING");
+            // V2 embedding setup for activity listeners.
+            m_delegate = new AudioQueryDelegate(application.getApplicationContext(), activity);
+            activityBinding.addRequestPermissionsResultListener( m_delegate );
+
+            //lifecycle = FlutterLifecycleAdapter.getActivityLifecycle(activityBinding);
+
+            //lifecycle = (Lifecycle) activityBinding.getLifecycle();
+            //activityBinding.
+            //observer = new LifeCycleObserver(activityBinding.getActivity() );
+            //lifecycle.addObserver(observer);
+        }
+        channel.setMethodCallHandler( new FlutterAudioQueryPlugin( m_delegate) );
+
+  }
+
+  private void tearDown() {
+      m_activityBinding.removeRequestPermissionsResultListener(m_delegate);
+      m_activityBinding = null;
+//      if (lifecycle != null) {
+//          lifecycle.removeObserver(observer);
+//          lifecycle = null;
+//      }
+      m_delegate = null;
+      channel.setMethodCallHandler(null);
+      channel = null;
+      application.unregisterActivityLifecycleCallbacks(observer);
+      application = null;
+    }
+
+    private class LifeCycleObserver
+            implements Application.ActivityLifecycleCallbacks, DefaultLifecycleObserver {
+
+        private final Activity thisActivity;
+
+        LifeCycleObserver(Activity activity) {
+            this.thisActivity = activity;
+        }
+
+        @Override
+        public void onCreate(@NonNull LifecycleOwner owner) {}
+
+        @Override
+        public void onStart(@NonNull LifecycleOwner owner) {}
+
+        @Override
+        public void onResume(@NonNull LifecycleOwner owner) {}
+
+        @Override
+        public void onPause(@NonNull LifecycleOwner owner) {}
+
+        @Override
+        public void onStop(@NonNull LifecycleOwner owner) {
+            onActivityStopped(thisActivity);
+        }
+
+        @Override
+        public void onDestroy(@NonNull LifecycleOwner owner) {
+            onActivityDestroyed(thisActivity);
+        }
+
+        @Override
+        public void onActivityCreated(Activity activity, Bundle savedInstanceState) {}
+
+        @Override
+        public void onActivityStarted(Activity activity) {}
+
+        @Override
+        public void onActivityResumed(Activity activity) {}
+
+        @Override
+        public void onActivityPaused(Activity activity) {}
+
+        @Override
+        public void onActivitySaveInstanceState(Activity activity, Bundle outState) {}
+
+        @Override
+        public void onActivityDestroyed(Activity activity) {
+            if (thisActivity == activity && activity.getApplicationContext() != null) {
+                ((Application) activity.getApplicationContext())
+                        .unregisterActivityLifecycleCallbacks(
+                                this); // Use getApplicationContext() to avoid casting failures
+            }
+        }
+
+        @Override
+        public void onActivityStopped(Activity activity) {
+
+        }
+    } //// LifeCycleObserver end
+
+} // end FlutterAudioQueryPlugin
