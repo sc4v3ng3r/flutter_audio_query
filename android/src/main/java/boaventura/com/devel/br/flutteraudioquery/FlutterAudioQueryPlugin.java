@@ -173,7 +173,7 @@ public class FlutterAudioQueryPlugin implements MethodCallHandler, FlutterPlugin
 
         if (registrar != null) {
             // V1 embedding  delegate creation
-            m_delegate = new AudioQueryDelegate(registrar);
+            m_delegate = AudioQueryDelegate.instance(registrar);
             observer = new LifeCycleObserver(activity);
             application.registerActivityLifecycleCallbacks(observer);
 
@@ -181,14 +181,17 @@ public class FlutterAudioQueryPlugin implements MethodCallHandler, FlutterPlugin
 
         else {
             // V2 embedding setup for activity listeners.
-            m_delegate = new AudioQueryDelegate(application.getApplicationContext(), activity);
-            activityBinding.addRequestPermissionsResultListener( m_delegate );
+            if (m_delegate == null)
+                m_delegate = AudioQueryDelegate.instance(application.getApplicationContext(), activity);
+
+            activityBinding.addRequestPermissionsResultListener(m_delegate);
 
             lifecycle = FlutterLifecycleAdapter.getActivityLifecycle(activityBinding);
 
             //activityBinding.
-            observer = new LifeCycleObserver(activityBinding.getActivity() );
+            observer = new LifeCycleObserver(activityBinding.getActivity());
             lifecycle.addObserver(observer);
+
         }
 
         if (channel == null) {

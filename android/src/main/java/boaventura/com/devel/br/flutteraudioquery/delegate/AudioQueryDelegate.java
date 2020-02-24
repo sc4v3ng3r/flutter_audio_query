@@ -48,6 +48,8 @@ import io.flutter.view.FlutterNativeView;
 public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResultListener,
     AudioQueryDelegateInterface {
 
+    private static AudioQueryDelegate m_instance;
+
     private static final String ERROR_CODE_PENDING_RESULT = "pending_result";
     private static final String ERROR_CODE_PERMISSION_DENIED = "PERMISSION DENIED";
     private static final String SORT_TYPE = "sort_type";
@@ -67,7 +69,22 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
     private final PlaylistLoader m_playlistLoader;
 
 
-    public AudioQueryDelegate(final Context context, final Activity activity){
+
+    public static final AudioQueryDelegate instance(final Context context, final Activity activity){
+        if (m_instance == null)
+            m_instance = new AudioQueryDelegate(context, activity);
+
+        return m_instance;
+    }
+
+    public static final AudioQueryDelegate instance(final PluginRegistry.Registrar registrar){
+        if (m_instance == null)
+            m_instance = new AudioQueryDelegate(registrar);
+
+        return m_instance;
+    }
+
+    private AudioQueryDelegate(final Context context, final Activity activity){
         m_artistLoader = new ArtistLoader(context );
         m_albumLoader = new AlbumLoader(context );
         m_songLoader = new SongLoader( context );
@@ -89,7 +106,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
         };
     }
 
-    public AudioQueryDelegate(final PluginRegistry.Registrar registrar){
+    private AudioQueryDelegate(final PluginRegistry.Registrar registrar){
 
         m_artistLoader = new ArtistLoader(registrar.context() );
         m_albumLoader = new AlbumLoader(registrar.context() );
@@ -101,7 +118,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
             @Override
             public boolean isPermissionGranted(String permissionName) {
 
-                return (ContextCompat.checkSelfPermission( registrar.activity(), permissionName)
+                return (ActivityCompat.checkSelfPermission( registrar.activity(), permissionName)
                     == PackageManager.PERMISSION_GRANTED);
             }
 
@@ -130,7 +147,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
      */
     @Override
     public void artistSourceHandler(MethodCall call, MethodChannel.Result result){
-        if ( canIbeDependency(call, result)){
+        if ( canIbeDependency(call, result) ){
 
             if (m_permissionManager.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE) ){
                 clearPendencies();
