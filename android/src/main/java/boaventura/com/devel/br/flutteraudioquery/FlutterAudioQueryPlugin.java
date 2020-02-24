@@ -180,16 +180,15 @@ public class FlutterAudioQueryPlugin implements MethodCallHandler, FlutterPlugin
         }
 
         else {
-            Log.i("AUDIO_QUERY", "NO Lifecycle");
             // V2 embedding setup for activity listeners.
             m_delegate = new AudioQueryDelegate(application.getApplicationContext(), activity);
             activityBinding.addRequestPermissionsResultListener( m_delegate );
 
-//            lifecycle = FlutterLifecycleAdapter.getActivityLifecycle(activityBinding);
+            lifecycle = FlutterLifecycleAdapter.getActivityLifecycle(activityBinding);
 
             //activityBinding.
-//            observer = new LifeCycleObserver(activityBinding.getActivity() );
-//            lifecycle.addObserver(observer);
+            observer = new LifeCycleObserver(activityBinding.getActivity() );
+            lifecycle.addObserver(observer);
         }
 
         if (channel == null) {
@@ -202,10 +201,10 @@ public class FlutterAudioQueryPlugin implements MethodCallHandler, FlutterPlugin
   private void tearDown() {
       m_activityBinding.removeRequestPermissionsResultListener(m_delegate);
       m_activityBinding = null;
-//      if (lifecycle != null) {
-//          lifecycle.removeObserver(observer);
-//          lifecycle = null;
-//      }
+      if (lifecycle != null) {
+          lifecycle.removeObserver(observer);
+          lifecycle = null;
+      }
       m_delegate = null;
       channel.setMethodCallHandler(null);
       channel = null;

@@ -16,7 +16,6 @@ dependencies:
 
 
 flutter:
-
   plugin:
     platforms:
       android:
