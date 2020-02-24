@@ -180,16 +180,16 @@ public class FlutterAudioQueryPlugin implements MethodCallHandler, FlutterPlugin
         }
 
         else {
-
+            Log.i("AUDIO_QUERY", "NO Lifecycle");
             // V2 embedding setup for activity listeners.
             m_delegate = new AudioQueryDelegate(application.getApplicationContext(), activity);
             activityBinding.addRequestPermissionsResultListener( m_delegate );
 
-            lifecycle = FlutterLifecycleAdapter.getActivityLifecycle(activityBinding);
+//            lifecycle = FlutterLifecycleAdapter.getActivityLifecycle(activityBinding);
 
             //activityBinding.
-            observer = new LifeCycleObserver(activityBinding.getActivity() );
-            lifecycle.addObserver(observer);
+//            observer = new LifeCycleObserver(activityBinding.getActivity() );
+//            lifecycle.addObserver(observer);
         }
 
         if (channel == null) {
