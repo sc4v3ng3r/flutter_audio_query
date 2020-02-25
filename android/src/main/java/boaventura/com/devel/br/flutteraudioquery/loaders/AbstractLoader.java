@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 
 import boaventura.com.devel.br.flutteraudioquery.loaders.tasks.AbstractLoadTask;
+import boaventura.com.devel.br.flutteraudioquery.sortingtypes.StorageType;
 import io.flutter.plugin.common.MethodChannel;
 
 public abstract class AbstractLoader {
@@ -27,10 +28,11 @@ public abstract class AbstractLoader {
      * @param sortOrder
      * @param type An integer number that can be used to identify what kind of task do you want
      *             to create.
+     * @param storage content url integer number
      * @return
      */
     protected abstract AbstractLoadTask createLoadTask(final MethodChannel.Result result, final String selection,
-                                         final String[] selectionArgs, String sortOrder, final int type );
+                                         final String[] selectionArgs, String sortOrder, final int type, final StorageType storage );
 
 
 

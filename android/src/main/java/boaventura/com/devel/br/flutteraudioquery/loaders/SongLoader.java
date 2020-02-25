@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.provider.MediaStore;
+import android.net.Uri;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.Map;
 
 import boaventura.com.devel.br.flutteraudioquery.loaders.tasks.AbstractLoadTask;
 import boaventura.com.devel.br.flutteraudioquery.sortingtypes.SongSortType;
+import boaventura.com.devel.br.flutteraudioquery.sortingtypes.StorageType;
 import io.flutter.plugin.common.MethodChannel;
 
 public class SongLoader extends AbstractLoader {
@@ -147,10 +149,10 @@ public class SongLoader extends AbstractLoader {
      * @param sortType SongSortType object to define sort type for data queried.
      *
      */
-    public void getSongs(final MethodChannel.Result result, final SongSortType sortType){
+    public void getSongs(final MethodChannel.Result result, final SongSortType sortType, final StorageType storageType){
 
         createLoadTask( result,null,null,
-                parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
+                parseSortOrder(sortType), QUERY_TYPE_DEFAULT, storageType).execute();
     }
 
     /**
@@ -163,11 +165,11 @@ public class SongLoader extends AbstractLoader {
      * @param sortType SongSortType object to define sort type for data queried.
      */
     public void searchSongs(final MethodChannel.Result result, final String namedQuery,
-                            final SongSortType sortType){
+                            final SongSortType sortType, final StorageType storageType){
 
         String[] args =  new String[]{namedQuery + "%"};
         createLoadTask(result, MediaStore.Audio.Media.TITLE + " like ?",
-                args, parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
+                args, parseSortOrder(sortType), QUERY_TYPE_DEFAULT, storageType).execute();
     }
 
     /**
@@ -177,13 +179,12 @@ public class SongLoader extends AbstractLoader {
      * @param result MethodChannel.Result object to send reply for dart.
      * @param songIds Ids of songs that will be fetched.
      */
-    public void getSongsFromPlaylist(MethodChannel.Result result, final List<String> songIds){
+    public void getSongsFromPlaylist(MethodChannel.Result result, final List<String> songIds, final StorageType storageType){
         String[] values;
 
         if ( (songIds != null) && (songIds.size() > 0) ){
              values = songIds.toArray(new String[songIds.size()] );
-             this.
-             createLoadTask(result, SONG_PROJECTION[0] + " =?", values, prepareIDsSongsSortOrder(songIds), QUERY_TYPE_DEFAULT)
+             createLoadTask(result, SONG_PROJECTION[0] + " =?", values, prepareIDsSongsSortOrder(songIds), QUERY_TYPE_DEFAULT, storageType)
                      .execute();
         }
         else result.success( new ArrayList<Map<String,Object>>() );
@@ -229,13 +230,13 @@ public class SongLoader extends AbstractLoader {
      * @param sortType SongSortType object to define sort type for data queried.
      */
     public void getSongsFromAlbum(final MethodChannel.Result result, final String albumId,
-                                  final SongSortType sortType){
+                                  final SongSortType sortType, final StorageType storageType){
 
        // Log.i("MFBG", "Art: " + artist + " album: " + albumId);
         String selection = MediaStore.Audio.Media.ALBUM_ID + " =?";
 
        createLoadTask( result, selection, new String[] {albumId},
-               parseSortOrder(sortType), QUERY_TYPE_ALBUM_SONGS).execute();
+               parseSortOrder(sortType), QUERY_TYPE_ALBUM_SONGS, storageType).execute();
     }
 
     /**
@@ -247,12 +248,12 @@ public class SongLoader extends AbstractLoader {
      * @param sortType SongSortType object to define sort type for data queried.
      */
     public void getSongsFromArtistAlbum(final MethodChannel.Result result, final String albumId,
-                                        final String artist, final SongSortType sortType){
+                                        final String artist, final SongSortType sortType, final StorageType storageType){
         String selection = MediaStore.Audio.Media.ALBUM_ID + " =?"
                 + " and " + MediaStore.Audio.Media.ARTIST + " =?";
 
         createLoadTask( result, selection, new String[] {albumId, artist},
-                parseSortOrder(sortType), QUERY_TYPE_ALBUM_SONGS).execute();
+                parseSortOrder(sortType), QUERY_TYPE_ALBUM_SONGS, storageType).execute();
     }
     /**
      * This method queries songs from a specific artist.
@@ -261,10 +262,10 @@ public class SongLoader extends AbstractLoader {
      * @param sortType SongSortType object to define sort type for data queried.
      */
     public void getSongsFromArtist(final MethodChannel.Result result, final String artistName,
-                                   final SongSortType sortType ){
+                                   final SongSortType sortType, final StorageType storageType){
 
         createLoadTask(result, MediaStore.Audio.Media.ARTIST + " =?",
-                new String[] { artistName }, parseSortOrder(sortType), QUERY_TYPE_DEFAULT )
+                new String[] { artistName }, parseSortOrder(sortType), QUERY_TYPE_DEFAULT, storageType )
                 .execute();
     }
 
@@ -276,10 +277,10 @@ public class SongLoader extends AbstractLoader {
      * @param sortType SongSortType object to define sort type for data queried.
      */
     public void getSongsFromGenre(final MethodChannel.Result result, final String genre,
-                                  final SongSortType sortType){
+                                  final SongSortType sortType, final StorageType storageType){
 
         createLoadTask(result, genre, null,
-                parseSortOrder( sortType), QUERY_TYPE_GENRE_SONGS )
+                parseSortOrder( sortType), QUERY_TYPE_GENRE_SONGS, storageType)
                 .execute();
     }
 
@@ -290,7 +291,7 @@ public class SongLoader extends AbstractLoader {
      * @param sortType SongSortType object to define sort type for data queried.
      */
     public void getSongsById(final MethodChannel.Result result, final List<String> ids,
-                             final SongSortType sortType){
+                             final SongSortType sortType, final StorageType storageType){
 
         String[] selectionArgs;
         String sortOrder = null;
@@ -313,16 +314,16 @@ public class SongLoader extends AbstractLoader {
         }
 
         createLoadTask(result, MediaStore.Audio.Media._ID, selectionArgs,
-                sortOrder, QUERY_TYPE_DEFAULT).execute();
+                sortOrder, QUERY_TYPE_DEFAULT, storageType).execute();
     }
 
 
 
     @Override
     protected SongTaskLoad createLoadTask(MethodChannel.Result result, final String selection, final String [] selectionArgs,
-                                final String sortOrder, final int type){
+                                final String sortOrder, final int type, final StorageType storage){
 
-        return new SongTaskLoad(result, getContentResolver(), selection, selectionArgs, sortOrder, type);
+        return new SongTaskLoad(result, getContentResolver(), selection, selectionArgs, sortOrder, type, storage);
 
     }
 
@@ -331,6 +332,7 @@ public class SongLoader extends AbstractLoader {
         private MethodChannel.Result m_result;
         private ContentResolver m_resolver;
         private int m_queryType;
+        private Uri m_storageUri;
 
         /**
          *
@@ -339,14 +341,16 @@ public class SongLoader extends AbstractLoader {
          * @param selection
          * @param selectionArgs
          * @param sortOrder
+         * @param storageType
          */
         SongTaskLoad(MethodChannel.Result result, ContentResolver m_resolver, String selection,
-                     String[] selectionArgs, String sortOrder, int type){
+                     String[] selectionArgs, String sortOrder, int type, StorageType storageType){
 
             super(selection, selectionArgs, sortOrder);
             this.m_resolver = m_resolver;
             this.m_result =result;
             this.m_queryType = type;
+            this.m_storageUri = storageType == StorageType.DEFAULT ? MediaStore.Audio.Media.EXTERNAL_CONTENT_URI : MediaStore.Audio.Media.INTERNAL_CONTENT_URI ;
         }
 
         @Override
@@ -412,7 +416,7 @@ public class SongLoader extends AbstractLoader {
          * @return List of ids in string.
          */
         private List<String> getSongIdsFromGenre(final String genre){
-           Cursor songIdsCursor = m_resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+           Cursor songIdsCursor = m_resolver.query(m_storageUri,
                     new String[] {"Distinct " + MediaStore.Audio.Media._ID, "genre_name" },
                     "genre_name" + " =?",new String[] {genre},null);
 
@@ -444,7 +448,7 @@ public class SongLoader extends AbstractLoader {
 
             try{
                 songsCursor = m_resolver.query(
-                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                        m_storageUri,
                         SongLoader.SONG_PROJECTION, selection, selectionArgs, sortOrder );
             }
 

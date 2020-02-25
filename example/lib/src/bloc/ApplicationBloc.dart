@@ -202,7 +202,9 @@ class ApplicationBloc extends BlocBase {
   void _fetchSongData({String query}) {
     if (query == null)
       audioQuery
-          .getSongs(sortType: _songSortTypeSelected)
+          .getSongs(
+              sortType: _songSortTypeSelected,
+              storageType: StorageType.INTERNAL)
           .then((songList) => _songController.sink.add(songList))
           .catchError((error) => _songController.sink.addError(error));
     else

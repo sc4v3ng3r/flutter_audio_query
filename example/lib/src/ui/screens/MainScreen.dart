@@ -48,30 +48,31 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       appBar: AppBar(
         title: StreamBuilder<SearchBarState>(
-            initialData: _currentSearchBarState,
-            stream: bloc.searchBarState,
-            builder: (context, snapshot) {
-              if (snapshot.data == SearchBarState.EXPANDED)
-                return TextField(
-                  controller: _searchController,
-                  autofocus: true,
-                  onChanged: (typed) {
-                    print("make search for: ${_searchController.text}");
-                    bloc.search(
-                        option: _currentNavigationOption,
-                        query: _searchController.text);
-                  },
-                  style: new TextStyle(
-                    color: Colors.white,
-                  ),
-                  decoration: new InputDecoration(
-                      prefixIcon: new Icon(Icons.search, color: Colors.white),
-                      hintText: "Search...",
-                      hintStyle: new TextStyle(color: Colors.grey)),
-                );
+          initialData: _currentSearchBarState,
+          stream: bloc.searchBarState,
+          builder: (context, snapshot) {
+            if (snapshot.data == SearchBarState.EXPANDED)
+              return TextField(
+                controller: _searchController,
+                autofocus: true,
+                onChanged: (typed) {
+                  print("make search for: ${_searchController.text}");
+                  bloc.search(
+                      option: _currentNavigationOption,
+                      query: _searchController.text);
+                },
+                style: new TextStyle(
+                  color: Colors.white,
+                ),
+                decoration: new InputDecoration(
+                    prefixIcon: new Icon(Icons.search, color: Colors.white),
+                    hintText: "Search...",
+                    hintStyle: new TextStyle(color: Colors.grey)),
+              );
 
-              return Text('Flutter AudioQuery Plugin');
-            }),
+            return Text('Flutter AudioQuery Plugin');
+          },
+        ),
         actions: <Widget>[
           StreamBuilder<SearchBarState>(
               initialData: _currentSearchBarState,

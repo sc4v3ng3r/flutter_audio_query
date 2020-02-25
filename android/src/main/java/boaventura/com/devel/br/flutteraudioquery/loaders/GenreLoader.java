@@ -14,6 +14,7 @@ import java.util.Map;
 import boaventura.com.devel.br.flutteraudioquery.loaders.tasks.AbstractLoadTask;
 import boaventura.com.devel.br.flutteraudioquery.sortingtypes.GenreSortType;
 import boaventura.com.devel.br.flutteraudioquery.sortingtypes.SongSortType;
+import boaventura.com.devel.br.flutteraudioquery.sortingtypes.StorageType;
 import io.flutter.plugin.common.MethodChannel;
 
 public class GenreLoader extends AbstractLoader {
@@ -30,10 +31,10 @@ public class GenreLoader extends AbstractLoader {
     @Override
     protected GenreLoadTask createLoadTask(
             final MethodChannel.Result result, final String selection,
-            final String[] selectionArgs, final String sortOrder, final int type) {
+            final String[] selectionArgs, final String sortOrder, final int type, final StorageType storage) {
 
         return new GenreLoadTask(result, getContentResolver(),
-                selection, selectionArgs, sortOrder);
+                selection, selectionArgs, sortOrder, storage);
     }
 
 
@@ -63,9 +64,9 @@ public class GenreLoader extends AbstractLoader {
      * @param result MethodChannel.Result object to send reply for dart
      * @param sortType GenreSortType object to define sort type for data queried.
      */
-    public void getGenres(final MethodChannel.Result result, final GenreSortType sortType){
+    public void getGenres(final MethodChannel.Result result, final GenreSortType sortType, StorageType storageType){
         createLoadTask(result, null, null, parseSortOrder(sortType),
-                QUERY_TYPE_DEFAULT).execute();
+                QUERY_TYPE_DEFAULT, storageType).execute();
     }
 
     /**
@@ -76,11 +77,11 @@ public class GenreLoader extends AbstractLoader {
      * @param sortType GenreSortType object to define sort type for data queried.
      */
     public void searchGenres(final MethodChannel.Result results, final String namedQuery,
-                            final GenreSortType sortType ){
+                            final GenreSortType sortType, StorageType storageType){
 
         String[] args = new String[]{ namedQuery + "%"};
         createLoadTask(results, GENRE_PROJECTION[0] + " like ?", args,
-                parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
+                parseSortOrder(sortType), QUERY_TYPE_DEFAULT, storageType).execute();
     }
 
     static class GenreLoadTask extends AbstractLoadTask<List<Map<String,Object>>>{
@@ -96,7 +97,7 @@ public class GenreLoader extends AbstractLoader {
         private ContentResolver m_resolver;
 
         GenreLoadTask(MethodChannel.Result result, ContentResolver resolver, String selection,
-                      String[] selectionArgs, String sortOrder) {
+                      String[] selectionArgs, String sortOrder, StorageType storage) {
             super(selection, selectionArgs, sortOrder);
 
             m_resolver = resolver;
