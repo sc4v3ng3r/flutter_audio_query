@@ -108,9 +108,11 @@ public class GenreLoader extends AbstractLoader {
                                                      String sortOrder) {
 
             List<Map<String, Object>> dataList= new ArrayList<>();
+            try {
             Cursor genreCursor = m_resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                     new String[] {"Distinct " + GENRE_PROJECTION[0] }, selection,
                     selectionArgs, sortOrder);
+
 
 //            Cursor genreCursor = m_resolver.query(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI,
 //                    GENRE_PROJECTION, selection, selectionArgs, sortOrder);
@@ -134,6 +136,8 @@ public class GenreLoader extends AbstractLoader {
                 }
                 genreCursor.close();
             }
+
+            }catch(Exception e) {}
 
             return dataList;
         }
