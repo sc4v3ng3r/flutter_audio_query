@@ -52,6 +52,8 @@ class SongInfo extends DataModel {
   ///Returns album artwork path which current song appears.
   String get albumArtwork => _data['album_artwork'];
 
+  String get genreName => _data['name'];
+
   bool get isMusic => _data['is_music'];
 
   bool get isPodcast => _data['is_podcast'];
@@ -61,4 +63,39 @@ class SongInfo extends DataModel {
   bool get isAlarm => _data['is_alarm'];
 
   bool get isNotification => _data['is_notification'];
+
+  get toMap {
+    return ({
+      "album": this.album,
+      "albumArtwork": this.albumArtwork,
+      "artist": this.artist,
+      "artistId": this.artistId,
+      "bookmark": this.bookmark,
+      "composer": this.composer,
+      "displayName": this.displayName,
+      "duration": this.duration,
+      "filepath": this.filePath,
+      "fileSize": this.fileSize,
+      "hashCode": this.hashCode,
+      "id": this.id,
+      "isAlarm": this.isAlarm,
+      "isMusic": this.isMusic,
+      "isNotification": this.isNotification,
+      "isPodcast": this.isPodcast,
+      "isRingtone": this.isRingtone,
+      "title": this.title,
+      "track": this.track,
+      "year": this.year,
+    });
+  }
+
+  List<SongInfo> toSongInfo(String songJson) {
+    List<SongInfo> retVal = [];
+    List songs = json.decode(songJson);
+    songs.map((song) {
+      retVal.add(SongInfo._(song));
+    });
+
+    return retVal;
+  }
 }

@@ -22,6 +22,8 @@
 
 library flutter_audio_query;
 
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 

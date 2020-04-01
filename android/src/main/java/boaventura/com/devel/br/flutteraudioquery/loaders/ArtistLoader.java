@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.net.Uri;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -274,22 +275,17 @@ public class ArtistLoader extends AbstractLoader {
                     int idCount = artistIds.size();
 
                     if (idCount > 0) {
-                        if (idCount > 1) {
-                            String[] args = artistIds.toArray(new String[idCount]);
+                        String[] args = artistIds.toArray(new String[idCount]);
 
-                            String createdSelection = createMultipleValueSelectionArgs(
-                                    MediaStore.Audio.Artists._ID, args);
+                        String createdSelection = createMultipleValueSelectionArgs(
+                                MediaStore.Audio.Artists._ID, args);
 
-                            return basicDataLoad(createdSelection, args,
-                                    MediaStore.Audio.Artists.DEFAULT_SORT_ORDER);
-                        } else {
-                            return basicDataLoad(
-                                    MediaStore.Audio.Artists._ID + " =?",
-                                    new String[]{artistIds.get(0)},
-                                    MediaStore.Audio.Artists.DEFAULT_SORT_ORDER);
-                        }
+                        return basicDataLoad(createdSelection, args,
+                                MediaStore.Audio.Artists.DEFAULT_SORT_ORDER);
+                    } else {
+                     return new ArrayList<>();
+
                     }
-                    return new ArrayList<>();
             }
 
             Cursor artistCursor = m_resolver.query(
@@ -423,10 +419,12 @@ public class ArtistLoader extends AbstractLoader {
             //Log.i("MDBG",  "Genero: " + genreName +" Artistas: ");
             List<String> artistsIds = new ArrayList<>();
 
-            Cursor artistNamesCursor = m_resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    new String[]{"Distinct " + MediaStore.Audio.Media.ARTIST_ID, "genre_name"},
-                    "genre_name" + " =?", new String[]{genreName}, null);
-
+        //    Cursor artistNamesCursor = m_resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+        //             new String[]{"Distinct " + MediaStore.Audio.Media.ARTIST_ID, "genre_name"},
+        //             "genre_name" + " =?", new String[]{genreName}, null);
+           Cursor artistNamesCursor = m_resolver.query(Uri.parse("content://media/external/audio/audiocolumns"), new String[]{
+                    MediaStore.Audio.AudioColumns.IS_ALARM
+           },null,null,null);                    
             if (artistNamesCursor != null) {
 
                 while (artistNamesCursor.moveToNext()) {

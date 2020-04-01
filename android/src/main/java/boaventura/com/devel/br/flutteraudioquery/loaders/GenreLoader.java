@@ -19,8 +19,8 @@ import io.flutter.plugin.common.MethodChannel;
 public class GenreLoader extends AbstractLoader {
 
     private static final String[] GENRE_PROJECTION = {
-            "genre_name",
-            //MediaStore.Audio.GenresColumns.NAME,
+            // "genre_name",
+            MediaStore.Audio.Genres.NAME,
     };
 
     public GenreLoader(Context context) {
@@ -50,7 +50,7 @@ public class GenreLoader extends AbstractLoader {
 
             default:
             case DEFAULT:
-                sortOrder = "genre_name ASC";
+                sortOrder = "name ASC";
                 //sortOrder = MediaStore.Audio.Genres.DEFAULT_SORT_ORDER;
                 break;
         }
@@ -108,14 +108,13 @@ public class GenreLoader extends AbstractLoader {
                                                      String sortOrder) {
 
             List<Map<String, Object>> dataList= new ArrayList<>();
-            try {
-            Cursor genreCursor = m_resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    new String[] {"Distinct " + GENRE_PROJECTION[0] }, selection,
-                    selectionArgs, sortOrder);
+            // Cursor genreCursor = m_resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+            //         new String[] {"Distinct " + GENRE_PROJECTION[0] }, selection,
+            //         selectionArgs, sortOrder);
 
 
-//            Cursor genreCursor = m_resolver.query(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI,
-//                    GENRE_PROJECTION, selection, selectionArgs, sortOrder);
+           Cursor genreCursor = m_resolver.query(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI,
+                   GENRE_PROJECTION, selection, selectionArgs, sortOrder);
 
             if (genreCursor != null){
                 while ( genreCursor.moveToNext() ){
@@ -137,7 +136,6 @@ public class GenreLoader extends AbstractLoader {
                 genreCursor.close();
             }
 
-            }catch(Exception e) {}
 
             return dataList;
         }

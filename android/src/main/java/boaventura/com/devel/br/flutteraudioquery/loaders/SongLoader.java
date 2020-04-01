@@ -277,7 +277,6 @@ public class SongLoader extends AbstractLoader {
      */
     public void getSongsFromGenre(final MethodChannel.Result result, final String genre,
                                   final SongSortType sortType){
-
         createLoadTask(result, genre, null,
                 parseSortOrder( sortType), QUERY_TYPE_GENRE_SONGS )
                 .execute();
@@ -361,7 +360,7 @@ public class SongLoader extends AbstractLoader {
         protected List< Map<String,Object> > loadData(
                 final String selection, final String [] selectionArgs,
                 final String sortOrder ){
-
+                    
             switch (m_queryType){
                 case QUERY_TYPE_DEFAULT:
                     // In this case the selection will be always by id.
@@ -379,25 +378,26 @@ public class SongLoader extends AbstractLoader {
 
                 case QUERY_TYPE_GENRE_SONGS:
                     List<String> songIds = getSongIdsFromGenre(selection);
+                    List a = new ArrayList();
+                    Map<String, Object> hm = new HashMap<String, Object>();
                     int idCount = songIds.size();
-                    if ( idCount > 0){
 
-                        if (idCount > 1 ){
-                            String[] args = songIds.toArray( new String[idCount] );
-                            String createdSelection = createMultipleValueSelectionArgs(
-                                    MediaStore.Audio.Media._ID, args);
-                            return  basicLoad(
-                                    createdSelection,
-                                    args,sortOrder );
-                        }
-
-                        else {
-                            return basicLoad(MediaStore.Audio.Media._ID + " =?",
-                                    new String[]{ songIds.get(0)},
-                                    sortOrder );
-                        }
-                    }
-                    break;
+                        return basicLoad(MediaStore.Audio.Media._ID + " > 0",
+                                // new String[]{ "1"},
+                                null,
+                                sortOrder );
+                    // if (idCount < 1 ){
+                    //     String[] args = songIds.toArray( new String[idCount] );
+                    //     String createdSelection = createMultipleValueSelectionArgs(
+                    //             MediaStore.Audio.Media._ID, args);
+                    //     return  basicLoad(
+                    //             createdSelection,
+                    //             args,sortOrder );
+                    // }else {
+                    //     return basicLoad(MediaStore.Audio.Media._ID + " =?",
+                    //             new String[]{ songIds.get(0)},
+                    //             sortOrder );
+                    // }
 
                 default:
                     break;
@@ -412,9 +412,19 @@ public class SongLoader extends AbstractLoader {
          * @return List of ids in string.
          */
         private List<String> getSongIdsFromGenre(final String genre){
-           Cursor songIdsCursor = m_resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    new String[] {"Distinct " + MediaStore.Audio.Media._ID, "genre_name" },
-                    "genre_name" + " =?",new String[] {genre},null);
+        //    Cursor songIdsCursor = m_resolver.query(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI,
+        //             new String[] {"Distinct " + MediaStore.Audio.Genres._ID, MediaStore.Audio.Genres.NAME },
+        //             "name" + " like ?",new String[] {genre},null);
+        String filters = "";
+        String uGenre = genre.toUpperCase();
+        // TODO: FIX
+        if (uGenre.equals("POP") || uGenre.equals("ROCK") || uGenre.equals("JAZZ") || uGenre.equals("RNB")) {
+            filters = "name like '"+genre+"'";
+        }else{
+            filters = "name != 'POP' COLLATE NOCASE AND name != 'RNB' COLLATE NOCASE AND name != 'ROCK' COLLATE NOCASE AND name NOT LIKE 'HIP HOP' COLLATE NOCASE AND name NOT LIKE 'JAZZ' COLLATE NOCASE";
+        }
+        Cursor songIdsCursor = m_resolver.query(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI,
+        new String[] {"Distinct " + MediaStore.Audio.Genres._ID, MediaStore.Audio.Genres.NAME },filters,null,null);
 
            List<String> songIds = new ArrayList<>();
 
