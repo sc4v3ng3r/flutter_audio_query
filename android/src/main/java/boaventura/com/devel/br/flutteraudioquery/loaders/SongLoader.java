@@ -524,7 +524,7 @@ public class SongLoader extends AbstractLoader {
 
             String artPath = null;
 
-            if (artCursor !=null){
+            if (artCursor !=null && artCursor.moveToFirst()){
                 while (artCursor.moveToNext()) {
 
                     try {
