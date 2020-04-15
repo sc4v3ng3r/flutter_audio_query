@@ -3,6 +3,7 @@ package boaventura.com.devel.br.flutteraudioquery.loaders;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Log;
 
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import boaventura.com.devel.br.flutteraudioquery.loaders.cache.AlbumArtCache;
 import boaventura.com.devel.br.flutteraudioquery.loaders.tasks.AbstractLoadTask;
 import boaventura.com.devel.br.flutteraudioquery.sortingtypes.SongSortType;
 import io.flutter.plugin.common.MethodChannel;
@@ -28,7 +30,8 @@ public class SongLoader extends AbstractLoader {
 
     private static final String[] SONG_ALBUM_PROJECTION = {
             MediaStore.Audio.AlbumColumns.ALBUM,
-            MediaStore.Audio.AlbumColumns.ALBUM_ART
+            MediaStore.Audio.AlbumColumns.ALBUM_ART,
+            MediaStore.Audio.AudioColumns._ID,
     };
 
     static private final String[] SONG_PROJECTION = {
@@ -53,7 +56,7 @@ public class SongLoader extends AbstractLoader {
             MediaStore.Audio.Media.SIZE, // string with file size in bytes
     };
 
-    public SongLoader(final Context context){
+    public SongLoader(final Context context) {
 
         super(context);
 
@@ -89,13 +92,13 @@ public class SongLoader extends AbstractLoader {
      * @param sortType SongSortType The type of sort desired.
      * @return A String for SQL language query usage.
      */
-    private String parseSortOrder(SongSortType sortType){
+    private String parseSortOrder(SongSortType sortType) {
         String sortOrder;
 
-        switch (sortType){
+        switch (sortType) {
 
             case ALPHABETIC_COMPOSER:
-                sortOrder = MediaStore.Audio.Media.COMPOSER+ " ASC";
+                sortOrder = MediaStore.Audio.Media.COMPOSER + " ASC";
                 break;
 
             case GREATER_DURATION:
@@ -143,29 +146,28 @@ public class SongLoader extends AbstractLoader {
 
     /**
      * This method query for all songs available on device storage
-     * @param result MethodChannel.Result object to send reply for dart
-     * @param sortType SongSortType object to define sort type for data queried.
      *
+     * @param result   MethodChannel.Result object to send reply for dart
+     * @param sortType SongSortType object to define sort type for data queried.
      */
-    public void getSongs(final MethodChannel.Result result, final SongSortType sortType){
+    public void getSongs(final MethodChannel.Result result, final SongSortType sortType) {
 
-        createLoadTask( result,null,null,
+        createLoadTask(result, null, null,
                 parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
     }
 
     /**
-     *
      * This method makes a query that search genre by name with
      * nameQuery as query String.
      *
-     * @param result MethodChannel.Result object to send reply for dart.
+     * @param result     MethodChannel.Result object to send reply for dart.
      * @param namedQuery Query param to match song title.
-     * @param sortType SongSortType object to define sort type for data queried.
+     * @param sortType   SongSortType object to define sort type for data queried.
      */
     public void searchSongs(final MethodChannel.Result result, final String namedQuery,
-                            final SongSortType sortType){
+                            final SongSortType sortType) {
 
-        String[] args =  new String[]{namedQuery + "%"};
+        String[] args = new String[]{namedQuery + "%"};
         createLoadTask(result, MediaStore.Audio.Media.TITLE + " like ?",
                 args, parseSortOrder(sortType), QUERY_TYPE_DEFAULT).execute();
     }
@@ -174,19 +176,18 @@ public class SongLoader extends AbstractLoader {
      * This method fetch songs by Ids. Here it is used to fetch
      * songs that appears on specific playlist.
      *
-     * @param result MethodChannel.Result object to send reply for dart.
+     * @param result  MethodChannel.Result object to send reply for dart.
      * @param songIds Ids of songs that will be fetched.
      */
-    public void getSongsFromPlaylist(MethodChannel.Result result, final List<String> songIds){
+    public void getSongsFromPlaylist(MethodChannel.Result result, final List<String> songIds) {
         String[] values;
 
-        if ( (songIds != null) && (songIds.size() > 0) ){
-             values = songIds.toArray(new String[songIds.size()] );
-             this.
-             createLoadTask(result, SONG_PROJECTION[0] + " =?", values, prepareIDsSongsSortOrder(songIds), QUERY_TYPE_DEFAULT)
-                     .execute();
-        }
-        else result.success( new ArrayList<Map<String,Object>>() );
+        if ((songIds != null) && (songIds.size() > 0)) {
+            values = songIds.toArray(new String[songIds.size()]);
+            this.
+                    createLoadTask(result, SONG_PROJECTION[0] + " =?", values, prepareIDsSongsSortOrder(songIds), QUERY_TYPE_DEFAULT)
+                    .execute();
+        } else result.success(new ArrayList<Map<String, Object>>());
     }
 
     /**
@@ -196,7 +197,7 @@ public class SongLoader extends AbstractLoader {
      * @param songIds Song ids list
      * @return Sql String case when then or null if songIds size is not greater then 1.
      */
-    private String prepareIDsSongsSortOrder(final List<String> songIds){
+    private String prepareIDsSongsSortOrder(final List<String> songIds) {
         if (songIds.size() == 1)
             return null;
 
@@ -207,9 +208,9 @@ public class SongLoader extends AbstractLoader {
                 .append("'")
                 .append(" THEN 0");
 
-        for(int i = 1; i < songIds.size(); i++){
+        for (int i = 1; i < songIds.size(); i++) {
             orderStr.append(" WHEN '")
-                    .append( songIds.get(i) )
+                    .append(songIds.get(i))
                     .append("'")
                     .append(" THEN ")
                     .append(i);
@@ -224,73 +225,76 @@ public class SongLoader extends AbstractLoader {
     /**
      * This method queries for all songs that appears on specific album.
      *
-     * @param result MethodChannel.Result object to send reply for dart.
-     * @param albumId Album id that we want fetch songs
+     * @param result   MethodChannel.Result object to send reply for dart.
+     * @param albumId  Album id that we want fetch songs
      * @param sortType SongSortType object to define sort type for data queried.
      */
     public void getSongsFromAlbum(final MethodChannel.Result result, final String albumId,
-                                  final SongSortType sortType){
+                                  final SongSortType sortType) {
 
-       // Log.i("MFBG", "Art: " + artist + " album: " + albumId);
+        // Log.i("MFBG", "Art: " + artist + " album: " + albumId);
         String selection = MediaStore.Audio.Media.ALBUM_ID + " =?";
 
-       createLoadTask( result, selection, new String[] {albumId},
-               parseSortOrder(sortType), QUERY_TYPE_ALBUM_SONGS).execute();
+        createLoadTask(result, selection, new String[]{albumId},
+                parseSortOrder(sortType), QUERY_TYPE_ALBUM_SONGS).execute();
     }
 
     /**
      * This method queries for songs from specific artist that appears on specific album.
      *
-     * @param result MethodChannel.Result object to send reply for dart.
-     * @param albumId Album id that we want fetch songs
-     * @param artist Artist name that appears in album
+     * @param result   MethodChannel.Result object to send reply for dart.
+     * @param albumId  Album id that we want fetch songs
+     * @param artist   Artist name that appears in album
      * @param sortType SongSortType object to define sort type for data queried.
      */
     public void getSongsFromArtistAlbum(final MethodChannel.Result result, final String albumId,
-                                        final String artist, final SongSortType sortType){
+                                        final String artist, final SongSortType sortType) {
         String selection = MediaStore.Audio.Media.ALBUM_ID + " =?"
                 + " and " + MediaStore.Audio.Media.ARTIST + " =?";
 
-        createLoadTask( result, selection, new String[] {albumId, artist},
+        createLoadTask(result, selection, new String[]{albumId, artist},
                 parseSortOrder(sortType), QUERY_TYPE_ALBUM_SONGS).execute();
     }
+
     /**
      * This method queries songs from a specific artist.
-     * @param result MethodChannel.Result object to send reply for dart.
+     *
+     * @param result     MethodChannel.Result object to send reply for dart.
      * @param artistName Artist name that we want fetch songs.
-     * @param sortType SongSortType object to define sort type for data queried.
+     * @param sortType   SongSortType object to define sort type for data queried.
      */
     public void getSongsFromArtist(final MethodChannel.Result result, final String artistName,
-                                   final SongSortType sortType ){
+                                   final SongSortType sortType) {
 
         createLoadTask(result, MediaStore.Audio.Media.ARTIST + " =?",
-                new String[] { artistName }, parseSortOrder(sortType), QUERY_TYPE_DEFAULT )
+                new String[]{artistName}, parseSortOrder(sortType), QUERY_TYPE_DEFAULT)
                 .execute();
     }
 
     /**
      * This method queries songs that appears on specific genre.
      *
-     * @param result MethodChannel.Result object to send reply for dart.
-     * @param genre Genre name that we want songs.
+     * @param result   MethodChannel.Result object to send reply for dart.
+     * @param genre    Genre name that we want songs.
      * @param sortType SongSortType object to define sort type for data queried.
      */
     public void getSongsFromGenre(final MethodChannel.Result result, final String genre,
-                                  final SongSortType sortType){
+                                  final SongSortType sortType) {
 
         createLoadTask(result, genre, null,
-                parseSortOrder( sortType), QUERY_TYPE_GENRE_SONGS )
+                parseSortOrder(sortType), QUERY_TYPE_GENRE_SONGS)
                 .execute();
     }
 
     /**
      * This method fetch songs with specified Ids.
-     * @param result MethodChannel.Result object to send reply for dart.
-     * @param ids Songs Ids.
+     *
+     * @param result   MethodChannel.Result object to send reply for dart.
+     * @param ids      Songs Ids.
      * @param sortType SongSortType object to define sort type for data queried.
      */
     public void getSongsById(final MethodChannel.Result result, final List<String> ids,
-                             final SongSortType sortType){
+                             final SongSortType sortType) {
 
         String[] selectionArgs;
         String sortOrder = null;
@@ -300,16 +304,14 @@ public class SongLoader extends AbstractLoader {
             return;
         }
 
-        if (ids.size() > 1){
-            selectionArgs = ids.toArray( new String[ ids.size() ]);
+        if (ids.size() > 1) {
+            selectionArgs = ids.toArray(new String[ids.size()]);
 
-            if(sortType == SongSortType.CURRENT_IDs_ORDER)
-                sortOrder = prepareIDsSongsSortOrder( ids );
-        }
-
-        else{
+            if (sortType == SongSortType.CURRENT_IDs_ORDER)
+                sortOrder = prepareIDsSongsSortOrder(ids);
+        } else {
             sortOrder = parseSortOrder(sortType);
-            selectionArgs = new String[]{ ids.get(0) };
+            selectionArgs = new String[]{ids.get(0)};
         }
 
         createLoadTask(result, MediaStore.Audio.Media._ID, selectionArgs,
@@ -317,23 +319,21 @@ public class SongLoader extends AbstractLoader {
     }
 
 
-
     @Override
-    protected SongTaskLoad createLoadTask(MethodChannel.Result result, final String selection, final String [] selectionArgs,
-                                final String sortOrder, final int type){
+    protected SongTaskLoad createLoadTask(MethodChannel.Result result, final String selection, final String[] selectionArgs,
+                                          final String sortOrder, final int type) {
 
         return new SongTaskLoad(result, getContentResolver(), selection, selectionArgs, sortOrder, type);
 
     }
 
 
-    private static class SongTaskLoad extends AbstractLoadTask< List< Map<String,Object> > > {
+    private static class SongTaskLoad extends AbstractLoadTask<List<Map<String, Object>>> {
         private MethodChannel.Result m_result;
         private ContentResolver m_resolver;
         private int m_queryType;
 
         /**
-         *
          * @param result
          * @param m_resolver
          * @param selection
@@ -341,11 +341,11 @@ public class SongLoader extends AbstractLoader {
          * @param sortOrder
          */
         SongTaskLoad(MethodChannel.Result result, ContentResolver m_resolver, String selection,
-                     String[] selectionArgs, String sortOrder, int type){
+                     String[] selectionArgs, String sortOrder, int type) {
 
             super(selection, selectionArgs, sortOrder);
             this.m_resolver = m_resolver;
-            this.m_result =result;
+            this.m_result = result;
             this.m_queryType = type;
         }
 
@@ -358,43 +358,41 @@ public class SongLoader extends AbstractLoader {
         }
 
         @Override
-        protected List< Map<String,Object> > loadData(
-                final String selection, final String [] selectionArgs,
-                final String sortOrder ){
+        protected List<Map<String, Object>> loadData(
+                final String selection, final String[] selectionArgs,
+                final String sortOrder) {
 
-            switch (m_queryType){
+            switch (m_queryType) {
                 case QUERY_TYPE_DEFAULT:
                     // In this case the selection will be always by id.
                     // used for fetch songs for playlist or songs by id.
-                    if ( (selectionArgs!=null) && (selectionArgs.length > 1) ){
-                        return basicLoad( createMultipleValueSelectionArgs(MediaStore.Audio.Media._ID,
+                    if ((selectionArgs != null) && (selectionArgs.length > 1)) {
+                        return basicLoad(createMultipleValueSelectionArgs(MediaStore.Audio.Media._ID,
                                 selectionArgs), selectionArgs, sortOrder);
 
                     } else
-                        return  basicLoad(selection, selectionArgs, sortOrder);
+                        return basicLoad(selection, selectionArgs, sortOrder);
 
                 case QUERY_TYPE_ALBUM_SONGS:
                     //Log.i("MDBG", "new way");
-                    return basicLoad(selection,selectionArgs,sortOrder);
+                    return basicLoad(selection, selectionArgs, sortOrder);
 
                 case QUERY_TYPE_GENRE_SONGS:
                     List<String> songIds = getSongIdsFromGenre(selection);
                     int idCount = songIds.size();
-                    if ( idCount > 0){
+                    if (idCount > 0) {
 
-                        if (idCount > 1 ){
-                            String[] args = songIds.toArray( new String[idCount] );
+                        if (idCount > 1) {
+                            String[] args = songIds.toArray(new String[idCount]);
                             String createdSelection = createMultipleValueSelectionArgs(
                                     MediaStore.Audio.Media._ID, args);
-                            return  basicLoad(
+                            return basicLoad(
                                     createdSelection,
-                                    args,sortOrder );
-                        }
-
-                        else {
+                                    args, sortOrder);
+                        } else {
                             return basicLoad(MediaStore.Audio.Media._ID + " =?",
-                                    new String[]{ songIds.get(0)},
-                                    sortOrder );
+                                    new String[]{songIds.get(0)},
+                                    sortOrder);
                         }
                     }
                     break;
@@ -408,62 +406,60 @@ public class SongLoader extends AbstractLoader {
 
         /**
          * This method fetch song ids that appears on specific genre.
+         *
          * @param genre genre name
          * @return List of ids in string.
          */
-        private List<String> getSongIdsFromGenre(final String genre){
-           Cursor songIdsCursor = m_resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    new String[] {"Distinct " + MediaStore.Audio.Media._ID, "genre_name" },
-                    "genre_name" + " =?",new String[] {genre},null);
+        private List<String> getSongIdsFromGenre(final String genre) {
+            Cursor songIdsCursor = m_resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    new String[]{"Distinct " + MediaStore.Audio.Media._ID, "genre_name"},
+                    "genre_name" + " =?", new String[]{genre}, null);
 
-           List<String> songIds = new ArrayList<>();
+            List<String> songIds = new ArrayList<>();
 
-           if (songIdsCursor != null){
+            if (songIdsCursor != null) {
 
-               while ( songIdsCursor.moveToNext() ){
-                   try {
-                       String id = songIdsCursor.getString(songIdsCursor.getColumnIndex(MediaStore.Audio.Media._ID));
-                       songIds.add(id);
-                   }
-                   catch (Exception ex){
-                       Log.e(TAG_ERROR, "SongLoader::getSonIdsFromGenre method exception");
-                       Log.e(TAG_ERROR, ex.getMessage() );
-                   }
-               }
-               songIdsCursor.close();
-           }
+                while (songIdsCursor.moveToNext()) {
+                    try {
+                        String id = songIdsCursor.getString(songIdsCursor.getColumnIndex(MediaStore.Audio.Media._ID));
+                        songIds.add(id);
+                    } catch (Exception ex) {
+                        Log.e(TAG_ERROR, "SongLoader::getSonIdsFromGenre method exception");
+                        Log.e(TAG_ERROR, ex.getMessage());
+                    }
+                }
+                songIdsCursor.close();
+            }
 
-           return songIds;
+            return songIds;
         }
 
-        private List<Map<String,Object>> basicLoad(final String selection, final String[] selectionArgs,
-                                                   final String sortOrder){
+        private List<Map<String, Object>> basicLoad(final String selection, final String[] selectionArgs,
+                                                    final String sortOrder) {
 
-            List< Map<String, Object> > dataList = new ArrayList<>();
+            List<Map<String, Object>> dataList = new ArrayList<>();
             Cursor songsCursor = null;
 
-            try{
+            try {
                 songsCursor = m_resolver.query(
                         MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                        SongLoader.SONG_PROJECTION, selection, selectionArgs, sortOrder );
-            }
-
-            catch (RuntimeException ex){
+                        SongLoader.SONG_PROJECTION, selection, selectionArgs, sortOrder);
+            } catch (RuntimeException ex) {
 
                 System.out.println("SongLoader::basicLoad " + ex);
-                m_result.error("SONG_READ_ERROR", ex.getMessage() , null);
+                m_result.error("SONG_READ_ERROR", ex.getMessage(), null);
             }
 
-            if (songsCursor != null){
-                Map<String,String> albumArtMap = new HashMap<>();
+            if (songsCursor != null) {
+                Map<String, String> albumArtMap = new HashMap<>();
 
-                while( songsCursor.moveToNext() ){
+                while (songsCursor.moveToNext()) {
                     try {
 
                         Map<String, Object> songData = new HashMap<>();
 
-                        for (String column : songsCursor.getColumnNames()){
-                            switch (column ){
+                        for (String column : songsCursor.getColumnNames()) {
+                            switch (column) {
                                 case MediaStore.Audio.Media.IS_MUSIC:
                                 case MediaStore.Audio.Media.IS_PODCAST:
                                 case MediaStore.Audio.Media.IS_RINGTONE:
@@ -473,14 +469,14 @@ public class SongLoader extends AbstractLoader {
                                             (songsCursor.getInt(songsCursor.getColumnIndex(column)) != 0));
                                     break;
                                 default:
-                                    songData.put(column, songsCursor.getString( songsCursor.getColumnIndex(column)) );
+                                    songData.put(column, songsCursor.getString(songsCursor.getColumnIndex(column)));
                             }
 
                         }
 
 
                         String albumKey = songsCursor.getString(
-                                songsCursor.getColumnIndex(SONG_PROJECTION[4]));
+                                songsCursor.getColumnIndex(SONG_PROJECTION[1]));
 
                         String artPath;
                         if (!albumArtMap.containsKey(albumKey)) {
@@ -494,11 +490,9 @@ public class SongLoader extends AbstractLoader {
                         artPath = albumArtMap.get(albumKey);
                         songData.put("album_artwork", artPath);
                         dataList.add(songData);
-                    }
-
-                    catch(Exception ex){
+                    } catch (Exception ex) {
                         Log.e(TAG_ERROR, "SongLoader::basicLoad method exception");
-                        Log.e(TAG_ERROR, ex.getMessage() );
+                        Log.e(TAG_ERROR, ex.getMessage());
                     }
                 }
 
@@ -511,28 +505,33 @@ public class SongLoader extends AbstractLoader {
         /**
          * This method the image of the album if exists. If there is no album artwork
          * null is returned
+         *
          * @param album Album name that we want the artwork
          * @return String with image path or null if there is no image.
          */
-        private String getAlbumArtPathForSong(String album){
+        private String getAlbumArtPathForSong(String album) {
+            Log.i("AlbumLoader", album);
+            if (Build.VERSION.SDK_INT >=29){
+                int id = Integer.parseInt(album);
+                return AlbumArtCache.getInstance().getPathForAlbum(id);
+            }
             Cursor artCursor = m_resolver.query(
                     MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
                     SONG_ALBUM_PROJECTION,
-                    SONG_ALBUM_PROJECTION[0] +  " =?",
-                    new String[] {album},
+                    SONG_ALBUM_PROJECTION[2] + " =?",
+                    new String[]{album},
                     null);
 
             String artPath = null;
 
-            if (artCursor !=null && artCursor.moveToFirst()){
+            if (artCursor != null && artCursor.moveToFirst()) {
                 while (artCursor.moveToNext()) {
 
                     try {
+
                         artPath = artCursor.getString(artCursor.getColumnIndex(SONG_ALBUM_PROJECTION[1]));
 
-                    }
-
-                    catch (Exception ex) {
+                    } catch (Exception ex) {
                         Log.e(TAG_ERROR, "SongLoader::getAlbumArtPathForSong method exception");
                         Log.e(TAG_ERROR, ex.getMessage());
                     }
