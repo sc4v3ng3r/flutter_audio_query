@@ -1,8 +1,11 @@
 package boaventura.com.devel.br.flutteraudioquery.loaders;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Log;
 
@@ -11,7 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import boaventura.com.devel.br.flutteraudioquery.loaders.cache.AlbumArtCache;
 import boaventura.com.devel.br.flutteraudioquery.loaders.tasks.AbstractLoadTask;
+import boaventura.com.devel.br.flutteraudioquery.loaders.tasks.SaveImageTask;
 import boaventura.com.devel.br.flutteraudioquery.sortingtypes.AlbumSortType;
 import io.flutter.plugin.common.MethodChannel;
 
@@ -325,8 +330,19 @@ public class AlbumLoader extends AbstractLoader {
                             for (String albumColumn : ALBUM_PROJECTION) {
                                 String value = cursor.getString(cursor.getColumnIndex(albumColumn));
                                 dataMap.put(albumColumn, value);
-                                //Log.i(TAG, albumColumn + ": " + value);
+//                                Log.i("AlbumLoader", albumColumn + ": " + value);
                             }
+
+                            if (Build.VERSION.SDK_INT >= 29){
+                                int albumId = Integer.parseInt(dataMap.get("_id").toString());
+                                boolean exists = AlbumArtCache.getInstance().artExists(albumId);
+                                if (!exists){
+                                    new SaveImageTask(m_resolver,albumId).execute();
+                                }
+                                String artPath = AlbumArtCache.getInstance().getPathForAlbum(albumId);
+                                dataMap.put("album_art",artPath);
+                            }
+
                             dataList.add(dataMap);
                         } catch (Exception ex) {
                             Log.e("ERROR", "AlbumLoader::basicLoad", ex);

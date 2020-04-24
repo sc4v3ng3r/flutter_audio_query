@@ -3,6 +3,7 @@ package boaventura.com.devel.br.flutteraudioquery.loaders;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Log;
 
@@ -11,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import boaventura.com.devel.br.flutteraudioquery.loaders.cache.AlbumArtCache;
 import boaventura.com.devel.br.flutteraudioquery.loaders.tasks.AbstractLoadTask;
 import boaventura.com.devel.br.flutteraudioquery.sortingtypes.ArtistSortType;
 import io.flutter.plugin.common.EventChannel;
@@ -381,7 +383,8 @@ public class ArtistLoader extends AbstractLoader {
             Cursor artworkCursor = m_resolver.query(
                     MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
                     new String[]{
-                            MediaStore.Audio.AlbumColumns.ALBUM_ART,
+                            MediaStore.Audio.Albums._ID,
+                            MediaStore.Audio.Albums.ALBUM_ART,
                             MediaStore.Audio.AlbumColumns.ARTIST
                     },
 
@@ -393,9 +396,19 @@ public class ArtistLoader extends AbstractLoader {
                 //Log.i(TAG, "total paths " + artworkCursor.getCount());
                     while (artworkCursor.moveToNext()) {
                         try {
-                            artworkPath = artworkCursor.getString(
-                                    artworkCursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART)
-                            );
+
+                            if (Build.VERSION.SDK_INT >=29){
+                                String albumId = artworkCursor.getString(
+                                        artworkCursor.getColumnIndex(MediaStore.Audio.Albums._ID));
+                                Log.i("ArtistLoader",albumId);
+
+                                int id = Integer.parseInt(albumId);
+                                artworkPath = AlbumArtCache.getInstance().getPathForAlbum(id);
+                            } else {
+                                artworkPath = artworkCursor.getString(
+                                        artworkCursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART)
+                                );
+                            }
 
                             // breaks in first valid path founded.
                             if (artworkPath != null)

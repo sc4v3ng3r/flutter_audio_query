@@ -32,6 +32,7 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
 
 import boaventura.com.devel.br.flutteraudioquery.delegate.AudioQueryDelegate;
+import boaventura.com.devel.br.flutteraudioquery.loaders.cache.AlbumArtCache;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
@@ -80,6 +81,7 @@ public class FlutterAudioQueryPlugin implements MethodCallHandler, FlutterPlugin
 
       final FlutterAudioQueryPlugin plugin = new FlutterAudioQueryPlugin();
       Log.i("AUDIO_QUERY", "Using V1 EMBEDDING");
+      Log.i("AUDIO_QUERY",AlbumArtCache.CAHCE_DIR);
       plugin.setup(registrar.messenger(), application, registrar.activity(), registrar, null);
   }
 
@@ -115,7 +117,6 @@ public class FlutterAudioQueryPlugin implements MethodCallHandler, FlutterPlugin
                   result.error("unknown_source",
                               "method call was made by an unknown source", null);
                   break;
-
           }
       }
 
@@ -146,6 +147,7 @@ public class FlutterAudioQueryPlugin implements MethodCallHandler, FlutterPlugin
                 null,
                 m_activityBinding
         );
+        AlbumArtCache.CAHCE_DIR = m_pluginBinding.getApplicationContext().getCacheDir().getAbsolutePath();
   }
 
   @Override
