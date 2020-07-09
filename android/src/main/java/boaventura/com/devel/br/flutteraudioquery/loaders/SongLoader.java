@@ -511,7 +511,7 @@ public class SongLoader extends AbstractLoader {
          */
         private String getAlbumArtPathForSong(String album) {
             Log.i("AlbumLoader", album);
-            if (Build.VERSION.SDK_INT >=29){
+            if (Build.VERSION.SDK_INT >= 29) {
                 int id = Integer.parseInt(album);
                 return AlbumArtCache.getInstance().getPathForAlbum(id);
             }
@@ -525,17 +525,22 @@ public class SongLoader extends AbstractLoader {
             String artPath = null;
 
             if (artCursor != null && artCursor.moveToFirst()) {
-                while (artCursor.moveToNext()) {
+                do {
 
                     try {
 
                         artPath = artCursor.getString(artCursor.getColumnIndex(SONG_ALBUM_PROJECTION[1]));
+                        Log.i(TAG, artPath);
+                        if (artPath != null && !artPath.isEmpty()) {
+                            artCursor.close();
+                            return artPath;
+                        }
 
                     } catch (Exception ex) {
                         Log.e(TAG_ERROR, "SongLoader::getAlbumArtPathForSong method exception");
                         Log.e(TAG_ERROR, ex.getMessage());
                     }
-                }
+                } while ((artCursor.moveToNext()));
 
                 artCursor.close();
             }
