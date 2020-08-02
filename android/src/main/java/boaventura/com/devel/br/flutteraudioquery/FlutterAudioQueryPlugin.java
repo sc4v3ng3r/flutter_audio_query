@@ -202,17 +202,23 @@ public class FlutterAudioQueryPlugin implements MethodCallHandler, FlutterPlugin
   }
 
   private void tearDown() {
-      m_activityBinding.removeRequestPermissionsResultListener(m_delegate);
-      m_activityBinding = null;
+      if(m_activityBinding != null){
+          m_activityBinding.removeRequestPermissionsResultListener(m_delegate);
+          m_activityBinding = null;
+      }
       if (lifecycle != null) {
           lifecycle.removeObserver(observer);
           lifecycle = null;
       }
       m_delegate = null;
-      channel.setMethodCallHandler(null);
-      channel = null;
-      application.unregisterActivityLifecycleCallbacks(observer);
-      application = null;
+      if (channel != null) {
+          channel.setMethodCallHandler(null);
+          channel = null;
+      }
+      if(application != null){
+          application.unregisterActivityLifecycleCallbacks(observer);
+          application = null;
+      }
     }
 
     private class LifeCycleObserver
