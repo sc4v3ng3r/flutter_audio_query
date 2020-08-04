@@ -58,7 +58,7 @@ public class FlutterAudioQueryPlugin implements MethodCallHandler, FlutterPlugin
 
 
 
-  // This is null when not using v2 embedding;
+  // These are null when not using v2 embedding;
   private Lifecycle lifecycle;
   private LifeCycleObserver observer;
 
@@ -109,6 +109,11 @@ public class FlutterAudioQueryPlugin implements MethodCallHandler, FlutterPlugin
 
               case "playlist":
                   m_delegate.playlistSourceHandler(call, result);
+                  break;
+
+
+              case "artwork":
+                  m_delegate.artworkSourceHandler(call, result);
                   break;
 
               default:

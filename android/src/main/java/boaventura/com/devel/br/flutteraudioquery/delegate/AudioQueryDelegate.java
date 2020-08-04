@@ -4,7 +4,9 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.util.Log;
+import android.util.Size;
 
 import java.util.List;
 
@@ -14,6 +16,7 @@ import androidx.core.content.ContextCompat;
 import boaventura.com.devel.br.flutteraudioquery.loaders.AlbumLoader;
 import boaventura.com.devel.br.flutteraudioquery.loaders.ArtistLoader;
 import boaventura.com.devel.br.flutteraudioquery.loaders.GenreLoader;
+import boaventura.com.devel.br.flutteraudioquery.loaders.ImageLoader;
 import boaventura.com.devel.br.flutteraudioquery.loaders.PlaylistLoader;
 import boaventura.com.devel.br.flutteraudioquery.loaders.SongLoader;
 import boaventura.com.devel.br.flutteraudioquery.sortingtypes.AlbumSortType;
@@ -67,6 +70,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
     private final SongLoader m_songLoader;
     private final GenreLoader m_genreLoader;
     private final PlaylistLoader m_playlistLoader;
+    private final ImageLoader m_imageLoader;
 
 
 
@@ -90,6 +94,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
         m_songLoader = new SongLoader( context );
         m_genreLoader = new GenreLoader( context );
         m_playlistLoader = new PlaylistLoader( context );
+        m_imageLoader = new ImageLoader(context);
 
         m_permissionManager = new PermissionManager() {
             @Override
@@ -113,6 +118,7 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
         m_songLoader = new SongLoader( registrar.context() );
         m_genreLoader = new GenreLoader( registrar.context() );
         m_playlistLoader = new PlaylistLoader( registrar.context() );
+        m_imageLoader = new ImageLoader( registrar.context()  );
 
         m_permissionManager = new PermissionManager() {
             @Override
@@ -189,6 +195,19 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
      */
     @Override
     public void songSourceHandler(MethodCall call, MethodChannel.Result result){
+        if ( canIbeDependency(call, result)){
+
+            if (m_permissionManager.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE) ){
+                clearPendencies();
+                handleReadOnlyMethods(call, result);
+            }
+            else
+                m_permissionManager.askForPermission(Manifest.permission.READ_EXTERNAL_STORAGE,
+                        REQUEST_CODE_PERMISSION_READ_EXTERNAL);
+        } else finishWithAlreadyActiveError(result);
+    }
+
+    public void artworkSourceHandler(MethodCall call, MethodChannel.Result result){
         if ( canIbeDependency(call, result)){
 
             if (m_permissionManager.isPermissionGranted(Manifest.permission.READ_EXTERNAL_STORAGE) ){
@@ -388,6 +407,19 @@ public class AudioQueryDelegate implements PluginRegistry.RequestPermissionsResu
             case "searchPlaylists":
                 m_playlistLoader.searchPlaylists(result, (String)call.argument("query"),
                         PlaylistSortType.values()[(int)call.argument(SORT_TYPE)]);
+                break;
+
+            case "getArtwork":
+                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q){
+                    int resourceType = (int) call.argument( "resource" );
+                    String resourceId = (String) call.argument( "id" );
+                    int width = (int) call.argument("width");
+                    int height = (int) call.argument("height");
+                    m_imageLoader.searchArtworkBytes(result, resourceType, resourceId,
+                            new Size(width, height));
+                }
+                else result.notImplemented();
+
                 break;
 
             default:
