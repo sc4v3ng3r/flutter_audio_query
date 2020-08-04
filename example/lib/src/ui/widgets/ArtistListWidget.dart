@@ -12,21 +12,45 @@ class ArtistListWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final FlutterAudioQuery audioQuery = FlutterAudioQuery();
     return ListView.builder(
         shrinkWrap: true,
         padding: EdgeInsets.only(bottom: 16.0),
         itemCount: artistList.length,
         itemBuilder: (context, index) {
           ArtistInfo artist = artistList[index];
+          print("Calling artwork");
           return Stack(
             children: <Widget>[
-              CardItemWidget(
-                height: 250.0,
-                title: "Artist: ${artist.name}",
-                subtitle: "Number of Albums: ${artist.numberOfAlbums}",
-                infoText: "Number of Songs: ${artist.numberOfTracks}",
-                backgroundImage: artist.artistArtPath,
-              ),
+              (artist.artistArtPath == null)
+                  ? FutureBuilder(
+                      future: audioQuery.getArtwork(
+                          type: ResourceType.ARTIST, id: artist.id),
+                      builder: (_, snapshot) {
+                        if (snapshot.data == null)
+                          return Container(
+                            height: 250.0,
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        return CardItemWidget(
+                          height: 250.0,
+                          title: "Artist: ${artist.name}",
+                          subtitle:
+                              "Number of Albums: ${artist.numberOfAlbums}",
+                          infoText: "Number of Songs: ${artist.numberOfTracks}",
+                          backgroundImage: artist.artistArtPath,
+                          rawImage: snapshot.data,
+                        );
+                      })
+                  : CardItemWidget(
+                      height: 250.0,
+                      title: "Artist: ${artist.name}",
+                      subtitle: "Number of Albums: ${artist.numberOfAlbums}",
+                      infoText: "Number of Songs: ${artist.numberOfTracks}",
+                      backgroundImage: artist.artistArtPath,
+                    ),
               Positioned.fill(
                 child: Material(
                   color: Colors.transparent,

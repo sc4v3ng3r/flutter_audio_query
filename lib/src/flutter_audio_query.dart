@@ -32,6 +32,8 @@ enum PlayListMethodType {
   WRITE
 }
 
+enum ResourceType { ARTIST, ALBUM, SONG }
+
 /// This class provides an interface for access audio data info.
 class FlutterAudioQuery {
   static const String _CHANNEL_NAME =
@@ -45,6 +47,7 @@ class FlutterAudioQuery {
   static const String SOURCE_ALBUM = 'album';
   static const String SOURCE_SONGS = 'song';
   static const String SOURCE_GENRE = 'genre';
+  static const String SOURCE_ARTWORK = 'artwork';
   static const String SORT_TYPE = "sort_type";
   static const String PLAYLIST_METHOD_TYPE = "method_type";
   static const String SOURCE_PLAYLIST = 'playlist';
@@ -148,7 +151,6 @@ class FlutterAudioQuery {
   /// [artist] Artist name must be non null.
   Future<List<AlbumInfo>> getAlbumsFromArtist(
       {@required final String artist,
-
       AlbumSortType sortType = AlbumSortType.DEFAULT}) async {
     List<dynamic> dataList = await channel.invokeMethod('getAlbumsFromArtist', {
       'artist': artist,
@@ -351,6 +353,30 @@ class FlutterAudioQuery {
     });
 
     return _parsePlaylistsDataList(dataList);
+  }
+
+  /// This method should be used if you're on Android >= Q with scoped storage working.
+  ///
+  Future<Uint8List> getArtwork({
+    @required final ResourceType type,
+    @required final String id,
+    final Size size,
+  }) async {
+    assert(id != null && type != null);
+    final data = await channel.invokeMethod("getArtwork", {
+      SOURCE_KEY: SOURCE_ARTWORK,
+      "resource": type.index,
+      "id": id,
+      "width": size?.width?.round() ?? 250,
+      "height": size?.height?.round() ?? 250,
+    });
+
+    Map<String, dynamic> dataMap = Map<String, dynamic>.from(data);
+    if (dataMap["image"] != null) {
+      final imageBytes = Uint8List.fromList(List<int>.from(dataMap["image"]));
+      return imageBytes;
+    }
+    return Uint8List.fromList([]);
   }
 
   /// This method creates a new empty playlist named [playlistName].
