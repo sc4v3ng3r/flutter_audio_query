@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
 import './CardItemWidget.dart';
@@ -19,11 +21,10 @@ class ArtistListWidget extends StatelessWidget {
         itemCount: artistList.length,
         itemBuilder: (context, index) {
           ArtistInfo artist = artistList[index];
-          print("Calling artwork");
           return Stack(
             children: <Widget>[
               (artist.artistArtPath == null)
-                  ? FutureBuilder(
+                  ? FutureBuilder<Uint8List>(
                       future: audioQuery.getArtwork(
                           type: ResourceType.ARTIST, id: artist.id),
                       builder: (_, snapshot) {

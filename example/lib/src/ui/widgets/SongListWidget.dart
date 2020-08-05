@@ -90,8 +90,8 @@ class SongListWidget extends StatelessWidget {
               leading: (song.albumArtwork == null)
                   ? FutureBuilder<Uint8List>(
                       future: audioQuery.getArtwork(
-                          type: ResourceType.ALBUM,
-                          id: song.albumId,
+                          type: ResourceType.SONG,
+                          id: song.id,
                           size: Size(100, 100)),
                       builder: (_, snapshot) {
                         if (snapshot.data == null)
@@ -99,11 +99,15 @@ class SongListWidget extends StatelessWidget {
                             child: CircularProgressIndicator(),
                           );
 
+                        if (snapshot.data.isEmpty)
+                          return CircleAvatar(
+                            backgroundImage: AssetImage("assets/no_cover.png"),
+                          );
+
                         return CircleAvatar(
                           backgroundColor: Colors.transparent,
-                          child: Image.memory(
+                          backgroundImage: MemoryImage(
                             snapshot.data,
-                            fit: BoxFit.fill,
                           ),
                         );
                       })
