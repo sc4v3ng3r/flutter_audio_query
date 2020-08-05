@@ -6,7 +6,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.util.Size;
@@ -18,9 +17,6 @@ import java.util.Map;
 
 import boaventura.com.devel.br.flutteraudioquery.loaders.tasks.AbstractLoadTask;
 import io.flutter.plugin.common.MethodChannel;
-
-
-enum ResourceType {ARTIST, ALBUM, SONG};
 
 public class ImageLoader extends AbstractLoader {
     public ImageLoader(Context context) {
@@ -99,6 +95,7 @@ public class ImageLoader extends AbstractLoader {
             this.m_result = null;
         }
 
+        // finds an image
         private Map<String,Object> findImage(Cursor cursor) {
 
             Map<String, Object> map = new HashMap<>();
@@ -133,6 +130,7 @@ public class ImageLoader extends AbstractLoader {
             return map;
         }
 
+        // extract bitmap raw bytes.
         private byte[] getBitmapBytes(Bitmap bmp){
             byte[] imageBytes = null;
             try {
@@ -170,18 +168,17 @@ public class ImageLoader extends AbstractLoader {
                         final Uri uri = ContentUris.appendId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.buildUpon(),
                                 Long.parseLong( selectionArgs[0] )).build();
                         try {
-
                             Bitmap bitmap = this.m_resolver.loadThumbnail(uri, size, null);
                             map.put(key, getBitmapBytes(bitmap));
                         }
                         catch (IOException ex){
-                            Log.i("DBG", "Problem reading song image " + ex.toString());
+                            //Log.i("DBG", "Problem reading song image " + ex.toString());
                         }
 
                         if (map.isEmpty())
                             map.put(key, null);
 
-                        break;
+                        return map;
                 }
 
                 return findImage(cursor);
