@@ -355,7 +355,18 @@ class FlutterAudioQuery {
     return _parsePlaylistsDataList(dataList);
   }
 
-  /// This method should be used if you're on Android >= Q with scoped storage working.
+  /// This method fetchs an artowrk for ARSTIS, ALBUM or SONG based on content id.
+  /// It must be used on Android >= Q as scoped storage does not allow load images
+  /// using absolute file path.
+  ///
+  /// It returns an Uint8List with the bitmap bytes or empty list if no image was found.
+  ///
+  /// [type] The resource type you want to fetch an image. The values can be:
+  /// ResourceType.ARTIST, ResourceType.ALBUM OR ResourceType.SONG. It must be non null.
+  ///
+  /// [id] The content id you want an artwork image.
+  ///
+  /// [size] The image dimensions. The default value is Size(250, 250)
   ///
   Future<Uint8List> getArtwork({
     @required final ResourceType type,

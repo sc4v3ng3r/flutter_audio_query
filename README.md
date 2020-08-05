@@ -82,6 +82,52 @@ List<AlbumInfo> albums = await audioQuery.getAlbumsFromArtist(artist: artist.nam
       print(artistAlbum); //print all album property values
     });
 ```
+
+#### Getting artwork on Android >= Q:
+Since Android API level 29 ALBUM_ART constant is deprecated and plus
+scoped storage approach we can't load artwork from absolute image path.
+So if your app is running over Android API >= 29 you will get all artwork fields with null. To fetch images on these API levels you can use getArwork method.
+ 
+```dart
+ /// detecting, loading and displaying an artist artwork.
+ 
+ ArtistInfo artist // assuming a non null instance
+
+ // check if artistArtPath isn't available.
+
+ (artist.artistArtPath == null)
+
+    ? FutureBuilder<Uint8List>(
+      future: audioQuery.getArtwork(
+
+        type: ResourceType.ARTIST, id: artist.id),
+        builder: (_, snapshot) {
+          if (snapshot.data == null)
+            return Container(
+              height: 250.0,
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+            
+            return CardItemWidget(
+              height: 250.0,
+              title: artist.name,
+              subtitle: "Number of Albums: ${artist.numberOfAlbums}",
+              infoText: "Number of Songs: ${artist.numberOfTracks}",
+              // The image bytes
+              // You can use Image.memory widget constructor 
+              // or MemoryImage image provider class to load image from bytes
+              // or a different approach.
+              rawImage: snapshot.data,
+            );
+          }) :
+          // or you can load image from File path if available.
+          Image.file( File( artist.artistArtPath ) )
+
+```
+
+
 ### Getting genre data
 ```dart
 /// getting all genres available

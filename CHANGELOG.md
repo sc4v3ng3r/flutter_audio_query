@@ -1,3 +1,7 @@
+## 0.3.5+2
+ * Support loading artwork on Android >= Q with getArtwork method
+ 
+
 ## 0.3.4+2  
 * Support V2 embedding Flutter API.
 * Fixing accept permission bug when using V2 Embedding Flutter API.  
