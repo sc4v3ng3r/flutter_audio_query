@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 class CardItemWidget extends StatelessWidget {
   final double width, height;
   final String backgroundImage, title, subtitle, infoText;
+  final List<int> rawImage;
   static const titleMaxLines = 2;
   static const titleTextStyle =
       TextStyle(fontWeight: FontWeight.w500, fontSize: 16.0);
@@ -13,19 +14,23 @@ class CardItemWidget extends StatelessWidget {
       this.height,
       this.backgroundImage,
       this.title = "Title",
+      this.rawImage,
       this.subtitle = "subtitle",
       this.infoText = "infotext"});
 
   @override
   Widget build(BuildContext context) {
+    final hasRawImage = !(rawImage == null || rawImage.isEmpty);
     final mainContainer = Container(
       width: width,
       height: height,
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: (backgroundImage == null)
+          image: (backgroundImage == null && !hasRawImage)
               ? AssetImage("assets/no_cover.png")
-              : FileImage(File(backgroundImage)),
+              : (hasRawImage)
+                  ? MemoryImage(rawImage) // Image.memory(rawImage)
+                  : FileImage(File(backgroundImage)),
           fit: BoxFit.cover,
           alignment: AlignmentDirectional.center,
         ),

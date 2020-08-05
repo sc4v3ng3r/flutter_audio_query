@@ -13,20 +13,28 @@ class ListItemWidget extends StatelessWidget {
   final Widget title, subtitle;
   final Widget trailing;
   final OnTap onTap;
+  final Widget leading;
 
   ListItemWidget(
-      {this.title, this.subtitle, this.imagePath, this.trailing, this.onTap});
+      {this.title,
+      this.subtitle,
+      this.leading,
+      this.imagePath,
+      this.trailing,
+      this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
         ListTile(
-          leading: CircleAvatar(
-            backgroundImage: (imagePath == null)
-                ? AssetImage("assets/no_cover.png")
-                : FileImage(File(imagePath)),
-          ),
+          leading: (this.leading == null)
+              ? CircleAvatar(
+                  backgroundImage: (imagePath == null)
+                      ? AssetImage("assets/no_cover.png")
+                      : FileImage(File(imagePath)),
+                )
+              : leading,
           onTap: onTap,
           title: title ?? Container(),
           subtitle: subtitle ?? Container(),

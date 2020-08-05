@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_audio_query/flutter_audio_query.dart';
 import '../../Utility.dart';
@@ -15,78 +17,101 @@ class SongListWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-
     return ListView.builder(
         itemCount: songList.length,
         itemBuilder: (context, songIndex) {
           SongInfo song = songList[songIndex];
           return ListItemWidget(
-            title: Text("${song.title}"),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                Text("Artist: ${song.artist}"),
-                Text(
-                  "Duration: ${Utility.parseToMinutesSeconds(int.parse(song.duration))}",
-                  style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500),
-                ),
-              ],
-            ),
-            trailing: (addToPlaylistAction == true)
-                ? IconButton(
-                    icon: Icon(Icons.playlist_add),
-                    onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              title: Text(_dialogTitle),
-                              content: FutureBuilder<List<PlaylistInfo>>(
-                                  future: audioQuery.getPlaylists(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.hasError) {
-                                      print("has error");
-                                      return Utility.createDefaultInfoWidget(
-                                          Text("${snapshot.error}"));
-                                    }
+              title: Text("${song.title}"),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
+                  Text("Artist: ${song.artist}"),
+                  Text(
+                    "Duration: ${Utility.parseToMinutesSeconds(int.parse(song.duration))}",
+                    style:
+                        TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+              trailing: (addToPlaylistAction == true)
+                  ? IconButton(
+                      icon: Icon(Icons.playlist_add),
+                      onPressed: () {
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AlertDialog(
+                                title: Text(_dialogTitle),
+                                content: FutureBuilder<List<PlaylistInfo>>(
+                                    future: audioQuery.getPlaylists(),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasError) {
+                                        print("has error");
+                                        return Utility.createDefaultInfoWidget(
+                                            Text("${snapshot.error}"));
+                                      }
 
-                                    if (snapshot.hasData) {
-                                      if (snapshot.data.isEmpty) {
-                                        print("is Empty");
-                                        return NoDataWidget(
-                                          title: "There is no playlists",
+                                      if (snapshot.hasData) {
+                                        if (snapshot.data.isEmpty) {
+                                          print("is Empty");
+                                          return NoDataWidget(
+                                            title: "There is no playlists",
+                                          );
+                                        }
+
+                                        return PlaylistDialogContent(
+                                          options: snapshot.data
+                                              .map((playlist) => playlist.name)
+                                              .toList(),
+                                          onSelected: (index) {
+                                            snapshot.data[index]
+                                                .addSong(song: song);
+                                            Navigator.pop(context);
+                                          },
                                         );
                                       }
 
-                                      return PlaylistDialogContent(
-                                        options: snapshot.data
-                                            .map((playlist) => playlist.name)
-                                            .toList(),
-                                        onSelected: (index) {
-                                          snapshot.data[index]
-                                              .addSong(song: song);
-                                          Navigator.pop(context);
-                                        },
-                                      );
-                                    }
+                                      print("has no data");
+                                      return Utility.createDefaultInfoWidget(
+                                          CircularProgressIndicator());
+                                    }),
+                              );
+                            });
+                      },
+                      tooltip: "add to playlist",
+                    )
+                  : Container(
+                      width: .0,
+                      height: .0,
+                    ),
+              imagePath: song.albumArtwork,
+              leading: (song.albumArtwork == null)
+                  ? FutureBuilder<Uint8List>(
+                      future: audioQuery.getArtwork(
+                          type: ResourceType.SONG,
+                          id: song.id,
+                          size: Size(100, 100)),
+                      builder: (_, snapshot) {
+                        if (snapshot.data == null)
+                          return CircleAvatar(
+                            child: CircularProgressIndicator(),
+                          );
 
-                                    print("has no data");
-                                    return Utility.createDefaultInfoWidget(
-                                        CircularProgressIndicator());
-                                  }),
-                            );
-                          });
-                    },
-                    tooltip: "add to playlist",
-                  )
-                : Container(
-                    width: .0,
-                    height: .0,
-                  ),
-            imagePath: song.albumArtwork,
-          );
+                        if (snapshot.data.isEmpty)
+                          return CircleAvatar(
+                            backgroundImage: AssetImage("assets/no_cover.png"),
+                          );
+
+                        return CircleAvatar(
+                          backgroundColor: Colors.transparent,
+                          backgroundImage: MemoryImage(
+                            snapshot.data,
+                          ),
+                        );
+                      })
+                  : null);
         });
   }
 }
