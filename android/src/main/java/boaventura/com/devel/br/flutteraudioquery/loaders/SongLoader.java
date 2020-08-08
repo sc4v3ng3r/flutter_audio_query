@@ -294,6 +294,7 @@ public class SongLoader extends AbstractLoader {
 
         String[] selectionArgs;
         String sortOrder = null;
+        String selection = MediaStore.Audio.Media._ID;
 
         if (ids == null || ids.isEmpty()) {
             result.error("NO_SONG_IDS", "No Ids was provided", null);
@@ -309,10 +310,11 @@ public class SongLoader extends AbstractLoader {
 
         else{
             sortOrder = parseSortOrder(sortType);
+            selection = selection + " =?";
             selectionArgs = new String[]{ ids.get(0) };
         }
 
-        createLoadTask(result, MediaStore.Audio.Media._ID, selectionArgs,
+        createLoadTask(result, selection, selectionArgs,
                 sortOrder, QUERY_TYPE_DEFAULT).execute();
     }
 
