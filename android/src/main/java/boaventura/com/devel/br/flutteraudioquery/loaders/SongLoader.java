@@ -257,14 +257,14 @@ public class SongLoader extends AbstractLoader {
     /**
      * This method queries songs from a specific artist.
      * @param result MethodChannel.Result object to send reply for dart.
-     * @param artistName Artist name that we want fetch songs.
+     * @param artistId Artist name that we want fetch songs.
      * @param sortType SongSortType object to define sort type for data queried.
      */
-    public void getSongsFromArtist(final MethodChannel.Result result, final String artistName,
+    public void getSongsFromArtist(final MethodChannel.Result result, final String artistId,
                                    final SongSortType sortType ){
 
-        createLoadTask(result, MediaStore.Audio.Media.ARTIST + " =?",
-                new String[] { artistName }, parseSortOrder(sortType), QUERY_TYPE_DEFAULT )
+        createLoadTask(result, MediaStore.Audio.Media.ARTIST_ID + " =?",
+                new String[] { artistId }, parseSortOrder(sortType), QUERY_TYPE_DEFAULT )
                 .execute();
     }
 
