@@ -115,6 +115,7 @@ public class ArtistLoader extends AbstractLoader {
                                ArtistSortType sortType){
         String[] selectionArgs;
         String sortOrder = null;
+        String selection = MediaStore.Audio.Artists._ID;
 
         if (ids == null || ids.isEmpty()) {
             result.error("NO_ARTIST_IDS", "No Ids was provided", null);
@@ -130,10 +131,11 @@ public class ArtistLoader extends AbstractLoader {
 
         else{
             sortOrder = parseSortOrder(sortType);
+            selection = selection + " =?";
             selectionArgs = new String[]{ ids.get(0) };
         }
 
-        createLoadTask(result, MediaStore.Audio.Artists._ID, selectionArgs,
+        createLoadTask(result, selection, selectionArgs,
                 sortOrder, QUERY_TYPE_DEFAULT).execute();
     }
     /**

@@ -46,6 +46,8 @@ class SongInfo extends DataModel {
   /// Returns a String with a file path to audio data file
   String get filePath => _data['_data'];
 
+  String get uri => _data["uri"];
+
   /// Returns a String with the size, in bytes, of this audio file.
   String get fileSize => _data['_size'];
 

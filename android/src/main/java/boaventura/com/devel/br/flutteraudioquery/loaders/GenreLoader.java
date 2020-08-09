@@ -19,7 +19,9 @@ import io.flutter.plugin.common.MethodChannel;
 public class GenreLoader extends AbstractLoader {
 
     private static final String[] GENRE_PROJECTION = {
-            "genre_name",
+//            "name",
+            MediaStore.Audio.GenresColumns.NAME,
+           // MediaStore.Audio.Genres._ID,
             //MediaStore.Audio.GenresColumns.NAME,
     };
 
@@ -50,7 +52,7 @@ public class GenreLoader extends AbstractLoader {
 
             default:
             case DEFAULT:
-                sortOrder = "genre_name ASC";
+                sortOrder = GENRE_PROJECTION[0] + " ASC";
                 //sortOrder = MediaStore.Audio.Genres.DEFAULT_SORT_ORDER;
                 break;
         }
@@ -108,16 +110,15 @@ public class GenreLoader extends AbstractLoader {
                                                      String sortOrder) {
 
             List<Map<String, Object>> dataList= new ArrayList<>();
-            Cursor genreCursor = m_resolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    new String[] {"Distinct " + GENRE_PROJECTION[0] }, selection,
-                    selectionArgs, sortOrder);
+            Cursor genreCursor = null;
 
-//            Cursor genreCursor = m_resolver.query(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI,
-//                    GENRE_PROJECTION, selection, selectionArgs, sortOrder);
+            try {
+                genreCursor = m_resolver.query(MediaStore.Audio.Genres.EXTERNAL_CONTENT_URI,
+                        new String[]{"Distinct " + GENRE_PROJECTION[0]}, selection,
+                        selectionArgs, sortOrder);
 
-            if (genreCursor != null){
-                while ( genreCursor.moveToNext() ){
-                    try {
+                if (genreCursor != null) {
+                    while (genreCursor.moveToNext()) {
                         Map<String, Object> data = new HashMap<>();
                         for (String column : genreCursor.getColumnNames()) {
                             String genreName = genreCursor.getString(
@@ -126,13 +127,13 @@ public class GenreLoader extends AbstractLoader {
                         }
                         dataList.add(data);
                     }
-
-                    catch(Exception ex){
-                        Log.e(TAG_ERROR, "GenreLoader::loadData method exception");
-                        Log.e(TAG_ERROR, ex.getMessage() );
-                    }
+                    genreCursor.close();
                 }
-                genreCursor.close();
+            }
+
+            catch(RuntimeException ex){
+                Log.e(TAG_ERROR, "GenreLoader::loadData method exception");
+                //Log.e(TAG_ERROR, ex.getMessage() );
             }
 
             return dataList;

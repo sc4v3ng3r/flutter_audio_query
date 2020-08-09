@@ -1,8 +1,11 @@
 package boaventura.com.devel.br.flutteraudioquery.loaders;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Log;
 
@@ -18,7 +21,6 @@ import io.flutter.plugin.common.MethodChannel;
 public class SongLoader extends AbstractLoader {
 
     private static final String TAG = "MDBG";
-    //private static final String GENRE_NAME = "genre_name";
 
     private static final int QUERY_TYPE_GENRE_SONGS = 0x01;
     private static final int QUERY_TYPE_ALBUM_SONGS = 0x02;
@@ -257,14 +259,14 @@ public class SongLoader extends AbstractLoader {
     /**
      * This method queries songs from a specific artist.
      * @param result MethodChannel.Result object to send reply for dart.
-     * @param artistName Artist name that we want fetch songs.
+     * @param artistId Artist name that we want fetch songs.
      * @param sortType SongSortType object to define sort type for data queried.
      */
-    public void getSongsFromArtist(final MethodChannel.Result result, final String artistName,
+    public void getSongsFromArtist(final MethodChannel.Result result, final String artistId,
                                    final SongSortType sortType ){
 
-        createLoadTask(result, MediaStore.Audio.Media.ARTIST + " =?",
-                new String[] { artistName }, parseSortOrder(sortType), QUERY_TYPE_DEFAULT )
+        createLoadTask(result, MediaStore.Audio.Media.ARTIST_ID + " =?",
+                new String[] { artistId }, parseSortOrder(sortType), QUERY_TYPE_DEFAULT )
                 .execute();
     }
 
@@ -294,6 +296,7 @@ public class SongLoader extends AbstractLoader {
 
         String[] selectionArgs;
         String sortOrder = null;
+        String selection = MediaStore.Audio.Media._ID;
 
         if (ids == null || ids.isEmpty()) {
             result.error("NO_SONG_IDS", "No Ids was provided", null);
@@ -309,10 +312,11 @@ public class SongLoader extends AbstractLoader {
 
         else{
             sortOrder = parseSortOrder(sortType);
+            selection = selection + " =?";
             selectionArgs = new String[]{ ids.get(0) };
         }
 
-        createLoadTask(result, MediaStore.Audio.Media._ID, selectionArgs,
+        createLoadTask(result, selection, selectionArgs,
                 sortOrder, QUERY_TYPE_DEFAULT).execute();
     }
 
@@ -459,11 +463,16 @@ public class SongLoader extends AbstractLoader {
 
                 while( songsCursor.moveToNext() ){
                     try {
-
                         Map<String, Object> songData = new HashMap<>();
-
                         for (String column : songsCursor.getColumnNames()){
                             switch (column ){
+                                case MediaStore.Audio.Media._ID:
+                                    String id = songsCursor.getString( songsCursor.getColumnIndex(column));
+                                    final Uri uri = ContentUris.appendId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.buildUpon(),
+                                            Long.parseLong( id )).build();
+                                    songData.put("uri" , uri.toString() );
+                                    break;
+                                    
                                 case MediaStore.Audio.Media.IS_MUSIC:
                                 case MediaStore.Audio.Media.IS_PODCAST:
                                 case MediaStore.Audio.Media.IS_RINGTONE:
