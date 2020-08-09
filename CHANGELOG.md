@@ -1,6 +1,10 @@
-## 0.3.5+2
+## 0.3.5+5
  * Support loading artwork on Android >= Q with getArtwork method
- 
+ * **Bug fix**: getGenres call bug fixed
+ * **Bug fix**: getSongsById when call with one single id
+ * **Bug fix**: getSongsFromArtist call
+ * **Breaking change**:
+    * The method getSongsFromArtist now accepts artistId as parameter.
 
 ## 0.3.4+2  
 * Support V2 embedding Flutter API.
