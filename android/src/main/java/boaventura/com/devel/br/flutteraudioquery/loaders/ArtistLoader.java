@@ -299,6 +299,7 @@ public class ArtistLoader extends AbstractLoader {
                     ArtistLoader.PROJECTION,
                     selection, selectionArgs, sortOrder);
 
+            Map<Integer, String> artworks = AlbumLoader.getAlbumsArt(m_resolver, true);
             List<Map<String, Object>> list = new ArrayList<>();
             if (artistCursor != null) {
 
@@ -311,7 +312,8 @@ public class ArtistLoader extends AbstractLoader {
                         }
                         // some album artwork of this artist that can be used
                         // as artist cover picture if there is one.
-                        map.put("artist_cover", getArtistArtPath((String) map.get(PROJECTION[1])));
+                        map.put("artist_cover",
+                                artworks.get(artistCursor.getInt(artistCursor.getColumnIndex(PROJECTION[0]))));
                         list.add(map);
                     }
                     catch (Exception ex) {
@@ -343,6 +345,7 @@ public class ArtistLoader extends AbstractLoader {
                     /*where clause arguments */selectionArgs,
                     sortOrder);
 
+            Map<Integer, String> artworks = AlbumLoader.getAlbumsArt(m_resolver, true);
             List<Map<String, Object>> list = new ArrayList<>();
             if (artistCursor != null) {
 
@@ -355,7 +358,8 @@ public class ArtistLoader extends AbstractLoader {
                         }
                         // some album artwork of this artist that can be used
                         // as artist cover picture if there is one.
-                        map.put("artist_cover", getArtistArtPath((String) map.get(PROJECTION[1])));
+                        map.put("artist_cover",
+                                artworks.get(artistCursor.getInt(artistCursor.getColumnIndex(PROJECTION[0]))));
                         //Log.i("MDGB", "getting: " +  (String) map.get(MediaStore.Audio.Media.ARTIST));
                         list.add(map);
                     }
@@ -368,50 +372,6 @@ public class ArtistLoader extends AbstractLoader {
             }
 
             return list;
-        }
-
-        /**
-         * Method used to get some album artwork image path from an specific artist
-         * and this image can be used as artist cover.
-         *
-         * @param artistName name of artist
-         * @return Path String from some album from artist or null if there is no one.
-         */
-        private String getArtistArtPath(String artistName) {
-            String artworkPath = null;
-
-            Cursor artworkCursor = m_resolver.query(
-                    MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
-                    new String[]{
-                            MediaStore.Audio.AlbumColumns.ALBUM_ART,
-                            MediaStore.Audio.AlbumColumns.ARTIST
-                    },
-
-                    MediaStore.Audio.AlbumColumns.ARTIST + "=?",
-                    new String[]{artistName},
-                    MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
-
-            if (artworkCursor != null) {
-                //Log.i(TAG, "total paths " + artworkCursor.getCount());
-                    while (artworkCursor.moveToNext()) {
-                        try {
-                            artworkPath = artworkCursor.getString(
-                                    artworkCursor.getColumnIndex(MediaStore.Audio.Albums.ALBUM_ART)
-                            );
-
-                            // breaks in first valid path founded.
-                            if (artworkPath != null)
-                                break;
-                        }
-                        catch (Exception ex) {
-                            Log.e(TAG_ERROR, ex.getMessage());
-                        }
-                    }
-                //Log.i(TAG, "found path: " + artworkPath );
-                artworkCursor.close();
-            }
-
-            return artworkPath;
         }
 
         /**
