@@ -1,8 +1,11 @@
 package boaventura.com.devel.br.flutteraudioquery.loaders;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Log;
 
@@ -18,7 +21,6 @@ import io.flutter.plugin.common.MethodChannel;
 public class SongLoader extends AbstractLoader {
 
     private static final String TAG = "MDBG";
-    //private static final String GENRE_NAME = "genre_name";
 
     private static final int QUERY_TYPE_GENRE_SONGS = 0x01;
     private static final int QUERY_TYPE_ALBUM_SONGS = 0x02;
@@ -461,11 +463,16 @@ public class SongLoader extends AbstractLoader {
 
                 while( songsCursor.moveToNext() ){
                     try {
-
                         Map<String, Object> songData = new HashMap<>();
-
                         for (String column : songsCursor.getColumnNames()){
                             switch (column ){
+                                case MediaStore.Audio.Media._ID:
+                                    String id = songsCursor.getString( songsCursor.getColumnIndex(column));
+                                    final Uri uri = ContentUris.appendId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.buildUpon(),
+                                            Long.parseLong( id )).build();
+                                    songData.put("uri" , uri.toString() );
+                                    break;
+                                    
                                 case MediaStore.Audio.Media.IS_MUSIC:
                                 case MediaStore.Audio.Media.IS_PODCAST:
                                 case MediaStore.Audio.Media.IS_RINGTONE:
