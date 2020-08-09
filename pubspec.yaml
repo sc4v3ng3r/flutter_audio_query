@@ -6,7 +6,7 @@ version: 0.3.5+5
 homepage: https://github.com/sc4v3ng3r/flutter_audio_query
 
 environment:
-  sdk: ">=2.1.0-dev.68.0 <3.0.0"
+  sdk: ">=2.1.0 <3.0.0"
   flutter: ">=1.10.0 <2.0.0"
 
 dependencies:
