@@ -1,3 +1,6 @@
+## 0.3.5+6
+ * Fixing missed song id empty field bug.
+
 ## 0.3.5+5
  * Support loading artwork on Android >= Q with getArtwork method
  * **Bug fix**: getGenres call bug fixed
