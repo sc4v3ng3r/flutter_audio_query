@@ -49,7 +49,7 @@ To use this plugin, add `flutter_audio_query` as a [dependency in your pubspec.y
 
 ```yaml
   dependencies:
-    flutter_audio_query: "^0.3.5+5"
+    flutter_audio_query: "^0.3.5+6"
 ```
 
 ## API
