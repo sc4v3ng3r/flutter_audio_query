@@ -471,6 +471,7 @@ public class SongLoader extends AbstractLoader {
                                     final Uri uri = ContentUris.appendId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI.buildUpon(),
                                             Long.parseLong( id )).build();
                                     songData.put("uri" , uri.toString() );
+                                    songData.put(column, id);
                                     break;
                                     
                                 case MediaStore.Audio.Media.IS_MUSIC:
