@@ -459,7 +459,7 @@ public class SongLoader extends AbstractLoader {
             }
 
             if (songsCursor != null){
-                Map<String,String> albumArtMap = new HashMap<>();
+                Map<Integer,String> albumArtMap = AlbumLoader.getAlbumsArt(m_resolver);
 
                 while( songsCursor.moveToNext() ){
                     try {
@@ -489,19 +489,11 @@ public class SongLoader extends AbstractLoader {
                         }
 
 
-                        String albumKey = songsCursor.getString(
-                                songsCursor.getColumnIndex(SONG_PROJECTION[4]));
+                        int albumKey = songsCursor.getInt(
+                                songsCursor.getColumnIndex(SONG_PROJECTION[1]));
 
-                        String artPath;
-                        if (!albumArtMap.containsKey(albumKey)) {
 
-                            artPath = getAlbumArtPathForSong(albumKey);
-                            albumArtMap.put(albumKey, artPath);
-
-                            //Log.i("MDBG", "song for album  " + albumKey + "adding path: " + artPath);
-                        }
-
-                        artPath = albumArtMap.get(albumKey);
+                        String artPath = albumArtMap.get(albumKey);
                         songData.put("album_artwork", artPath);
                         dataList.add(songData);
                     }
@@ -516,42 +508,6 @@ public class SongLoader extends AbstractLoader {
             }
 
             return dataList;
-        }
-
-        /**
-         * This method the image of the album if exists. If there is no album artwork
-         * null is returned
-         * @param album Album name that we want the artwork
-         * @return String with image path or null if there is no image.
-         */
-        private String getAlbumArtPathForSong(String album){
-            Cursor artCursor = m_resolver.query(
-                    MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
-                    SONG_ALBUM_PROJECTION,
-                    SONG_ALBUM_PROJECTION[0] +  " =?",
-                    new String[] {album},
-                    null);
-
-            String artPath = null;
-
-            if (artCursor !=null){
-                while (artCursor.moveToNext()) {
-
-                    try {
-                        artPath = artCursor.getString(artCursor.getColumnIndex(SONG_ALBUM_PROJECTION[1]));
-
-                    }
-
-                    catch (Exception ex) {
-                        Log.e(TAG_ERROR, "SongLoader::getAlbumArtPathForSong method exception");
-                        Log.e(TAG_ERROR, ex.getMessage());
-                    }
-                }
-
-                artCursor.close();
-            }
-
-            return artPath;
         }
 
     }

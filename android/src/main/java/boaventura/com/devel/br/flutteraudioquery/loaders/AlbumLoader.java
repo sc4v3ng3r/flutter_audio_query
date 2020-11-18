@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +33,12 @@ public class AlbumLoader extends AbstractLoader {
             MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS
             /*, MediaStore.Audio.AlbumColumns.ALBUM_ID*/
             //MediaStore.Audio.AlbumColumns.NUMBER_OF_SONGS_FOR_ARTIST,
+    };
+
+    private static final String[] ALBUM_ART_PROTECTION = {
+            MediaStore.Audio.AudioColumns._ID,
+            MediaStore.Audio.AlbumColumns.ARTIST_ID,
+            MediaStore.Audio.AlbumColumns.ALBUM_ART,
     };
 
     private static final String[] ALBUM_MEDIA_PROJECTION = {
@@ -480,5 +488,51 @@ public class AlbumLoader extends AbstractLoader {
             m_result = null;
         }
 
+    }
+
+    /**
+     * This method the images of the albums if exists.
+     * @param resolver
+     * @return Map with album ID key and art path value.
+     */
+    static public Map<Integer, String> getAlbumsArt(@NonNull ContentResolver resolver) {
+        return getAlbumsArt(resolver, false);
+    }
+
+    /**
+     * This method the images of the albums if exists.
+     * @param resolver
+     * @return Map with album|artist ID key and art path value.
+     */
+    static public Map<Integer, String> getAlbumsArt(
+            @NonNull ContentResolver resolver, boolean withArtistKey) {
+        Map<Integer, String> dataList = new HashMap<>();
+
+        Cursor cursor = resolver.query(MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI,
+                ALBUM_ART_PROTECTION, null, null, null);
+
+        if (cursor != null) {
+            if (cursor.getCount() == 0) {
+                cursor.close();
+                return dataList;
+            }
+            else {
+                while ( cursor.moveToNext() ) {
+                    try {
+                        int key = cursor
+                                .getInt(cursor.getColumnIndex(ALBUM_ART_PROTECTION[withArtistKey ? 1 : 0]));
+                        String path = cursor
+                                .getString(cursor.getColumnIndex(ALBUM_ART_PROTECTION[2]));
+                        dataList.put(key, path);
+                    } catch (Exception ex) {
+                        Log.e("ERROR", "AlbumLoader::getAlbumsArt", ex);
+                        Log.e("ERROR", "while reading basic load cursor");
+                    }
+
+                }
+            }
+            cursor.close();
+        }
+        return dataList;
     }
 }
