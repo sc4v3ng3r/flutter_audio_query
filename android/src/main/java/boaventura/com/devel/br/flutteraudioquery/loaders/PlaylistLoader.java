@@ -288,7 +288,7 @@ public class PlaylistLoader extends AbstractLoader {
      * @return
      */
     private int getBase(final Uri playlistUri){
-        String[] col = new String[]{ "count(*)"};
+        String[] col = new String[]{ MediaStore.Audio.Playlists.Members.PLAY_ORDER };
         int base = -1;
 
         Cursor cursor = getContentResolver().query(playlistUri, col, null,null,null );
