@@ -191,6 +191,8 @@ public class PlaylistLoader extends AbstractLoader {
 
         Uri playlistUri = MediaStore.Audio.Playlists.Members.getContentUri("external", Long.parseLong(playlistId));
 
+        Cursor cursor = resolver.query(uri, projection, null, null, null);
+
         int base = 0;
 		if (cursor.moveToLast())
 			base = cursor.getInt(0) + 1;
