@@ -290,7 +290,7 @@ public class PlaylistLoader extends AbstractLoader {
         String[] col = new String[]{ "count(*)"};
         int base = -1;
 
-        Cursor cursor = getContentResolver().query(playlistUri, null, null,null,null );
+        Cursor cursor = getContentResolver().query(playlistUri, col, null,null,null );
         if (cursor != null){
             cursor.moveToNext();
             base = cursor.getInt(0);
