@@ -189,10 +189,12 @@ public class PlaylistLoader extends AbstractLoader {
     public void addSongToPlaylist(final MethodChannel.Result results, final String playlistId,
                                   final String songId){
 
-        Uri playlistUri = MediaStore.Audio.Playlists.Members.getContentUri("external",
-                Long.parseLong(playlistId));
+        Uri playlistUri = MediaStore.Audio.Playlists.Members.getContentUri("external", Long.parseLong(playlistId));
 
-        int base = getBase(playlistUri);
+        int base = 0;
+		if (cursor.moveToLast())
+			base = cursor.getInt(0) + 1;
+		cursor.close();
 
         try{
             ContentResolver resolver = getContentResolver();
