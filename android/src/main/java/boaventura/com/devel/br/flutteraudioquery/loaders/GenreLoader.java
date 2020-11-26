@@ -133,7 +133,7 @@ public class GenreLoader extends AbstractLoader {
 
             catch(RuntimeException ex){
                 Log.e(TAG_ERROR, "GenreLoader::loadData method exception");
-                //Log.e(TAG_ERROR, ex.getMessage() );
+                Log.e(TAG_ERROR, ex.getMessage() );
             }
 
             return dataList;
