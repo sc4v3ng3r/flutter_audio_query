@@ -194,7 +194,7 @@ public class PlaylistLoader extends AbstractLoader {
 
         int base = getBase(playlistUri);
 
-        if (base != -1){
+        try{
             ContentResolver resolver = getContentResolver();
             ContentValues values = new ContentValues();
             values.put(MediaStore.Audio.Playlists.Members.AUDIO_ID, songId);
@@ -204,7 +204,8 @@ public class PlaylistLoader extends AbstractLoader {
             getPlaylistById(results, playlistId);
         }
 
-        else {
+        catch (Exception e) {
+            Log.e(e.getMessage(),null);
             results.error("Error adding song to playlist", "base value " + base,null);
         }
     }
