@@ -189,6 +189,8 @@ public class PlaylistLoader extends AbstractLoader {
     public void addSongToPlaylist(final MethodChannel.Result results, final String playlistId,
                                   final String songId){
 
+        
+        ContentResolver resolver = getContentResolver();
         Uri playlistUri = MediaStore.Audio.Playlists.Members.getContentUri("external", Long.parseLong(playlistId));
 		String[] projection = new String[] { MediaStore.Audio.Playlists.Members.PLAY_ORDER };
 
@@ -200,7 +202,6 @@ public class PlaylistLoader extends AbstractLoader {
 		cursor.close();
 
         try{
-            ContentResolver resolver = getContentResolver();
             ContentValues values = new ContentValues();
             values.put(MediaStore.Audio.Playlists.Members.AUDIO_ID, songId);
             values.put(MediaStore.Audio.Playlists.Members.PLAY_ORDER, base);
