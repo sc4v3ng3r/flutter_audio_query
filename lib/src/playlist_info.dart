@@ -63,7 +63,7 @@ class PlaylistInfo extends DataModel {
   }
 
   ///
-  void moveSong({@required int from, @required int to}) async {
+  Future<void> moveSong({@required int from, @required int to}) async {
     if ((from >= 0 && from < (this._memberIds.length)) &&
         (to >= 0 && to < (this._memberIds.length))) {
       List<dynamic> updatedPlaylist =
