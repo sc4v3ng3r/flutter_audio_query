@@ -189,13 +189,19 @@ public class PlaylistLoader extends AbstractLoader {
     public void addSongToPlaylist(final MethodChannel.Result results, final String playlistId,
                                   final String songId){
 
-        Uri playlistUri = MediaStore.Audio.Playlists.Members.getContentUri("external",
-                Long.parseLong(playlistId));
+        
+        ContentResolver resolver = getContentResolver();
+        Uri playlistUri = MediaStore.Audio.Playlists.Members.getContentUri("external", Long.parseLong(playlistId));
+		String[] projection = new String[] { MediaStore.Audio.Playlists.Members.PLAY_ORDER };
 
-        int base = getBase(playlistUri);
+        Cursor cursor = resolver.query(playlistUri, projection, null, null, null);
 
-        if (base != -1){
-            ContentResolver resolver = getContentResolver();
+        int base = 0;
+		if (cursor.moveToLast())
+			base = cursor.getInt(0) + 1;
+		cursor.close();
+
+        try{
             ContentValues values = new ContentValues();
             values.put(MediaStore.Audio.Playlists.Members.AUDIO_ID, songId);
             values.put(MediaStore.Audio.Playlists.Members.PLAY_ORDER, base);
@@ -204,7 +210,8 @@ public class PlaylistLoader extends AbstractLoader {
             getPlaylistById(results, playlistId);
         }
 
-        else {
+        catch (Exception e) {
+            Log.e(e.getMessage(),null);
             results.error("Error adding song to playlist", "base value " + base,null);
         }
     }
@@ -287,7 +294,7 @@ public class PlaylistLoader extends AbstractLoader {
      * @return
      */
     private int getBase(final Uri playlistUri){
-        String[] col = new String[]{ "count(*)"};
+        String[] col = new String[]{ MediaStore.Audio.Playlists.Members.PLAY_ORDER };
         int base = -1;
 
         Cursor cursor = getContentResolver().query(playlistUri, col, null,null,null );
