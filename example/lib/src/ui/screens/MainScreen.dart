@@ -272,35 +272,27 @@ class _MainScreenState extends State<MainScreen> {
               items: <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
                   icon: Icon(Icons.account_box, color: Colors.white),
-                  title: Text(
-                    "Artists",
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  label: 'Artists',
                 ),
                 BottomNavigationBarItem(
-                    icon: Icon(
-                      Icons.album,
-                      color: Colors.white,
-                    ),
-                    title: Text(
-                      "Albums",
-                      style: TextStyle(color: Colors.white),
-                    )),
+                  icon: Icon(
+                    Icons.album,
+                    color: Colors.white,
+                  ),
+                  label: "Albums",
+                ),
                 BottomNavigationBarItem(
                   icon: Icon(Icons.library_music, color: Colors.white),
-                  title: Text(
-                    "Songs",
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  label: "Songs",
                 ),
                 BottomNavigationBarItem(
-                    icon: Icon(Icons.music_note, color: Colors.white),
-                    title:
-                        Text("Genre", style: TextStyle(color: Colors.white))),
+                  icon: Icon(Icons.music_note, color: Colors.white),
+                  label: "Genre",
+                ),
                 BottomNavigationBarItem(
-                    icon: Icon(Icons.list, color: Colors.white),
-                    title: Text("Playlists",
-                        style: TextStyle(color: Colors.white))),
+                  icon: Icon(Icons.list, color: Colors.white),
+                  label: "Playlists",
+                ),
               ],
             );
           }),

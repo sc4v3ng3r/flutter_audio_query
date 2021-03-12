@@ -6,12 +6,12 @@ abstract class DataModel {
   static const String ID = "_id";
 
   /// model data
-  Map<dynamic, dynamic> _data;
+  Map<dynamic, dynamic>? _data;
 
   DataModel._(this._data);
 
   /// The data model id
-  String get id => _data[ID] ?? "";
+  String get id => _data![ID] ?? "";
 
   @override
   String toString() {

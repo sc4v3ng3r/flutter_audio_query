@@ -22,9 +22,9 @@
 
 library flutter_audio_query;
 
+import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 

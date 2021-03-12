@@ -5,5 +5,5 @@ class GenreInfo extends DataModel {
   GenreInfo._(Map<dynamic, dynamic> map) : super._(map);
 
   /// The genre name
-  String get name => _data['name'];
+  String? get name => _data!['name'];
 }

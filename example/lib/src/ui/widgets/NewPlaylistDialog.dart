@@ -28,7 +28,7 @@ class _NewPlaylistDialogState extends State<NewPlaylistDialog> {
         StreamBuilder<PlaylistInfo>(
             stream: bloc.creationOutput,
             builder: (context, snapshot) {
-              return FlatButton(
+              return TextButton(
                 child: Text("Create"),
                 onPressed: () async {
                   bloc.createPlaylist(_textEditingController.text, context);

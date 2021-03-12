@@ -6,18 +6,18 @@ class ArtistInfo extends DataModel {
   ArtistInfo._(Map<dynamic, dynamic> map) : super._(map);
 
   /// Returns the name of artist
-  String get name => _data['artist'];
+  String? get name => _data!['artist'];
 
   /// Returns the number of tracks of current artist
-  String get numberOfTracks => _data['number_of_tracks'];
+  String? get numberOfTracks => _data!['number_of_tracks'];
 
   /// Returns the number of albums of current artist
-  String get numberOfAlbums => _data['number_of_albums'];
+  String? get numberOfAlbums => _data!['number_of_albums'];
 
   /// Returns the path from an image file that can be used as
   /// artist art or null if there is no one. The image file
   /// is the first artist album art work founded.
-  String get artistArtPath => _data['artist_cover'];
+  String? get artistArtPath => _data!['artist_cover'];
 
   @override
   String toString() {
