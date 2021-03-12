@@ -5,28 +5,28 @@ import './ListItemWidget.dart';
 typedef GenreItemTap = void Function(GenreInfo);
 
 class GenreListWidget extends StatelessWidget {
-  final List<GenreInfo> dataList;
-  final GenreItemTap onTap;
+  final List<GenreInfo>? dataList;
+  final GenreItemTap? onTap;
 
-  GenreListWidget({@required List<GenreInfo> genreList, this.onTap})
+  GenreListWidget({required List<GenreInfo>? genreList, this.onTap})
       : dataList = genreList;
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-        itemCount: dataList.length,
+        itemCount: dataList!.length,
         itemBuilder: (context, index) {
-          GenreInfo genre = dataList[index];
+          GenreInfo genre = dataList![index];
 
           return Stack(
             children: [
               ListItemWidget(
-                title: Text(genre.name),
+                title: Text(genre.name!),
               ),
               Positioned.fill(
                 child: InkWell(
                   onTap: () {
-                    if (onTap != null) onTap(genre);
+                    if (onTap != null) onTap!(genre);
                   },
                 ),
               ),
