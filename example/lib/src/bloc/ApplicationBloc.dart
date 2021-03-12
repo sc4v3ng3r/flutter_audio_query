@@ -108,7 +108,7 @@ class ApplicationBloc extends BlocBase {
     });
   }
 
-  int getLastSortSelectionChooseBasedInNavigation(NavigationOptions option) {
+  int getLastSortSelectionChooseBasedInNavigation(NavigationOptions? option) {
     switch (option) {
       case NavigationOptions.ARTISTS:
         return _artistSortTypeSelected.index;
@@ -158,7 +158,7 @@ class ApplicationBloc extends BlocBase {
   void changeNavigation(final NavigationOptions option) =>
       _navigationController.sink.add(option);
 
-  void _fetchArtistData({String query}) {
+  void _fetchArtistData({String? query}) {
     if (query == null)
       audioQuery
           .getArtists(sortType: _artistSortTypeSelected)
@@ -171,7 +171,7 @@ class ApplicationBloc extends BlocBase {
           .catchError((error) => _artistController.sink.addError(error));
   }
 
-  void _fetchPlaylistData({String query}) {
+  void _fetchPlaylistData({String? query}) {
     if (query == null)
       audioQuery
           .getPlaylists(sortType: _playlistSortTypeSelected)
@@ -186,7 +186,7 @@ class ApplicationBloc extends BlocBase {
           .catchError((error) => _playlistDataController.sink.addError(error));
   }
 
-  void _fetchAlbumData({String query}) {
+  void _fetchAlbumData({String? query}) {
     if (query == null)
       audioQuery
           .getAlbums(sortType: _albumSortTypeSelected)
@@ -199,7 +199,7 @@ class ApplicationBloc extends BlocBase {
           .catchError((error) => _albumController.sink.addError(error));
   }
 
-  void _fetchSongData({String query}) {
+  void _fetchSongData({String? query}) {
     if (query == null)
       audioQuery
           .getSongs(sortType: _songSortTypeSelected)
@@ -212,7 +212,7 @@ class ApplicationBloc extends BlocBase {
           .catchError((error) => _songController.sink.addError(error));
   }
 
-  void _fetchGenreData({String query}) {
+  void _fetchGenreData({String? query}) {
     if (query == null)
       audioQuery
           .getGenres(sortType: _genreSortTypeSelected)
@@ -249,7 +249,8 @@ class ApplicationBloc extends BlocBase {
     }
   }
 
-  void search({NavigationOptions option, final String query}) {
+  void search(
+      {required NavigationOptions option, required final String query}) {
     switch (option) {
       case NavigationOptions.ARTISTS:
         _fetchArtistData(query: query);
@@ -278,12 +279,12 @@ class ApplicationBloc extends BlocBase {
 
   @override
   void dispose() {
-    _navigationController?.close();
-    _artistController?.close();
-    _albumController?.close();
-    _songController?.close();
-    _genreController?.close();
-    _playlistDataController?.close();
-    _searchBarController?.close();
+    _navigationController.close();
+    _artistController.close();
+    _albumController.close();
+    _songController.close();
+    _genreController.close();
+    _playlistDataController.close();
+    _searchBarController.close();
   }
 }
