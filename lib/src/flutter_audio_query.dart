@@ -181,10 +181,10 @@ class FlutterAudioQuery {
   /// This method returns a list with all songs available on device storage.
   Future<List<SongInfo>> getSongs(
       {SongSortType sortType = SongSortType.DEFAULT}) async {
-    List<dynamic> dataList = await (channel.invokeMethod("getSongs", {
+    List<dynamic> dataList = await channel.invokeMethod("getSongs", {
       SOURCE_KEY: SOURCE_SONGS,
       SORT_TYPE: sortType.index,
-    }) as FutureOr<List<dynamic>>);
+    });
     return _parseSongDataList(dataList);
   }
 
@@ -194,11 +194,11 @@ class FlutterAudioQuery {
   Future<List<SongInfo>> getSongsFromArtist(
       {required final String artistId,
       SongSortType sortType = SongSortType.DEFAULT}) async {
-    List<dynamic> dataList = await (channel.invokeMethod("getSongsFromArtist", {
+    List<dynamic> dataList = await channel.invokeMethod("getSongsFromArtist", {
       'artist': artistId,
       SOURCE_KEY: SOURCE_SONGS,
       SORT_TYPE: sortType.index,
-    }) as FutureOr<List<dynamic>>);
+    });
 
     return _parseSongDataList(dataList);
   }
@@ -296,21 +296,21 @@ class FlutterAudioQuery {
   Future<List<SongInfo>> searchSongs(
       {required String query,
       SongSortType sortType = SongSortType.DEFAULT}) async {
-    List<dynamic> dataList = await (channel.invokeMethod("searchSongs", {
+    List<dynamic> dataList = await channel.invokeMethod("searchSongs", {
       SOURCE_KEY: SOURCE_SONGS,
       SORT_TYPE: sortType.index,
       QUERY_KEY: query
-    }) as FutureOr<List<dynamic>>);
+    });
     return _parseSongDataList(dataList);
   }
 
   /// This method returns a list of genre info with all genres available in device storage.
   Future<List<GenreInfo>> getGenres(
       {GenreSortType sortType = GenreSortType.DEFAULT}) async {
-    List<dynamic> dataList = await (channel.invokeMethod('getGenres', {
+    List<dynamic> dataList = await channel.invokeMethod('getGenres', {
       SOURCE_KEY: SOURCE_GENRE,
       SORT_TYPE: sortType.index,
-    }) as FutureOr<List<dynamic>>);
+    });
     return _parseGenreDataList(dataList);
   }
 
@@ -321,24 +321,25 @@ class FlutterAudioQuery {
   Future<List<GenreInfo>> searchGenres(
       {required final String query,
       GenreSortType sortType = GenreSortType.DEFAULT}) async {
-    List<dynamic> dataList = await (channel.invokeMethod("searchGenres", {
+    List<dynamic> dataList = await channel.invokeMethod("searchGenres", {
       SOURCE_KEY: SOURCE_GENRE,
       SORT_TYPE: sortType.index,
       QUERY_KEY: query,
-    }) as FutureOr<List<dynamic>>);
+    });
 
     return _parseGenreDataList(dataList);
   }
 
   /// This method returns a list of PlaylistInfo with all playlists available
   /// in device storage.
-  Future<List<PlaylistInfo>> getPlaylists(
+  Future<List<PlaylistInfo>?> getPlaylists(
       {PlaylistSortType sortType = PlaylistSortType.DEFAULT}) async {
-    List<dynamic> dataList = await (channel.invokeListMethod("getPlaylists", {
+    List<dynamic>? dataList = await channel.invokeListMethod("getPlaylists", {
       SOURCE_KEY: SOURCE_PLAYLIST,
       PLAYLIST_METHOD_TYPE: PlayListMethodType.READ.index,
       SORT_TYPE: sortType.index
-    }) as FutureOr<List<dynamic>>);
+    });
+    if (dataList == null) return null;
     return _parsePlaylistsDataList(dataList);
   }
 
@@ -349,12 +350,12 @@ class FlutterAudioQuery {
   Future<List<PlaylistInfo>> searchPlaylists(
       {required final String query,
       PlaylistSortType sortType = PlaylistSortType.DEFAULT}) async {
-    List<dynamic> dataList = await (channel.invokeMethod("searchPlaylists", {
+    List<dynamic> dataList = await channel.invokeMethod("searchPlaylists", {
       SOURCE_KEY: SOURCE_PLAYLIST,
       PLAYLIST_METHOD_TYPE: PlayListMethodType.READ.index,
       QUERY_KEY: query,
       SORT_TYPE: sortType.index,
-    }) as FutureOr<List<dynamic>>);
+    });
 
     return _parsePlaylistsDataList(dataList);
   }
