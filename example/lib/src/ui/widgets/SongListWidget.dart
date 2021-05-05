@@ -44,7 +44,7 @@ class SongListWidget extends StatelessWidget {
                             builder: (context) {
                               return AlertDialog(
                                 title: Text(_dialogTitle),
-                                content: FutureBuilder<List<PlaylistInfo>>(
+                                content: FutureBuilder<List<PlaylistInfo>?>(
                                     future: audioQuery.getPlaylists(),
                                     builder: (context, snapshot) {
                                       if (snapshot.hasError) {

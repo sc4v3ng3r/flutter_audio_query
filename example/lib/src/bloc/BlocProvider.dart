@@ -6,8 +6,6 @@ class BlocProvider<T extends BlocBase> extends StatefulWidget {
   final Widget child;
   final T bloc;
 
-  static Type _typeOf<T>() => T;
-
   BlocProvider({this.key, required this.child, required this.bloc})
       : super(key: key);
 

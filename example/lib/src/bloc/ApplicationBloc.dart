@@ -102,7 +102,7 @@ class ApplicationBloc extends BlocBase {
 
   void loadPlaylistData() {
     audioQuery.getPlaylists().then((playlist) {
-      _playlistDataController.sink.add(playlist);
+      if (playlist != null) _playlistDataController.sink.add(playlist);
     }).catchError((error) {
       _playlistDataController.sink.addError(error);
     });
@@ -175,9 +175,11 @@ class ApplicationBloc extends BlocBase {
     if (query == null)
       audioQuery
           .getPlaylists(sortType: _playlistSortTypeSelected)
-          .then(
-              (playlistData) => _playlistDataController.sink.add(playlistData))
-          .catchError((error) => _playlistDataController.sink.addError(error));
+          .then((playlistData) {
+        if (playlistData != null)
+          _playlistDataController.sink.add(playlistData);
+        // ignore: return_of_invalid_type_from_catch_error
+      }).catchError((error) => _playlistDataController.sink.addError(error));
     else
       audioQuery
           .searchPlaylists(query: query)
