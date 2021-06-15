@@ -1,10 +1,11 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 class CardItemWidget extends StatelessWidget {
-  final double width, height;
-  final String backgroundImage, title, subtitle, infoText;
-  final List<int> rawImage;
+  final double? width, height;
+  final String? backgroundImage, title, subtitle, infoText;
+  final List<int>? rawImage;
   static const titleMaxLines = 2;
   static const titleTextStyle =
       TextStyle(fontWeight: FontWeight.w500, fontSize: 16.0);
@@ -20,7 +21,7 @@ class CardItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasRawImage = !(rawImage == null || rawImage.isEmpty);
+    final hasRawImage = !(rawImage == null || rawImage!.isEmpty);
     final mainContainer = Container(
       width: width,
       height: height,
@@ -28,9 +29,9 @@ class CardItemWidget extends StatelessWidget {
         image: DecorationImage(
           image: (backgroundImage == null && !hasRawImage)
               ? AssetImage("assets/no_cover.png")
-              : (hasRawImage)
-                  ? MemoryImage(rawImage) // Image.memory(rawImage)
-                  : FileImage(File(backgroundImage)),
+              : ((hasRawImage)
+                  ? MemoryImage(rawImage as Uint8List) // Image.memory(rawImage)
+                  : FileImage(File(backgroundImage!))) as ImageProvider<Object>,
           fit: BoxFit.cover,
           alignment: AlignmentDirectional.center,
         ),
@@ -47,12 +48,12 @@ class CardItemWidget extends StatelessWidget {
               children: <Widget>[
                 Flexible(
                     child: Text(
-                  title,
+                  title!,
                   maxLines: titleMaxLines,
                   style: titleTextStyle,
                 )),
-                Flexible(child: Text(subtitle)),
-                Flexible(child: Text(infoText)),
+                Flexible(child: Text(subtitle!)),
+                Flexible(child: Text(infoText!)),
               ],
             ),
           ),

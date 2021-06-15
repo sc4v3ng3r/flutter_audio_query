@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class NoDataWidget extends StatelessWidget {
-  final String title;
+  final String? title;
 
   NoDataWidget({this.title});
 
@@ -17,7 +17,7 @@ class NoDataWidget extends StatelessWidget {
             icon: Icon(Icons.not_interested),
           ),
           Text(
-            title,
+            title!,
             maxLines: 1,
             textAlign: TextAlign.center,
             style: TextStyle(

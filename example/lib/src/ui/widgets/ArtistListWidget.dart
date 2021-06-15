@@ -5,11 +5,11 @@ import 'package:flutter_audio_query/flutter_audio_query.dart';
 import './CardItemWidget.dart';
 
 class ArtistListWidget extends StatelessWidget {
-  final List<ArtistInfo> artistList;
+  final List<ArtistInfo>? artistList;
   final _callback;
 
   ArtistListWidget(
-      {@required this.artistList, onArtistSelected(final ArtistInfo info)})
+      {required this.artistList, onArtistSelected(final ArtistInfo info)?})
       : _callback = onArtistSelected;
 
   @override
@@ -18,9 +18,9 @@ class ArtistListWidget extends StatelessWidget {
     return ListView.builder(
         shrinkWrap: true,
         padding: EdgeInsets.only(bottom: 16.0),
-        itemCount: artistList.length,
+        itemCount: artistList!.length,
         itemBuilder: (context, index) {
-          ArtistInfo artist = artistList[index];
+          ArtistInfo artist = artistList![index];
           return Stack(
             children: <Widget>[
               (artist.artistArtPath == null)

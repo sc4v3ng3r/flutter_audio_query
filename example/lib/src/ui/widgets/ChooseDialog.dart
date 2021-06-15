@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
 class ChooseDialog extends StatefulWidget {
-  final String title;
-  final List<String> options;
+  final String? title;
+  final List<String>? options;
   final _callback;
-  final int indexSelected;
+  final int? indexSelected;
 
   ChooseDialog(
-      {String title,
-      List<String> options,
-      void onChange(int index),
-      int initialSelectedIndex})
+      {String? title,
+      List<String>? options,
+      void onChange(int index)?,
+      int? initialSelectedIndex})
       : title = title,
         options = options,
         indexSelected = initialSelectedIndex,
@@ -21,7 +21,7 @@ class ChooseDialog extends StatefulWidget {
 }
 
 class _ChooseDialogState extends State<ChooseDialog> {
-  int selectedIndex;
+  int? selectedIndex;
 
   @override
   void initState() {
@@ -32,16 +32,16 @@ class _ChooseDialogState extends State<ChooseDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.title),
+      title: Text(widget.title!),
       content: ListView.builder(
           shrinkWrap: true,
-          itemCount: widget.options.length,
+          itemCount: widget.options!.length,
           itemBuilder: (context, index) {
             return RadioListTile(
-                title: Text(widget.options[index]),
+                title: Text(widget.options![index]),
                 value: index,
                 groupValue: selectedIndex,
-                onChanged: (value) {
+                onChanged: (dynamic value) {
                   setState(() {
                     selectedIndex = value;
                   });

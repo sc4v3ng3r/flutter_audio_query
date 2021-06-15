@@ -7,20 +7,20 @@ import './ListItemWidget.dart';
 import './NoDataWidget.dart';
 
 class SongListWidget extends StatelessWidget {
-  final List<SongInfo> songList;
+  final List<SongInfo>? songList;
   final String _dialogTitle = "Choose Playlist";
   final bool addToPlaylistAction;
 
   final FlutterAudioQuery audioQuery = FlutterAudioQuery();
 
-  SongListWidget({@required this.songList, this.addToPlaylistAction = true});
+  SongListWidget({required this.songList, this.addToPlaylistAction = true});
 
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
-        itemCount: songList.length,
+        itemCount: songList!.length,
         itemBuilder: (context, songIndex) {
-          SongInfo song = songList[songIndex];
+          SongInfo song = songList![songIndex];
           return ListItemWidget(
               title: Text("${song.title}"),
               subtitle: Column(
@@ -29,7 +29,7 @@ class SongListWidget extends StatelessWidget {
                 children: <Widget>[
                   Text("Artist: ${song.artist}"),
                   Text(
-                    "Duration: ${Utility.parseToMinutesSeconds(int.parse(song.duration))}",
+                    "Duration: ${Utility.parseToMinutesSeconds(int.parse(song.duration!))}",
                     style:
                         TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500),
                   ),
@@ -44,7 +44,7 @@ class SongListWidget extends StatelessWidget {
                             builder: (context) {
                               return AlertDialog(
                                 title: Text(_dialogTitle),
-                                content: FutureBuilder<List<PlaylistInfo>>(
+                                content: FutureBuilder<List<PlaylistInfo>?>(
                                     future: audioQuery.getPlaylists(),
                                     builder: (context, snapshot) {
                                       if (snapshot.hasError) {
@@ -54,7 +54,7 @@ class SongListWidget extends StatelessWidget {
                                       }
 
                                       if (snapshot.hasData) {
-                                        if (snapshot.data.isEmpty) {
+                                        if (snapshot.data!.isEmpty) {
                                           print("is Empty");
                                           return NoDataWidget(
                                             title: "There is no playlists",
@@ -62,11 +62,11 @@ class SongListWidget extends StatelessWidget {
                                         }
 
                                         return PlaylistDialogContent(
-                                          options: snapshot.data
+                                          options: snapshot.data!
                                               .map((playlist) => playlist.name)
                                               .toList(),
                                           onSelected: (index) {
-                                            snapshot.data[index]
+                                            snapshot.data![index!]
                                                 .addSong(song: song);
                                             Navigator.pop(context);
                                           },
@@ -99,7 +99,7 @@ class SongListWidget extends StatelessWidget {
                             child: CircularProgressIndicator(),
                           );
 
-                        if (snapshot.data.isEmpty)
+                        if (snapshot.data!.isEmpty)
                           return CircleAvatar(
                             backgroundImage: AssetImage("assets/no_cover.png"),
                           );
@@ -107,7 +107,7 @@ class SongListWidget extends StatelessWidget {
                         return CircleAvatar(
                           backgroundColor: Colors.transparent,
                           backgroundImage: MemoryImage(
-                            snapshot.data,
+                            snapshot.data!,
                           ),
                         );
                       })
@@ -116,22 +116,22 @@ class SongListWidget extends StatelessWidget {
   }
 }
 
-typedef OnSelected = void Function(int index);
+typedef OnSelected = void Function(int? index);
 
 class PlaylistDialogContent extends StatefulWidget {
-  final List<String> options;
-  final OnSelected onSelected;
-  final int initialIndexSelected;
+  final List<String?> options;
+  final OnSelected? onSelected;
+  final int? initialIndexSelected;
 
   PlaylistDialogContent(
-      {@required this.options, this.onSelected, this.initialIndexSelected});
+      {required this.options, this.onSelected, this.initialIndexSelected});
 
   @override
   _PlaylistDialogContentState createState() => _PlaylistDialogContentState();
 }
 
 class _PlaylistDialogContentState extends State<PlaylistDialogContent> {
-  int selectedIndex;
+  int? selectedIndex;
 
   @override
   void initState() {
@@ -146,14 +146,15 @@ class _PlaylistDialogContentState extends State<PlaylistDialogContent> {
         itemCount: widget.options.length,
         itemBuilder: (context, index) {
           return RadioListTile(
-              title: Text(widget.options[index]),
+              title: Text(widget.options[index]!),
               value: index,
               groupValue: selectedIndex,
-              onChanged: (value) {
+              onChanged: (dynamic value) {
                 setState(() {
                   selectedIndex = value;
                 });
-                if (widget.onSelected != null) widget.onSelected(selectedIndex);
+                if (widget.onSelected != null)
+                  widget.onSelected!(selectedIndex);
               });
         });
   }

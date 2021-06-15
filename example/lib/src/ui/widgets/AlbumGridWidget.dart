@@ -7,11 +7,11 @@ import './CardItemWidget.dart';
 /// widget that show a gridView with all albums of a specific artist
 class AlbumGridWidget extends StatelessWidget {
   final _onItemTap;
-  final List<AlbumInfo> dataList;
+  final List<AlbumInfo>? dataList;
 
   AlbumGridWidget(
-      {@required List<AlbumInfo> albumList,
-      onAlbumClicked(final AlbumInfo info)})
+      {required List<AlbumInfo>? albumList,
+      onAlbumClicked(final AlbumInfo info)?})
       : _onItemTap = onAlbumClicked,
         dataList = albumList;
 
@@ -21,11 +21,11 @@ class AlbumGridWidget extends StatelessWidget {
     return GridView.builder(
         shrinkWrap: true,
         padding: EdgeInsets.only(bottom: 16.0),
-        itemCount: dataList.length,
+        itemCount: dataList!.length,
         gridDelegate:
             SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
         itemBuilder: (context, index) {
-          AlbumInfo album = dataList[index];
+          AlbumInfo album = dataList![index];
 
           return Stack(
             children: <Widget>[
