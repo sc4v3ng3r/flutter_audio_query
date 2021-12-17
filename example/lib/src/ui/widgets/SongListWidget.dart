@@ -13,7 +13,7 @@ class SongListWidget extends StatelessWidget {
 
   final FlutterAudioQuery audioQuery = FlutterAudioQuery();
 
-  SongListWidget({@required this.songList, this.addToPlaylistAction = true});
+  SongListWidget({required this.songList, this.addToPlaylistAction = true});
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +54,7 @@ class SongListWidget extends StatelessWidget {
                                       }
 
                                       if (snapshot.hasData) {
-                                        if (snapshot.data.isEmpty) {
+                                        if (snapshot.data!.isEmpty) {
                                           print("is Empty");
                                           return NoDataWidget(
                                             title: "There is no playlists",
@@ -62,11 +62,11 @@ class SongListWidget extends StatelessWidget {
                                         }
 
                                         return PlaylistDialogContent(
-                                          options: snapshot.data
+                                          options: snapshot.data!
                                               .map((playlist) => playlist.name)
                                               .toList(),
                                           onSelected: (index) {
-                                            snapshot.data[index]
+                                            snapshot.data![index]
                                                 .addSong(song: song);
                                             Navigator.pop(context);
                                           },
@@ -87,7 +87,7 @@ class SongListWidget extends StatelessWidget {
                       height: .0,
                     ),
               imagePath: song.albumArtwork,
-              leading: (song.albumArtwork == null)
+              leading: (song.albumArtwork.isEmpty)
                   ? FutureBuilder<Uint8List>(
                       future: audioQuery.getArtwork(
                           type: ResourceType.SONG,
@@ -99,7 +99,7 @@ class SongListWidget extends StatelessWidget {
                             child: CircularProgressIndicator(),
                           );
 
-                        if (snapshot.data.isEmpty)
+                        if (snapshot.data!.isEmpty)
                           return CircleAvatar(
                             backgroundImage: AssetImage("assets/no_cover.png"),
                           );
@@ -107,7 +107,7 @@ class SongListWidget extends StatelessWidget {
                         return CircleAvatar(
                           backgroundColor: Colors.transparent,
                           backgroundImage: MemoryImage(
-                            snapshot.data,
+                            snapshot.data!,
                           ),
                         );
                       })
@@ -120,18 +120,18 @@ typedef OnSelected = void Function(int index);
 
 class PlaylistDialogContent extends StatefulWidget {
   final List<String> options;
-  final OnSelected onSelected;
+  final OnSelected? onSelected;
   final int initialIndexSelected;
 
   PlaylistDialogContent(
-      {@required this.options, this.onSelected, this.initialIndexSelected});
+      {required this.options, this.onSelected, this.initialIndexSelected = 0});
 
   @override
   _PlaylistDialogContentState createState() => _PlaylistDialogContentState();
 }
 
 class _PlaylistDialogContentState extends State<PlaylistDialogContent> {
-  int selectedIndex;
+  int selectedIndex = 0;
 
   @override
   void initState() {
@@ -151,9 +151,10 @@ class _PlaylistDialogContentState extends State<PlaylistDialogContent> {
               groupValue: selectedIndex,
               onChanged: (value) {
                 setState(() {
-                  selectedIndex = value;
+                  selectedIndex = value as int;
                 });
-                if (widget.onSelected != null) widget.onSelected(selectedIndex);
+                if (widget.onSelected != null)
+                  widget.onSelected!(selectedIndex);
               });
         });
   }

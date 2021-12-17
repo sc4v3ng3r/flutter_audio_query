@@ -8,7 +8,7 @@ import './ListItemWidget.dart';
 class PlaylistListWidget extends StatelessWidget {
   final List<PlaylistInfo> dataList;
   final ApplicationBloc appBloc;
-  PlaylistListWidget({@required this.dataList, @required this.appBloc});
+  PlaylistListWidget({required this.dataList, required this.appBloc});
 
   @override
   Widget build(BuildContext context) {

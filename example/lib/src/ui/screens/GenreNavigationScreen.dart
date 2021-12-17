@@ -6,7 +6,7 @@ import '../widgets/CardItemWidget.dart';
 class GenreNavigationScreen extends StatefulWidget {
   final GenreInfo currentGenre;
 
-  GenreNavigationScreen({@required this.currentGenre});
+  GenreNavigationScreen({required this.currentGenre});
 
   @override
   _GenreNavigationScreenState createState() => _GenreNavigationScreenState();
@@ -51,7 +51,8 @@ class _GenreNavigationScreenState extends State<GenreNavigationScreen> {
 
           case ConnectionState.active:
           case ConnectionState.done:
-            if (snapshot.data.isEmpty)
+            final data = snapshot.data ?? [];
+            if (data.isEmpty)
               return Utility.createDefaultInfoWidget(
                   Text("There is no Artists data to show"));
 
@@ -75,9 +76,9 @@ class _GenreNavigationScreenState extends State<GenreNavigationScreen> {
                       scrollDirection: Axis.horizontal,
                       padding: EdgeInsets.symmetric(vertical: 8.0),
                       shrinkWrap: true,
-                      itemCount: snapshot.data.length,
+                      itemCount: data.length,
                       itemBuilder: (context, index) {
-                        ArtistInfo artist = snapshot.data[index];
+                        ArtistInfo artist = data[index];
                         return CardItemWidget(
                           width: 150.0,
                           height: 250.0,
@@ -118,7 +119,8 @@ class _GenreNavigationScreenState extends State<GenreNavigationScreen> {
 
           case ConnectionState.active:
           case ConnectionState.done:
-            if (snapshot.data.isEmpty)
+            final data = snapshot.data ?? [];
+            if (data.isEmpty)
               return Utility.createDefaultInfoWidget(
                   Text("There is no Albums data to show"));
 
@@ -142,9 +144,9 @@ class _GenreNavigationScreenState extends State<GenreNavigationScreen> {
                       scrollDirection: Axis.horizontal,
                       padding: EdgeInsets.symmetric(vertical: 8.0),
                       shrinkWrap: true,
-                      itemCount: snapshot.data.length,
+                      itemCount: data.length,
                       itemBuilder: (context, index) {
-                        AlbumInfo album = snapshot.data[index];
+                        AlbumInfo album = data[index];
                         return CardItemWidget(
                           width: 150.0,
                           height: 250.0,

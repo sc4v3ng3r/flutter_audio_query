@@ -10,15 +10,10 @@ class NewPlaylistDialog extends StatefulWidget {
 }
 
 class _NewPlaylistDialogState extends State<NewPlaylistDialog> {
-  TextEditingController _textEditingController;
+  TextEditingController _textEditingController = TextEditingController();
   final PlaylistDialogBloc bloc = PlaylistDialogBloc();
 
   bool creationStatus = false;
-  @override
-  void initState() {
-    super.initState();
-    _textEditingController = new TextEditingController();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,11 +23,11 @@ class _NewPlaylistDialogState extends State<NewPlaylistDialog> {
         StreamBuilder<PlaylistInfo>(
             stream: bloc.creationOutput,
             builder: (context, snapshot) {
-              return FlatButton(
-                child: Text("Create"),
+              return TextButton(
                 onPressed: () async {
                   bloc.createPlaylist(_textEditingController.text, context);
                 },
+                child: Text("Create"),
               );
             }),
       ],
@@ -42,7 +37,7 @@ class _NewPlaylistDialogState extends State<NewPlaylistDialog> {
           return TextFormField(
             decoration: InputDecoration(
               hintText: 'Playlist name',
-              errorText: snapshot.error,
+              errorText: snapshot.error.toString(),
             ),
             autofocus: true,
             controller: _textEditingController,
@@ -76,15 +71,15 @@ class PlaylistDialogBloc extends BlocBase {
         print('Playlist created ${data.name}');
         Navigator.pop(context, data);
       }).catchError((error) {
-        print('creatoin error ${error.toString()}');
-        _errorController.sink.addError(error?.toString());
+        print('creatoin error ${error!.toString()}');
+        _errorController.sink.addError(error!.toString());
       });
     }
   }
 
   @override
   void dispose() {
-    _errorController?.close();
-    _creationController?.close();
+    _errorController.close();
+    _creationController.close();
   }
 }

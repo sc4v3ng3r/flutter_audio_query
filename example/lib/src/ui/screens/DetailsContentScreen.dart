@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 
 class DetailsContentScreen extends StatelessWidget {
   final Widget bodyContent;
-  final String appBarBackgroundImage;
+  final String? appBarBackgroundImage;
   final String appBarTitle;
 
   DetailsContentScreen(
-      {@required this.bodyContent,
+      {required this.bodyContent,
       this.appBarBackgroundImage,
-      this.appBarTitle});
+      required this.appBarTitle});
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +39,7 @@ class DetailsContentScreen extends StatelessWidget {
                         fit: BoxFit.cover,
                       )
                     : Image.file(
-                        File(appBarBackgroundImage),
+                        File(appBarBackgroundImage!),
                         fit: BoxFit.cover,
                       ),
               ),

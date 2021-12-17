@@ -10,8 +10,8 @@ class AlbumGridWidget extends StatelessWidget {
   final List<AlbumInfo> dataList;
 
   AlbumGridWidget(
-      {@required List<AlbumInfo> albumList,
-      onAlbumClicked(final AlbumInfo info)})
+      {required List<AlbumInfo> albumList,
+      onAlbumClicked(final AlbumInfo info)?})
       : _onItemTap = onAlbumClicked,
         dataList = albumList;
 
@@ -29,7 +29,7 @@ class AlbumGridWidget extends StatelessWidget {
 
           return Stack(
             children: <Widget>[
-              (album.albumArt == null)
+              (album.albumArt.isEmpty)
                   ? FutureBuilder<Uint8List>(
                       future: audioQuery.getArtwork(
                           type: ResourceType.ALBUM, id: album.id),
@@ -47,8 +47,8 @@ class AlbumGridWidget extends StatelessWidget {
                           title: album.title,
                           subtitle: "Number of Songs: ${album.numberOfSongs}",
                           infoText:
-                              ("Year: ${album.firstYear ?? album.lastYear ?? ""}"),
-                          rawImage: snapshot.data,
+                              ("Year: ${album.firstYear.isNotEmpty ? album.firstYear : album.lastYear}"),
+                          rawImage: snapshot.data!,
                           //backgroundImage: album.albumArt,
                         );
                       })
@@ -57,7 +57,7 @@ class AlbumGridWidget extends StatelessWidget {
                       title: album.title,
                       subtitle: "Number of Songs: ${album.numberOfSongs}",
                       infoText:
-                          ("Year: ${album.firstYear ?? album.lastYear ?? ""}"),
+                          ("Year: ${album.firstYear.isNotEmpty ? album.firstYear : album.lastYear}"),
                       backgroundImage: album.albumArt,
                     ),
               Positioned.fill(

@@ -1,10 +1,12 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 class CardItemWidget extends StatelessWidget {
-  final double width, height;
-  final String backgroundImage, title, subtitle, infoText;
-  final List<int> rawImage;
+  final double? width, height;
+  final String? backgroundImage;
+  final String title, subtitle, infoText;
+  final List<int>? rawImage;
   static const titleMaxLines = 2;
   static const titleTextStyle =
       TextStyle(fontWeight: FontWeight.w500, fontSize: 16.0);
@@ -20,17 +22,12 @@ class CardItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasRawImage = !(rawImage == null || rawImage.isEmpty);
     final mainContainer = Container(
       width: width,
       height: height,
       decoration: BoxDecoration(
         image: DecorationImage(
-          image: (backgroundImage == null && !hasRawImage)
-              ? AssetImage("assets/no_cover.png")
-              : (hasRawImage)
-                  ? MemoryImage(rawImage) // Image.memory(rawImage)
-                  : FileImage(File(backgroundImage)),
+          image: _getImageProvider(),
           fit: BoxFit.cover,
           alignment: AlignmentDirectional.center,
         ),
@@ -64,5 +61,15 @@ class CardItemWidget extends StatelessWidget {
       elevation: 4.0,
       child: mainContainer,
     );
+  }
+
+  ImageProvider _getImageProvider() {
+    final hasRawImage = !(rawImage == null || rawImage!.isEmpty);
+    if (backgroundImage == null && !hasRawImage) {
+      return AssetImage("assets/no_cover.png");
+    } else if (hasRawImage) {
+      return MemoryImage(Uint8List.fromList(rawImage!));
+    }
+    return FileImage(File(backgroundImage!));
   }
 }

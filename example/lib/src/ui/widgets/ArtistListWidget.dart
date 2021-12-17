@@ -9,7 +9,7 @@ class ArtistListWidget extends StatelessWidget {
   final _callback;
 
   ArtistListWidget(
-      {@required this.artistList, onArtistSelected(final ArtistInfo info)})
+      {required this.artistList, onArtistSelected(final ArtistInfo info)?})
       : _callback = onArtistSelected;
 
   @override
@@ -23,7 +23,7 @@ class ArtistListWidget extends StatelessWidget {
           ArtistInfo artist = artistList[index];
           return Stack(
             children: <Widget>[
-              (artist.artistArtPath == null)
+              (artist.artistArtPath.isEmpty)
                   ? FutureBuilder<Uint8List>(
                       future: audioQuery.getArtwork(
                           type: ResourceType.ARTIST, id: artist.id),
@@ -42,7 +42,7 @@ class ArtistListWidget extends StatelessWidget {
                               "Number of Albums: ${artist.numberOfAlbums}",
                           infoText: "Number of Songs: ${artist.numberOfTracks}",
                           backgroundImage: artist.artistArtPath,
-                          rawImage: snapshot.data,
+                          rawImage: snapshot.data!,
                         );
                       })
                   : CardItemWidget(

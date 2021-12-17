@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class NoDataWidget extends StatelessWidget {
   final String title;
 
-  NoDataWidget({this.title});
+  NoDataWidget({required this.title});
 
   @override
   Widget build(BuildContext context) {

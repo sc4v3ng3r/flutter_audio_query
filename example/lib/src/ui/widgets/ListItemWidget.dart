@@ -9,11 +9,11 @@ style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w500),
 typedef OnTap = void Function();
 
 class ListItemWidget extends StatelessWidget {
-  final String imagePath;
-  final Widget title, subtitle;
-  final Widget trailing;
-  final OnTap onTap;
-  final Widget leading;
+  final String? imagePath;
+  final Widget? title, subtitle;
+  final Widget? trailing;
+  final OnTap? onTap;
+  final Widget? leading;
 
   ListItemWidget(
       {this.title,
@@ -29,11 +29,7 @@ class ListItemWidget extends StatelessWidget {
       children: <Widget>[
         ListTile(
           leading: (this.leading == null)
-              ? CircleAvatar(
-                  backgroundImage: (imagePath == null)
-                      ? AssetImage("assets/no_cover.png")
-                      : FileImage(File(imagePath)),
-                )
+              ? CircleAvatar(backgroundImage: _getImageProvider())
               : leading,
           onTap: onTap,
           title: title ?? Container(),
@@ -47,5 +43,12 @@ class ListItemWidget extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  ImageProvider _getImageProvider() {
+    if (imagePath == null)
+      return AssetImage("assets/no_cover.png");
+    else
+      return FileImage(File(imagePath!));
   }
 }

@@ -7,10 +7,10 @@ class ChooseDialog extends StatefulWidget {
   final int indexSelected;
 
   ChooseDialog(
-      {String title,
-      List<String> options,
-      void onChange(int index),
-      int initialSelectedIndex})
+      {required String title,
+      required List<String> options,
+      ValueChanged<int>? onChange,
+      int initialSelectedIndex = 0})
       : title = title,
         options = options,
         indexSelected = initialSelectedIndex,
@@ -21,7 +21,7 @@ class ChooseDialog extends StatefulWidget {
 }
 
 class _ChooseDialogState extends State<ChooseDialog> {
-  int selectedIndex;
+  late int selectedIndex;
 
   @override
   void initState() {
@@ -37,13 +37,13 @@ class _ChooseDialogState extends State<ChooseDialog> {
           shrinkWrap: true,
           itemCount: widget.options.length,
           itemBuilder: (context, index) {
-            return RadioListTile(
+            return RadioListTile<int>(
                 title: Text(widget.options[index]),
                 value: index,
                 groupValue: selectedIndex,
                 onChanged: (value) {
                   setState(() {
-                    selectedIndex = value;
+                    selectedIndex = value as int;
                   });
 
                   if (widget._callback != null) widget._callback(selectedIndex);

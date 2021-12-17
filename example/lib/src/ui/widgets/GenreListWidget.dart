@@ -6,9 +6,9 @@ typedef GenreItemTap = void Function(GenreInfo);
 
 class GenreListWidget extends StatelessWidget {
   final List<GenreInfo> dataList;
-  final GenreItemTap onTap;
+  final GenreItemTap? onTap;
 
-  GenreListWidget({@required List<GenreInfo> genreList, this.onTap})
+  GenreListWidget({required List<GenreInfo> genreList, this.onTap})
       : dataList = genreList;
 
   @override
@@ -26,7 +26,7 @@ class GenreListWidget extends StatelessWidget {
               Positioned.fill(
                 child: InkWell(
                   onTap: () {
-                    if (onTap != null) onTap(genre);
+                    if (onTap != null) onTap!(genre);
                   },
                 ),
               ),
