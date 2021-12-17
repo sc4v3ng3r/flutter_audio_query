@@ -9,7 +9,7 @@ class PlaylistInfo extends DataModel {
   }
 
   /// The playlist name
-  String get name => _data["name"];
+  String get name => _data["name"] ?? '';
 
   /// Returns a list with id's of SongInfo which are songs
   /// that appears in this playlist. You can retrieve SongInfo objects that
