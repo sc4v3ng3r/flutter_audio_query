@@ -2,10 +2,10 @@ part of flutter_audio_query;
 
 class PlaylistInfo extends DataModel {
   /// Ids of songs that appears on this playlist.
-  List<String> _memberIds;
+  late List<String> _memberIds;
 
   PlaylistInfo._(Map<dynamic, dynamic> map) : super._(map) {
-    _memberIds = List<String>.from(_data["memberIds"]);
+    _memberIds = List<String>.from(_data["memberIds"] ?? []);
   }
 
   /// The playlist name
@@ -23,7 +23,7 @@ class PlaylistInfo extends DataModel {
 
   /// This method appends a [song] into [playlist] and returns a PlaylistInfo
   /// updated.
-  Future<void> addSong({@required final SongInfo song}) async {
+  Future<void> addSong({required final SongInfo song}) async {
     print("adding song ${song.id} to playlist ${this.id}");
 
     List<dynamic> updatedData =
@@ -39,7 +39,7 @@ class PlaylistInfo extends DataModel {
   }
 
   /// This method removes a specified [song] from this playlist.
-  Future<void> removeSong({@required SongInfo song}) async {
+  Future<void> removeSong({required SongInfo song}) async {
     List<dynamic> updatedPlaylist =
         await FlutterAudioQuery.channel.invokeMethod("removeSongFromPlaylist", {
       FlutterAudioQuery.SOURCE_KEY: FlutterAudioQuery.SOURCE_PLAYLIST,
@@ -63,7 +63,7 @@ class PlaylistInfo extends DataModel {
   }
 
   ///
-  void moveSong({@required int from, @required int to}) async {
+  void moveSong({required int from, required int to}) async {
     if ((from >= 0 && from < (this._memberIds.length)) &&
         (to >= 0 && to < (this._memberIds.length))) {
       List<dynamic> updatedPlaylist =
