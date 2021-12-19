@@ -373,13 +373,12 @@ class FlutterAudioQuery {
     required final String id,
     final Size? size,
   }) async {
-    assert(id != null && type != null);
     final data = await channel.invokeMethod("getArtwork", {
       SOURCE_KEY: SOURCE_ARTWORK,
       "resource": type.index,
       "id": id,
-      "width": size?.width?.round() ?? 250,
-      "height": size?.height?.round() ?? 250,
+      "width": size?.width.round() ?? 250,
+      "height": size?.height.round() ?? 250,
     });
 
     Map<String, dynamic> dataMap = Map<String, dynamic>.from(data);
@@ -410,7 +409,7 @@ class FlutterAudioQuery {
     await channel.invokeMethod("removePlaylist", {
       SOURCE_KEY: SOURCE_PLAYLIST,
       FlutterAudioQuery.PLAYLIST_METHOD_TYPE: PlayListMethodType.WRITE.index,
-      "playlist_id": playlist?.id
+      "playlist_id": playlist.id
     });
   }
 
